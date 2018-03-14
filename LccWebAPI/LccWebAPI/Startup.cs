@@ -2,12 +2,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using LccWebAPI.DatabaseContexts;
+using LccWebAPI.Services;
+using LccWebAPI.Utils;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using RiotSharp;
+using RiotSharp.Interfaces;
 
 namespace LccWebAPI
 {
@@ -23,6 +30,14 @@ namespace LccWebAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddSingleton<IHostedService, MatchDataCollectionService>();
+            services.AddSingleton<ILogging, Logging>();
+            services.AddSingleton<IThrottledRequestHelper>(new ThrottledRequestHelper(95, 120));
+            services.AddSingleton<IRiotApi>(RiotApi.GetDevelopmentInstance("RGAPI-47364332-4e72-46ba-a3c7-71c2d3d13c74"));
+
+            var connection = @"Server=(localdb)\mssqllocaldb;Database=SummonerDb;Trusted_Connection=True;ConnectRetryCount=0";
+            services.AddDbContext<SummonerDtoContext>(options => options.UseSqlServer(connection));
+
             services.AddMvc();
         }
 
