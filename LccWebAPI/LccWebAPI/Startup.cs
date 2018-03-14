@@ -33,7 +33,7 @@ namespace LccWebAPI
             services.AddSingleton<IHostedService, MatchDataCollectionService>();
             services.AddSingleton<ILogging, Logging>();
             services.AddSingleton<IThrottledRequestHelper>(new ThrottledRequestHelper(95, 120));
-            services.AddSingleton<IRiotApi>(RiotApi.GetDevelopmentInstance("RGAPI-47364332-4e72-46ba-a3c7-71c2d3d13c74"));
+            services.AddSingleton<IRiotApi>(RiotApi.GetDevelopmentInstance("RGAPI-9ac8e55f-f0f5-4a92-8073-0312593af904"));
 
             var connection = @"Server=(localdb)\mssqllocaldb;Database=SummonerDb;Trusted_Connection=True;ConnectRetryCount=0";
             services.AddDbContext<SummonerDtoContext>(options => options.UseSqlServer(connection));

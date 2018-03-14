@@ -6,13 +6,14 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Storage.Internal;
+using Microsoft.EntityFrameworkCore.ValueGeneration;
 using RiotSharp.Misc;
 using System;
 
 namespace LccWebAPI.Migrations
 {
     [DbContext(typeof(SummonerDtoContext))]
-    [Migration("20180314195500_Migration1")]
+    [Migration("20180314214054_Migration1")]
     partial class Migration1
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -29,34 +30,46 @@ namespace LccWebAPI.Migrations
 
                     b.Property<long?>("SummonerId");
 
-                    b.HasKey("Id")
-                        .HasName("PK_Key");
+                    b.HasKey("Id");
 
                     b.HasIndex("SummonerId");
 
                     b.ToTable("Summoners");
                 });
 
-            modelBuilder.Entity("RiotSharp.SummonerEndpoint.Summoner", b =>
+            modelBuilder.Entity("RiotSharp.SummonerEndpoint.SummonerBase", b =>
                 {
-                    b.Property<long>("Id")
-                        .ValueGeneratedOnAdd();
+                    b.Property<long>("Id");
 
                     b.Property<long>("AccountId");
 
-                    b.Property<long>("Level");
+                    b.Property<string>("Discriminator")
+                        .IsRequired();
 
                     b.Property<string>("Name");
 
-                    b.Property<int>("ProfileIconId");
-
                     b.Property<int>("Region");
-
-                    b.Property<DateTime>("RevisionDate");
 
                     b.HasKey("Id");
 
+                    b.ToTable("SummonerBase");
+
+                    b.HasDiscriminator<string>("Discriminator").HasValue("SummonerBase");
+                });
+
+            modelBuilder.Entity("RiotSharp.SummonerEndpoint.Summoner", b =>
+                {
+                    b.HasBaseType("RiotSharp.SummonerEndpoint.SummonerBase");
+
+                    b.Property<long>("Level");
+
+                    b.Property<int>("ProfileIconId");
+
+                    b.Property<DateTime>("RevisionDate");
+
                     b.ToTable("Summoner");
+
+                    b.HasDiscriminator().HasValue("Summoner");
                 });
 
             modelBuilder.Entity("LccWebAPI.Models.SummonerDto", b =>

@@ -10,21 +10,21 @@ namespace LccWebAPI.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Summoner",
+                name: "SummonerBase",
                 columns: table => new
                 {
-                    Id = table.Column<long>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Level = table.Column<long>(nullable: true),
+                    ProfileIconId = table.Column<int>(nullable: true),
+                    RevisionDate = table.Column<DateTime>(nullable: true),
+                    Id = table.Column<long>(nullable: false),
                     AccountId = table.Column<long>(nullable: false),
-                    Level = table.Column<long>(nullable: false),
+                    Discriminator = table.Column<string>(nullable: false),
                     Name = table.Column<string>(nullable: true),
-                    ProfileIconId = table.Column<int>(nullable: false),
-                    Region = table.Column<int>(nullable: false),
-                    RevisionDate = table.Column<DateTime>(nullable: false)
+                    Region = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Summoner", x => x.Id);
+                    table.PrimaryKey("PK_SummonerBase", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -37,11 +37,11 @@ namespace LccWebAPI.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Key", x => x.Id);
+                    table.PrimaryKey("PK_Summoners", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Summoners_Summoner_SummonerId",
+                        name: "FK_Summoners_SummonerBase_SummonerId",
                         column: x => x.SummonerId,
-                        principalTable: "Summoner",
+                        principalTable: "SummonerBase",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -58,7 +58,7 @@ namespace LccWebAPI.Migrations
                 name: "Summoners");
 
             migrationBuilder.DropTable(
-                name: "Summoner");
+                name: "SummonerBase");
         }
     }
 }

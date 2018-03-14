@@ -1,5 +1,6 @@
 ﻿using LccWebAPI.Models;
 using Microsoft.EntityFrameworkCore;
+using RiotSharp.SummonerEndpoint;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -18,9 +19,15 @@ namespace LccWebAPI.DatabaseContexts
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
+           
             modelBuilder.Entity<SummonerDto>()
-                .HasKey(e => e.Id)
-                .HasName("PK_Key");
+                .HasKey(c => c.Id);
+
+            modelBuilder.Entity<Summoner>().Property(x => x.Id).ValueGeneratedNever();
+            modelBuilder.Entity<Summoner>().Property(x => x.ProfileIconId).ValueGeneratedNever();
+            modelBuilder.Entity<SummonerBase>().Property(x => x.Id).ValueGeneratedNever();
+
+            base.OnModelCreating(modelBuilder);
         }
     }
 }

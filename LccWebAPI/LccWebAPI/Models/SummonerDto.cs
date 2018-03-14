@@ -15,8 +15,7 @@ namespace LccWebAPI.Models
             Summoner = summoner;
         }
 
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        [DatabaseGeneratedAttribute(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
         public Summoner Summoner { get; set; }
