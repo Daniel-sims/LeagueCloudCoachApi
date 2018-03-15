@@ -10,6 +10,7 @@ namespace LccWebAPI.Models
 {
     public class SummonerDto
     {
+        public SummonerDto()  {}
         public SummonerDto(Summoner summoner)
         {
             Summoner = summoner;

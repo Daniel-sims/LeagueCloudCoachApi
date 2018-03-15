@@ -54,8 +54,11 @@ namespace LccWebAPI.Services
                             var summoner = await _trottledRequestHelper.SendThrottledRequest<Summoner>(async () => await _riotApi.GetSummonerBySummonerIdAsync(RiotSharp.Misc.Region.euw, Convert.ToInt64(challengerPlayer.PlayerOrTeamId)));
                             _logging.LogEvent("Retrieved summoner - " + summoner.Name + ".");
 
-                            summonerDbContext.Summoners.Add(new SummonerDto(summoner));
-                            summonerDbContext.SaveChanges();
+                            if(summoner != null && summonerDbContext.Summoners.FirstOrDefault(x => x.Summoner.AccountId.Equals(summoner.AccountId)) == null)
+                            {
+                                summonerDbContext.Summoners.Add(new SummonerDto(summoner));
+                                summonerDbContext.SaveChanges();
+                            }
                         }
                     }
                     catch(RiotSharpException e)
@@ -63,7 +66,8 @@ namespace LccWebAPI.Services
                         _logging.LogEvent("RiotSharpException encountered - " + e.Message + ".");
                         if(e.HttpStatusCode == (HttpStatusCode)429)
                         {
-                            
+                            _logging.LogEvent("Sleeping for 50 seconds.");
+                            await Task.Run(() => Thread.Sleep(50 * 1000));
                         }
                     }
                     catch(Exception e)
@@ -71,7 +75,8 @@ namespace LccWebAPI.Services
                         _logging.LogEvent("Exception encountered - " + e.Message + ".");
                     }
                 }
-                _logging.LogEvent("MatchDataCollectionService finished.");
+                _logging.LogEvent("MatchDataCollectionService finished, will wait 10 minutes and start again.");
+                await Task.Run(() => Thread.Sleep(600000));
             }
             
         }
