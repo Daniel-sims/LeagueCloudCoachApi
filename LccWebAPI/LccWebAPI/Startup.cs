@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using LccWebAPI.DatabaseContexts;
+using LccWebAPI.Repository;
 using LccWebAPI.Services;
 using LccWebAPI.Utils;
 using Microsoft.AspNetCore.Builder;
@@ -35,9 +36,11 @@ namespace LccWebAPI
             services.AddSingleton<IThrottledRequestHelper, ThrottledRequestHelper>();
             services.AddSingleton<IRiotApi>(RiotApi.GetDevelopmentInstance("RGAPI-9ac8e55f-f0f5-4a92-8073-0312593af904"));
 
+            services.AddTransient<ISummonerRepository, SummonerRepository>();
+
             var connection = @"Server=(localdb)\mssqllocaldb;Database=SummonerDb;Trusted_Connection=True;ConnectRetryCount=0";
             services.AddDbContext<SummonerDtoContext>(options => options.UseSqlServer(connection));
-
+            
             services.AddMvc();
         }
 

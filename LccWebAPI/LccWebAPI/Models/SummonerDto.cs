@@ -19,6 +19,7 @@ namespace LccWebAPI.Models
         [DatabaseGeneratedAttribute(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
 
+        public DateTime DateLastUpdated { get; set; }
         public Summoner Summoner { get; set; }
     }
 }

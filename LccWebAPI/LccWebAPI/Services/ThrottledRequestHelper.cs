@@ -25,7 +25,7 @@ namespace LccWebAPI.Services
             _requestsPerTimePeriod = 90;
         }
 
-        public async Task<T> SendThrottledRequest<T>(Func<Task<T>> action)
+        public async Task<T> SendThrottledRequest<T>(Func<Task<T>> action) where T : class
         {
             try
             {
@@ -34,16 +34,20 @@ namespace LccWebAPI.Services
             }
             catch (RiotSharpException e)
             {
-                _logging.LogEvent("RiotSharpException encountered - " + e.Message + ".");
+                _logging.LogEvent("######RiotSharpException encountered - " + e.Message + ".");
                 if (e.HttpStatusCode == (HttpStatusCode)429)
                 {
                     _logging.LogEvent("Sleeping for 50 seconds.");
                     await Task.Run(() => Thread.Sleep(50 * 1000));
-                    return await action();
                 }
             }
+            catch(Exception e)
+            {
+                _logging.LogEvent("######Exception encountered when trying to send throttled request - " + e.Message);
+            }
 
-            throw new Exception("It's fucked when trying to send a throttled request.");
+
+            return await Task.FromResult<T>(null);
         }
 
         public void SetThrottleRates(int requestsPerTimePeriod, int timePeriod)
