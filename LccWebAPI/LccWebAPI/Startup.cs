@@ -38,9 +38,12 @@ namespace LccWebAPI
 
             services.AddTransient<ISummonerRepository, SummonerRepository>();
 
-            var connection = @"Server=(localdb)\mssqllocaldb;Database=SummonerDb;Trusted_Connection=True;ConnectRetryCount=0";
-            services.AddDbContext<SummonerDtoContext>(options => options.UseSqlServer(connection));
-            
+            var summonerConnection = @"Server=(localdb)\mssqllocaldb;Database=SummonerDb;Trusted_Connection=True;ConnectRetryCount=0";
+            services.AddDbContext<SummonerDtoContext>(options => options.UseSqlServer(summonerConnection));
+
+            var matchReferenceConnection = @"Server=(localdb)\mssqllocaldb;Database=MatchReferenceDb;Trusted_Connection=True;ConnectRetryCount=0";
+            services.AddDbContext<MatchReferenceDtoContext>(options => options.UseSqlServer(matchReferenceConnection));
+
             services.AddMvc();
         }
 

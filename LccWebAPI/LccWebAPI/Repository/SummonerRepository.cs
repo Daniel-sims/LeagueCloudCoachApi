@@ -34,7 +34,7 @@ namespace LccWebAPI.Repository
 
         public void UpdateSummoner(SummonerDto summoner)
         {
-            //_summonerContext.Entry(summoner).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+            _summonerContext.Entry(summoner).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
         }
 
         public void DeleteSummoner(long accountId)

@@ -19,13 +19,12 @@ namespace LccWebAPI.DatabaseContexts
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-           
-            modelBuilder.Entity<SummonerDto>()
-                .HasKey(c => c.Id);
+            modelBuilder.Entity<SummonerDto>().HasKey(c => c.Id);
 
             modelBuilder.Entity<Summoner>().Property(x => x.Id).ValueGeneratedNever();
             modelBuilder.Entity<Summoner>().Property(x => x.ProfileIconId).ValueGeneratedNever();
             modelBuilder.Entity<SummonerBase>().Property(x => x.Id).ValueGeneratedNever();
+            modelBuilder.Entity<SummonerBase>().Property(x => x.AccountId).ValueGeneratedNever();
 
             base.OnModelCreating(modelBuilder);
         }
