@@ -50,7 +50,6 @@ namespace LccWebAPI.Services
             Console.WriteLine("-----------Matches-----------");
             Console.WriteLine(matchesUpdateTotal + " Matches have been added this session.");
             Console.WriteLine(matchesUpdatedThisSession + " Matches updated this run");
-
         }
 
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
@@ -61,7 +60,9 @@ namespace LccWebAPI.Services
                 using (var scope = _serviceScopeFactory.CreateScope())
                 {
                     var summonerRepository = scope.ServiceProvider.GetRequiredService<ISummonerRepository>();
+                    var allSummonersInDatabase = summonerRepository.GetAllSummoners();
 
+                    _logging.LogEvent("We currently have " + allSummonersInDatabase.Count() + " stored in our database");
                     try
                     {
                         var challengerPlayers = await _trottledRequestHelper.SendThrottledRequest<League>(async () => await _riotApi.GetChallengerLeagueAsync(RiotSharp.Misc.Region.euw, LeagueQueue.RankedSolo));
@@ -75,14 +76,11 @@ namespace LccWebAPI.Services
                             var summonerInDatabase = summonerRepository.GetSummonerByAccountId(summoner.AccountId);
                             if (summoner != null && summonerInDatabase == null)
                             {
-                                var newSummoner = new SummonerDto(summoner)
-                                {
-                                    DateLastUpdated = summoner.RevisionDate
-                                };
+                                var newSummoner = new LccSummoner(summoner);
 
                                 summonerRepository.InsertSummoner(newSummoner);
                                 
-                                _logging.LogEvent("Summoner " + summoner.Name + " added.");
+                                _logging.LogEvent("new summoner " + summoner.Name + " added to the database.");
                                 ++newSummonersAddedToDatabaseTotal;
                                 ++newSummonersAddedThisSession;
 
@@ -104,7 +102,7 @@ namespace LccWebAPI.Services
                             {
                                 _logging.LogEvent("Summoner " + summoner.Name + " already exists in database.");
 
-                                DateTime lastUpdatedDate = summonerInDatabase.DateLastUpdated;
+                                DateTime lastUpdatedDate = summonerInDatabase.LastUpdated;
                                 DateTime lastRevisionDateFromRiot = summoner.RevisionDate;
 
                                 //If there's been a revision previously!
@@ -128,6 +126,9 @@ namespace LccWebAPI.Services
                                     _logging.LogEvent("Everything is all up to date!");
                                 }
                             }
+
+                            _logging.LogEvent("Saving changes.");
+                            summonerRepository.Save();
                         }
                     }
                     catch (RiotSharpException e)
@@ -143,17 +144,14 @@ namespace LccWebAPI.Services
                     {
                         _logging.LogEvent("Exception encountered - " + e.Message + ".");
                     }
-                    finally
-                    {
-                        summonerRepository.Save();
-                        _logging.LogEvent("Saving changes.");
-                    }
                 }
+
                 PrintSummary();
                 matchesUpdatedThisSession = 0;
                 newSummonersAddedThisSession = 0;
-                _logging.LogEvent("MatchDataCollectionService finished, will wait 5 minutes and start again.");
-                await Task.Run(() => Thread.Sleep(300000));
+
+                _logging.LogEvent("MatchDataCollectionService finished, will wait 10 seconds and start again.");
+                await Task.Run(() => Thread.Sleep(10000));
             }
         }
     }

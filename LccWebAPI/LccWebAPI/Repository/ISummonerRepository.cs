@@ -9,11 +9,11 @@ namespace LccWebAPI.Repository
 {
     public interface ISummonerRepository
     {
-        IEnumerable<SummonerDto> GetAllSummoners();
-        SummonerDto GetSummonerByAccountId(long accountId);
-        void InsertSummoner(SummonerDto summoner);
+        IEnumerable<LccSummoner> GetAllSummoners();
+        LccSummoner GetSummonerByAccountId(long accountId);
+        void InsertSummoner(LccSummoner summoner);
         void DeleteSummoner(long accountId);
-        void UpdateSummoner(SummonerDto summoner);
+        void UpdateSummoner(LccSummoner summoner);
         void Save();
     }
 }

@@ -10,37 +10,38 @@ namespace LccWebAPI.Repository
 {
     public class SummonerRepository : ISummonerRepository, IDisposable
     {
-        private SummonerDtoContext _summonerContext;
+        private SummonerContext _summonerContext;
 
-        public SummonerRepository(SummonerDtoContext summonerContext)
+        public SummonerRepository(SummonerContext summonerContext)
         {
             _summonerContext = summonerContext;
         }
 
-        public void InsertSummoner(SummonerDto summonerDto)
+        public void InsertSummoner(LccSummoner summonerDto)
         {
             _summonerContext.Summoners.Add(summonerDto);
         }
 
-        public IEnumerable<SummonerDto> GetAllSummoners()
+        public IEnumerable<LccSummoner> GetAllSummoners()
         {
             return _summonerContext.Summoners.ToList();
         }
 
-        public SummonerDto GetSummonerByAccountId(long accountId)
+        public LccSummoner GetSummonerByAccountId(long accountId)
         {
-            return _summonerContext.Summoners.FirstOrDefault(x => x.Summoner.AccountId == accountId);
+            return _summonerContext.Summoners.FirstOrDefault(x => x.AccountId == accountId);
         }
 
-        public void UpdateSummoner(SummonerDto summoner)
+        public void UpdateSummoner(LccSummoner summoner)
         {
             _summonerContext.Entry(summoner).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
         }
 
         public void DeleteSummoner(long accountId)
         {
-            SummonerDto summoner = _summonerContext.Summoners.Find(accountId);
-            _summonerContext.Summoners.Remove(summoner);
+            LccSummoner summoner = _summonerContext.Summoners.FirstOrDefault(x => x.AccountId == accountId);
+            if(summoner != null)
+                _summonerContext.Summoners.Remove(summoner);
         }
         
         public void Save()
