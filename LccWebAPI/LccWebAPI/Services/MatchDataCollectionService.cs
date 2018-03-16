@@ -61,7 +61,12 @@ namespace LccWebAPI.Services
                 _logging.LogEvent("MatchDataCollectionService started.");
                 using (var scope = _serviceScopeFactory.CreateScope())
                 {
-                    var summonerRepository = scope.ServiceProvider.GetRequiredService<ISummonerRepository>();
+                    using (var matchReferenceRepository = scope.ServiceProvider.GetRequiredService<IMatchReferenceRepository>())
+                    using (var summonerRepository = scope.ServiceProvider.GetRequiredService<ISummonerRepository>())
+                    {
+
+                    }
+
                     var matchReferenceRepository = scope.ServiceProvider.GetRequiredService<IMatchReferenceRepository>();
 
                     var allSummonersInDatabase = summonerRepository.GetAllSummoners();

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace LccWebAPI.Repository
 {
-    public interface IMatchReferenceRepository
+    public interface IMatchReferenceRepository : IDisposable
     {
         IEnumerable<LccMatchReference> GetAllMatchReferences();
         LccMatchReference GetMatchReferenceByGameId(long gameId);

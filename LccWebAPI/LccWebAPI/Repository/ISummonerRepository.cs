@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace LccWebAPI.Repository
 {
-    public interface ISummonerRepository
+    public interface ISummonerRepository : IDisposable
     {
         IEnumerable<LccSummoner> GetAllSummoners();
         LccSummoner GetSummonerByAccountId(long accountId);
