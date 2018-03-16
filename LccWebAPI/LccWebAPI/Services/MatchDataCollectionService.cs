@@ -50,8 +50,10 @@ namespace LccWebAPI.Services
             Console.WriteLine("-----------Matches-----------");
             Console.WriteLine(matchesUpdateTotal + " Matches have been added this session.");
             Console.WriteLine(matchesUpdatedThisSession + " Matches updated this run");
+            Console.WriteLine("#############################");
         }
 
+        // This task is not optmised in any way and has lots of code duplication
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
             while(!cancellationToken.IsCancellationRequested)
@@ -60,9 +62,13 @@ namespace LccWebAPI.Services
                 using (var scope = _serviceScopeFactory.CreateScope())
                 {
                     var summonerRepository = scope.ServiceProvider.GetRequiredService<ISummonerRepository>();
-                    var allSummonersInDatabase = summonerRepository.GetAllSummoners();
+                    var matchReferenceRepository = scope.ServiceProvider.GetRequiredService<IMatchReferenceRepository>();
 
-                    _logging.LogEvent("We currently have " + allSummonersInDatabase.Count() + " stored in our database");
+                    var allSummonersInDatabase = summonerRepository.GetAllSummoners();
+                    var allMatchesInDatabase = matchReferenceRepository.GetAllMatchReferences();
+
+                    _logging.LogEvent("We currently have " + allSummonersInDatabase.Count() + " stored in our database and " + allMatchesInDatabase.Count() + " matches.");
+
                     try
                     {
                         var challengerPlayers = await _trottledRequestHelper.SendThrottledRequest<League>(async () => await _riotApi.GetChallengerLeagueAsync(RiotSharp.Misc.Region.euw, LeagueQueue.RankedSolo));
@@ -90,8 +96,20 @@ namespace LccWebAPI.Services
                                 if(matchList?.Matches?.Count > 0)
                                 {
                                     _logging.LogEvent("Retrieved " + matchList?.Matches?.Count + " new matches to add to the database.");
-                                    matchesUpdatedThisSession += matchList.Matches.Count;
-                                    matchesUpdateTotal += matchList.Matches.Count;
+
+                                    foreach(var match in matchList?.Matches)
+                                    {
+                                        if(matchReferenceRepository.GetMatchReferenceByGameId(match.GameId) == null)
+                                        {
+                                            matchReferenceRepository.InsertMatchReference(new LccMatchReference(match));
+                                            matchesUpdatedThisSession++;
+                                            matchesUpdateTotal++;
+                                        }
+                                        else
+                                        {
+                                            _logging.LogEvent(match.GameId + " already exists in our database.");
+                                        }
+                                    }
                                 }
                                 else
                                 {
@@ -113,8 +131,19 @@ namespace LccWebAPI.Services
                                     if(newMatches?.Matches?.Count > 0)
                                     {
                                         _logging.LogEvent("Summoner " + summoner.Name + " has matches we didn't previously have adding " + newMatches.Matches.Count + " to the database");
-                                        matchesUpdatedThisSession += newMatches.Matches.Count;
-                                        matchesUpdateTotal += newMatches.Matches.Count;
+                                        foreach (var match in newMatches?.Matches)
+                                        {
+                                            if (matchReferenceRepository.GetMatchReferenceByGameId(match.GameId) == null)
+                                            {
+                                                matchReferenceRepository.InsertMatchReference(new LccMatchReference(match));
+                                                matchesUpdatedThisSession++;
+                                                matchesUpdateTotal++;
+                                            }
+                                            else
+                                            {
+                                                _logging.LogEvent(match.GameId + " already exists in our database.");
+                                            }
+                                        }
                                     }
                                     else
                                     {

@@ -37,9 +37,13 @@ namespace LccWebAPI
             services.AddSingleton<IRiotApi>(RiotApi.GetDevelopmentInstance("RGAPI-d32cf7d0-3419-43b4-b905-7f345db30969"));
 
             services.AddTransient<ISummonerRepository, SummonerRepository>();
+            services.AddTransient<IMatchReferenceRepository, MatchReferenceRepository>();
 
             var summonerConnection = @"Server=(localdb)\mssqllocaldb;Database=LccSummonerDb;Trusted_Connection=True;ConnectRetryCount=0";
             services.AddDbContext<SummonerContext>(options => options.UseSqlServer(summonerConnection));
+
+            var matchReferenceConnection = @"Server=(localdb)\mssqllocaldb;Database=LccMatchReferenceDb;Trusted_Connection=True;ConnectRetryCount=0";
+            services.AddDbContext<MatchReferenceContext>(options => options.UseSqlServer(matchReferenceConnection));
 
             services.AddMvc();
         }

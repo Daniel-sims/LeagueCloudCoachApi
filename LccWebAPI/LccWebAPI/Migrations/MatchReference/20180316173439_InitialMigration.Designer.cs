@@ -6,13 +6,14 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Storage.Internal;
+using RiotSharp.MatchEndpoint.Enums;
 using RiotSharp.Misc;
 using System;
 
-namespace LccWebAPI.Migrations
+namespace LccWebAPI.Migrations.MatchReference
 {
-    [DbContext(typeof(SummonerContext))]
-    [Migration("20180316170819_InitialMigration")]
+    [DbContext(typeof(MatchReferenceContext))]
+    [Migration("20180316173439_InitialMigration")]
     partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -22,28 +23,32 @@ namespace LccWebAPI.Migrations
                 .HasAnnotation("ProductVersion", "2.0.2-rtm-10011")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("LccWebAPI.Models.LccSummoner", b =>
+            modelBuilder.Entity("LccWebAPI.Models.LccMatchReference", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<long>("AccountId");
+                    b.Property<long>("ChampionId");
 
-                    b.Property<DateTime>("LastUpdated");
+                    b.Property<long>("GameId");
 
-                    b.Property<long>("Level");
+                    b.Property<int>("Lane");
 
-                    b.Property<string>("Name");
+                    b.Property<int>("PlatformId");
 
-                    b.Property<int>("ProfileIconId");
+                    b.Property<string>("Queue");
 
                     b.Property<int>("Region");
 
-                    b.Property<DateTime>("RevisionDate");
+                    b.Property<int>("Role");
+
+                    b.Property<int>("Season");
+
+                    b.Property<DateTime>("TimeStamp");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Summoners");
+                    b.ToTable("MatchReferences");
                 });
 #pragma warning restore 612, 618
         }
