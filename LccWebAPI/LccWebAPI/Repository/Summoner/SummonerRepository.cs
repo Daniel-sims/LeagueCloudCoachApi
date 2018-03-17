@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using LccWebAPI.DatabaseContexts;
 using LccWebAPI.Models;
+using LccWebAPI.Models.DatabaseModels;
 using RiotSharp.SummonerEndpoint;
 
 namespace LccWebAPI.Repository.Summoner

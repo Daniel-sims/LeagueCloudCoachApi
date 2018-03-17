@@ -1,6 +1,7 @@
 ﻿using LccWebAPI.Constants;
 using LccWebAPI.DatabaseContexts;
 using LccWebAPI.Models;
+using LccWebAPI.Models.DatabaseModels;
 using LccWebAPI.Repository.Match;
 using LccWebAPI.Repository.Summoner;
 using LccWebAPI.Utils;

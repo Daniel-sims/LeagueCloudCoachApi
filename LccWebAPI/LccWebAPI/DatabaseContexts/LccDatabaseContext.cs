@@ -1,4 +1,5 @@
 ﻿using LccWebAPI.Models;
+using LccWebAPI.Models.DatabaseModels;
 using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using System;

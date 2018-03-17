@@ -1,4 +1,5 @@
 ﻿using LccWebAPI.Models;
+using LccWebAPI.Models.DatabaseModels;
 using RiotSharp.SummonerEndpoint;
 using System;
 using System.Collections.Generic;

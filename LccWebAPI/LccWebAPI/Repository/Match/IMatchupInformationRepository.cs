@@ -1,4 +1,5 @@
 ﻿using LccWebAPI.Models;
+using LccWebAPI.Models.DatabaseModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
