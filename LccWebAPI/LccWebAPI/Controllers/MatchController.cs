@@ -38,20 +38,22 @@ namespace LccWebAPI.Controllers
             // So we don't care about which teams winning or losing
            
             // Get the id's in lists
-            List<long> friendlyTeamChampionIds = new List<long>(friendlyTeamChampions) { usersChampionId };
+            IList<long> friendlyTeamChampionIds = new List<long>(friendlyTeamChampions) { usersChampionId };
             List<long> enemyTeamChampionIds = enemyTeamChampions.ToList();
 
             foreach(LccMatchupInformation match in matchesContainingUsersChampionAndLane)
             {
-                /*
-                 * if(winningTeam matches friendly team)
-                 *      if(losing team matches enemy team)
-                 *          // Correct match - users team has won 
-                 * 
-                 * if(losingTeam matches friendly team)
-                 *      if(winning team matches friendly team)
-                 *          // Correct match - users team has lost
-                 */
+                IList<long> listOfWinningTeamIds = match.WinningTeam.Select(x => x.ChampionId).ToList();
+                IList<long> listOfLosingTeamIds = match.LosingTeam.Select(x => x.ChampionId).ToList();
+                
+                if(listOfWinningTeamIds.Contains(friendlyTeamChampionIds) && listOfLosingTeamIds.Contains(enemyTeamChampionIds) ||
+                    listOfWinningTeamIds.Contains(enemyTeamChampionIds) && listOfLosingTeamIds.Contains(friendlyTeamChampionIds)
+                    )
+                {
+
+                    // here
+                }
+
             }
            
             //matches to return
