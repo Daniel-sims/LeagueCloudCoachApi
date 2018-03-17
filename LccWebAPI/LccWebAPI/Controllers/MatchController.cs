@@ -41,24 +41,34 @@ namespace LccWebAPI.Controllers
             IList<long> friendlyTeamChampionIds = new List<long>(friendlyTeamChampions) { usersChampionId };
             List<long> enemyTeamChampionIds = enemyTeamChampions.ToList();
 
-            foreach(LccMatchupInformation match in matchesContainingUsersChampionAndLane)
-            {
-                IList<long> listOfWinningTeamIds = match.WinningTeam.Select(x => x.ChampionId).ToList();
-                IList<long> listOfLosingTeamIds = match.LosingTeam.Select(x => x.ChampionId).ToList();
-                
-                if(listOfWinningTeamIds.Contains(friendlyTeamChampionIds) && listOfLosingTeamIds.Contains(enemyTeamChampionIds) ||
-                    listOfWinningTeamIds.Contains(enemyTeamChampionIds) && listOfLosingTeamIds.Contains(friendlyTeamChampionIds)
-                    )
-                {
+            var compMatches = matchesContainingUsersChampionAndLane
+                .Where(q =>
+                    (q.LosingTeam.All(l => enemyTeamChampionIds.Contains(l.ChampionId))
+                        && q.WinningTeam.All(f => friendlyTeamChampionIds.Contains(f.ChampionId)))
+                        || (q.WinningTeam.All(f => enemyTeamChampionIds.Contains(f.ChampionId))
+                        && q.LosingTeam.All(l => friendlyTeamChampionIds.Contains(l.ChampionId))));
 
-                    // here
-                }
+            if (compMatches.Any())
+            {
 
             }
-           
+            //foreach(LccMatchupInformation match in matchesContainingUsersChampionAndLane)
+            //{
+            //    IList<long> listOfWinningTeamIds = match.WinningTeam.Select(x => x.ChampionId).ToList();
+            //    IList<long> listOfLosingTeamIds = match.LosingTeam.Select(x => x.ChampionId).ToList();
+
+            //    if(listOfWinningTeamIds.Contains(friendlyTeamChampionIds) && listOfLosingTeamIds.Contains(enemyTeamChampionIds) ||
+            //        listOfWinningTeamIds.Contains(enemyTeamChampionIds) && listOfLosingTeamIds.Contains(friendlyTeamChampionIds)
+            //        )
+            //    {
+
+            //        // here
+            //    }
+
+            //}
+
             //matches to return
-            List<Match> matches = new List<Match>();
-            return new JsonResult(matches);
+            return new JsonResult(compMatches);
         }
     }
 }
