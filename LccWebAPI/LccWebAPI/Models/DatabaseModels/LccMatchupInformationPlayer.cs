@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace LccWebAPI.Models
+namespace LccWebAPI.Models.DatabaseModels
 {
     public class LccMatchupInformationPlayer
     {

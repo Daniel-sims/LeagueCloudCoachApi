@@ -5,7 +5,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace LccWebAPI.Models
+namespace LccWebAPI.Models.DatabaseModels
 {
     //This object is used for quick lookup for matchups
     //You use this to find the GameId of a matchup before requesting it from Riot

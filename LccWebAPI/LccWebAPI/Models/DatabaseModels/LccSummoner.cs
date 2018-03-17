@@ -6,7 +6,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace LccWebAPI.Models
+namespace LccWebAPI.Models.DatabaseModels
 {
     public class LccSummoner
     {
