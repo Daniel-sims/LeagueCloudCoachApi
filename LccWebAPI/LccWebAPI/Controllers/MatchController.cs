@@ -1,12 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using LccWebAPI.Models.DatabaseModels;
+﻿using LccWebAPI.Models.DatabaseModels;
 using LccWebAPI.Repository.Match;
 using Microsoft.AspNetCore.Mvc;
 using RiotSharp.Interfaces;
 using RiotSharp.MatchEndpoint;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace LccWebAPI.Controllers
 {
@@ -28,38 +26,36 @@ namespace LccWebAPI.Controllers
         }
 
         [HttpGet("GetMatchup")]
-        public JsonResult GetMatchup(long usersChampionId, string usersLane, long[] friendlyTeamChampionIds, long[] enemyTeamChampionIds)
+        public JsonResult GetMatchup(long usersChampionId, string usersLane, long[] friendlyTeamChampions, long[] enemyTeamChampions)
         {
             var allMatchesInDatabase = _matchupInformationRepository.GetAllMatchupInformations();
-            var matchContainingUsersChampionAndLane 
-                = allMatchesInDatabase.Where(x => x.LosingTeam.Any(p => p.ChampionId == usersChampionId) || x.WinningTeam.Any(u => u.ChampionId == usersChampionId)).ToList();
-            
-            List<Match> matches = new List<Match>();
-            
-            foreach(var match in matchContainingUsersChampionAndLane)
+
+            // All matches with the users champion in, losing or none losing team
+            var matchesContainingUsersChampionAndLane 
+                = allMatchesInDatabase
+                .Where(x => x.LosingTeam.Any(p => p.ChampionId == usersChampionId) || x.WinningTeam.Any(u => u.ChampionId == usersChampionId)).ToList();
+
+            // So we don't care about which teams winning or losing
+           
+            // Get the id's in lists
+            List<long> teamOneIds = new List<long>(friendlyTeamChampions) { usersChampionId };
+            List<long> teamTwoIds = enemyTeamChampions.ToList();
+
+            foreach(LccMatchupInformation match in matchesContainingUsersChampionAndLane)
             {
-                List<LccMatchupInformationPlayer> players = match.LosingTeam.Concat(match.WinningTeam).ToList();
-
-                bool isUsersTeamWinning = match.LosingTeam.Concat(match.WinningTeam).Any(x => x.ChampionId == usersChampionId);
-
-                if(isUsersTeamWinning)
-                {
-                    //if(match.WinningTeam.Contains(friendlyTeamChampionIds))
-                    //{
-
-                    //}
-                    //losing team needs to match enemyTeamChampionIds
-                    //winning team needs to match friendlyTeamChampionIds
-                }
-                else
-                {
-                    //winning team needs to match enemyTeamChampionIds
-                    //losing team needs to match friendlyTeamChampionIds
-                }
-                
+                /*
+                 * if(winningTeam matches friendly team)
+                 *      if(losing team matches enemy team)
+                 *          // Correct match - users team has won 
+                 * 
+                 * if(losingTeam matches friendly team)
+                 *      if(winning team matches friendly team)
+                 *          // Correct match - users team has lost
+                 */
             }
-            
-            matches.Add(new Match());
+           
+            //matches to return
+            List<Match> matches = new List<Match>();
             return new JsonResult(matches);
         }
     }
