@@ -3,7 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using LccWebAPI.DatabaseContexts;
-using LccWebAPI.Repository;
+using LccWebAPI.Repository.Summoner;
+using LccWebAPI.Repository.Match;
 using LccWebAPI.Services;
 using LccWebAPI.Utils;
 using Microsoft.AspNetCore.Builder;
@@ -34,19 +35,13 @@ namespace LccWebAPI
             services.AddSingleton<IHostedService, MatchDataCollectionService>();
             services.AddSingleton<ILogging, Logging>();
             services.AddSingleton<IThrottledRequestHelper, ThrottledRequestHelper>();
-            services.AddSingleton<IRiotApi>(RiotApi.GetDevelopmentInstance("RGAPI-d32cf7d0-3419-43b4-b905-7f345db30969"));
+            services.AddSingleton<IRiotApi>(RiotApi.GetDevelopmentInstance("RGAPI-b2ae14f4-c242-47c9-af67-dadebc9602f8"));
 
             services.AddTransient<ISummonerRepository, SummonerRepository>();
-            services.AddTransient<IMatchReferenceRepository, MatchReferenceRepository>();
+            services.AddTransient<IMatchupInformationRepository, MatchupInformationRepository>();
 
-            var summonerConnection = @"Server=(localdb)\mssqllocaldb;Database=LccSummonerDb;Trusted_Connection=True;ConnectRetryCount=0";
-            services.AddDbContext<SummonerContext>(options => options.UseSqlServer(summonerConnection));
-
-            var matchReferenceConnection = @"Server=(localdb)\mssqllocaldb;Database=LccMatchReferenceDb;Trusted_Connection=True;ConnectRetryCount=0";
-            services.AddDbContext<MatchReferenceContext>(options => options.UseSqlServer(matchReferenceConnection));
-
-            var matchConnection = @"Server=(localdb)\mssqllocaldb;Database=LccMatchDb;Trusted_Connection=True;ConnectRetryCount=0";
-            services.AddDbContext<MatchupInformationContext>(options => options.UseSqlServer(matchConnection));
+            var dbConn = @"Server=(localdb)\mssqllocaldb;Database=LccDb;Trusted_Connection=True;ConnectRetryCount=0";
+            services.AddDbContext<LccDatabaseContext>(options => options.UseSqlServer(dbConn));
 
             services.AddMvc();
         }

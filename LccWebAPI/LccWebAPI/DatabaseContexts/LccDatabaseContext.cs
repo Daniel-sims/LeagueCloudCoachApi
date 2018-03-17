@@ -1,6 +1,6 @@
 ﻿using LccWebAPI.Models;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
-using RiotSharp.MatchEndpoint;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,19 +8,19 @@ using System.Threading.Tasks;
 
 namespace LccWebAPI.DatabaseContexts
 {
-    public class MatchupInformationContext : DbContext
+    public class LccDatabaseContext : DbContext
     {
-        public MatchupInformationContext(DbContextOptions<MatchupInformationContext> options)
+        public LccDatabaseContext(DbContextOptions<LccDatabaseContext> options)
             : base(options)
         { }
 
+        public DbSet<LccSummoner> Summoners { get; set; }
         public DbSet<LccMatchupInformation> Matches { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<LccMatchupInformation>().HasKey(c => c.Id);
-
-            base.OnModelCreating(modelBuilder);
+            modelBuilder.Entity<LccMatchupInformation>().HasMany(x => x.WinningTeam);
+            modelBuilder.Entity<LccMatchupInformation>().HasMany(x => x.LosingTeam);
         }
     }
 }

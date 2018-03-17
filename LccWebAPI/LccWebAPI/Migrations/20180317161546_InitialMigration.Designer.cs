@@ -6,14 +6,13 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage;
 using Microsoft.EntityFrameworkCore.Storage.Internal;
-using RiotSharp.MatchEndpoint.Enums;
 using RiotSharp.Misc;
 using System;
 
-namespace LccWebAPI.Migrations.MatchReference
+namespace LccWebAPI.Migrations
 {
-    [DbContext(typeof(MatchReferenceContext))]
-    [Migration("20180316173439_InitialMigration")]
+    [DbContext(typeof(LccDatabaseContext))]
+    [Migration("20180317161546_InitialMigration")]
     partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -23,32 +22,40 @@ namespace LccWebAPI.Migrations.MatchReference
                 .HasAnnotation("ProductVersion", "2.0.2-rtm-10011")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("LccWebAPI.Models.LccMatchReference", b =>
+            modelBuilder.Entity("LccWebAPI.Models.LccMatchupInformation", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<long>("ChampionId");
-
                     b.Property<long>("GameId");
-
-                    b.Property<int>("Lane");
-
-                    b.Property<int>("PlatformId");
-
-                    b.Property<string>("Queue");
-
-                    b.Property<int>("Region");
-
-                    b.Property<int>("Role");
-
-                    b.Property<int>("Season");
-
-                    b.Property<DateTime>("TimeStamp");
 
                     b.HasKey("Id");
 
-                    b.ToTable("MatchReferences");
+                    b.ToTable("Matches");
+                });
+
+            modelBuilder.Entity("LccWebAPI.Models.LccSummoner", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<long>("AccountId");
+
+                    b.Property<DateTime>("LastUpdated");
+
+                    b.Property<long>("Level");
+
+                    b.Property<string>("Name");
+
+                    b.Property<int>("ProfileIconId");
+
+                    b.Property<int>("Region");
+
+                    b.Property<DateTime>("RevisionDate");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Summoners");
                 });
 #pragma warning restore 612, 618
         }

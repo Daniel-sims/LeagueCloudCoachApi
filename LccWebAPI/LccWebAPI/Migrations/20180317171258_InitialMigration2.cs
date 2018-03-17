@@ -2,9 +2,9 @@
 using System;
 using System.Collections.Generic;
 
-namespace LccWebAPI.Migrations.MatchReference
+namespace LccWebAPI.Migrations
 {
-    public partial class initialSummoner : Migration
+    public partial class InitialMigration2 : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

@@ -1,6 +1,7 @@
 ﻿using RiotSharp.MatchEndpoint;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -11,16 +12,19 @@ namespace LccWebAPI.Models
     public class LccMatchupInformation
     {
         public LccMatchupInformation() { }
-        public LccMatchupInformation(long gameId, List<long> championIds)
+        public LccMatchupInformation(long gameId, List<LccMatchupInformationPlayer> winningTeam, List<LccMatchupInformationPlayer> losingTeam)
         {
             GameId = gameId;
-            ChampionIds = championIds;
+            WinningTeam = winningTeam;
+            LosingTeam = losingTeam;
         }
 
         public int Id { get; set; }
 
         public long GameId { get; set; }
-
-        public List<long> ChampionIds { get; set; }
+        
+        public virtual IList<LccMatchupInformationPlayer> WinningTeam { get; set; } = new List<LccMatchupInformationPlayer>();
+        
+        public virtual IList<LccMatchupInformationPlayer> LosingTeam { get; set; } = new List<LccMatchupInformationPlayer>();
     }
 }

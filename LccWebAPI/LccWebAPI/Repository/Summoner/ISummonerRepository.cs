@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace LccWebAPI.Repository
+namespace LccWebAPI.Repository.Summoner
 {
     public interface ISummonerRepository : IDisposable
     {

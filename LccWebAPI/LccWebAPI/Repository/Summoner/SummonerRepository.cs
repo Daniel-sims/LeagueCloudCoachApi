@@ -6,47 +6,47 @@ using LccWebAPI.DatabaseContexts;
 using LccWebAPI.Models;
 using RiotSharp.SummonerEndpoint;
 
-namespace LccWebAPI.Repository
+namespace LccWebAPI.Repository.Summoner
 {
     public class SummonerRepository : ISummonerRepository, IDisposable
     {
-        private SummonerContext _summonerContext;
+        private LccDatabaseContext _lccDatabaseContext;
 
-        public SummonerRepository(SummonerContext summonerContext)
+        public SummonerRepository(LccDatabaseContext lccDatabaseContext)
         {
-            _summonerContext = summonerContext;
+            _lccDatabaseContext = lccDatabaseContext;
         }
 
         public void InsertSummoner(LccSummoner summonerDto)
         {
-            _summonerContext.Summoners.Add(summonerDto);
+            _lccDatabaseContext.Summoners.Add(summonerDto);
         }
 
         public IEnumerable<LccSummoner> GetAllSummoners()
         {
-            return _summonerContext.Summoners.ToList();
+            return _lccDatabaseContext.Summoners.ToList();
         }
 
         public LccSummoner GetSummonerByAccountId(long accountId)
         {
-            return _summonerContext.Summoners.FirstOrDefault(x => x.AccountId == accountId);
+            return _lccDatabaseContext.Summoners.FirstOrDefault(x => x.AccountId == accountId);
         }
 
         public void UpdateSummoner(LccSummoner summoner)
         {
-            _summonerContext.Entry(summoner).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+            _lccDatabaseContext.Entry(summoner).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
         }
 
         public void DeleteSummoner(long accountId)
         {
-            LccSummoner summoner = _summonerContext.Summoners.FirstOrDefault(x => x.AccountId == accountId);
+            LccSummoner summoner = _lccDatabaseContext.Summoners.FirstOrDefault(x => x.AccountId == accountId);
             if(summoner != null)
-                _summonerContext.Summoners.Remove(summoner);
+                _lccDatabaseContext.Summoners.Remove(summoner);
         }
         
         public void Save()
         {
-            _summonerContext.SaveChanges();
+            _lccDatabaseContext.SaveChanges();
         }
 
         private bool disposed = false;
@@ -57,7 +57,7 @@ namespace LccWebAPI.Repository
             {
                 if (disposing)
                 {
-                    _summonerContext.Dispose();
+                    _lccDatabaseContext.Dispose();
                 }
             }
             this.disposed = true;

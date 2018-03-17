@@ -11,15 +11,28 @@ using System;
 
 namespace LccWebAPI.Migrations
 {
-    [DbContext(typeof(SummonerContext))]
-    partial class SummonerContextModelSnapshot : ModelSnapshot
+    [DbContext(typeof(LccDatabaseContext))]
+    [Migration("20180317171258_InitialMigration2")]
+    partial class InitialMigration2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "2.0.2-rtm-10011")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+            modelBuilder.Entity("LccWebAPI.Models.LccMatchupInformation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<long>("GameId");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Matches");
+                });
 
             modelBuilder.Entity("LccWebAPI.Models.LccSummoner", b =>
                 {

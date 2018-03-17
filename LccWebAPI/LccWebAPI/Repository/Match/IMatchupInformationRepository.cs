@@ -4,9 +4,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace LccWebAPI.Repository
+namespace LccWebAPI.Repository.Match
 {
-    interface IMatchupInformationRepository : IDisposable
+    public interface IMatchupInformationRepository : IDisposable
     {
         IEnumerable<LccMatchupInformation> GetAllMatchupInformations();
         LccMatchupInformation GetMatchupInformationByGameId(long gameId);
