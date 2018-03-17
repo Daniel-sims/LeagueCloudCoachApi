@@ -38,17 +38,17 @@ namespace LccWebAPI.Services
         int newSummonersAddedToDatabaseTotal = 0;
         int newSummonersAddedThisSession = 0;
 
-        int matchesUpdateTotal = 0;
+        int matchesUpdatedTotal = 0;
         int matchesUpdatedThisSession = 0;
         
         private void PrintSummary()
         {
             Console.WriteLine("###########SUMMARY###########");
-            Console.WriteLine("----------Summoners----------");
+            Console.WriteLine("----------Total----------");
             Console.WriteLine(newSummonersAddedToDatabaseTotal + " new summoners added to the database this session.");
+            Console.WriteLine(matchesUpdatedTotal + " Matches have been added this session.");
+            Console.WriteLine("---------This Run--------");
             Console.WriteLine(newSummonersAddedThisSession + " new summoners added to the database this run.");
-            Console.WriteLine("-----------Matches-----------");
-            Console.WriteLine(matchesUpdateTotal + " Matches have been added this session.");
             Console.WriteLine(matchesUpdatedThisSession + " Matches updated this run");
             Console.WriteLine("#############################");
         }
@@ -61,131 +61,119 @@ namespace LccWebAPI.Services
                 _logging.LogEvent("MatchDataCollectionService started.");
                 using (var scope = _serviceScopeFactory.CreateScope())
                 {
+                    using (var matchRepository = scope.ServiceProvider.GetRequiredService<IMatchupInformationRepository>())
                     using (var matchReferenceRepository = scope.ServiceProvider.GetRequiredService<IMatchReferenceRepository>())
                     using (var summonerRepository = scope.ServiceProvider.GetRequiredService<ISummonerRepository>())
                     {
-
-                    }
-
-                    var matchReferenceRepository = scope.ServiceProvider.GetRequiredService<IMatchReferenceRepository>();
-
-                    var allSummonersInDatabase = summonerRepository.GetAllSummoners();
-                    var allMatchesInDatabase = matchReferenceRepository.GetAllMatchReferences();
-
-                    _logging.LogEvent("We currently have " + allSummonersInDatabase.Count() + " stored in our database and " + allMatchesInDatabase.Count() + " matches.");
-
-                    try
-                    {
-                        var challengerPlayers = await _trottledRequestHelper.SendThrottledRequest<League>(async () => await _riotApi.GetChallengerLeagueAsync(RiotSharp.Misc.Region.euw, LeagueQueue.RankedSolo));
-                        _logging.LogEvent("Retrieved challenger players.");
-
-                        foreach (var challengerPlayer in challengerPlayers.Entries)
+                        try
                         {
-                            var summoner = await _trottledRequestHelper.SendThrottledRequest<Summoner>(async () => await _riotApi.GetSummonerBySummonerIdAsync(RiotSharp.Misc.Region.euw, Convert.ToInt64(challengerPlayer.PlayerOrTeamId)));
-                            _logging.LogEvent("Retrieved summoner - " + summoner.Name + ".");
-                            
-                            var summonerInDatabase = summonerRepository.GetSummonerByAccountId(summoner.AccountId);
-                            if (summoner != null && summonerInDatabase == null)
+                            var challengerPlayers = await _trottledRequestHelper.SendThrottledRequest<League>(async () => await _riotApi.GetChallengerLeagueAsync(RiotSharp.Misc.Region.euw, LeagueQueue.RankedSolo));
+
+                            int totalPlayers = challengerPlayers.Entries.Count;
+                            int currentCount = 0;
+
+                            foreach (var challengerPlayer in challengerPlayers.Entries)
                             {
-                                var newSummoner = new LccSummoner(summoner);
+                                Console.WriteLine(++currentCount + "/" + totalPlayers + " - " + challengerPlayer.PlayerOrTeamName);
 
-                                summonerRepository.InsertSummoner(newSummoner);
-                                
-                                _logging.LogEvent("new summoner " + summoner.Name + " added to the database.");
-                                ++newSummonersAddedToDatabaseTotal;
-                                ++newSummonersAddedThisSession;
+                                var summoner = await _trottledRequestHelper.SendThrottledRequest<Summoner>(async () => await _riotApi.GetSummonerBySummonerIdAsync(RiotSharp.Misc.Region.euw, Convert.ToInt64(challengerPlayer.PlayerOrTeamId)));
 
-                                //So because this is a new summoner we want to get just their 20 most recent matches
-                                var matchList = await _trottledRequestHelper.SendThrottledRequest<MatchList>(async () => await _riotApi.GetMatchListAsync(RiotSharp.Misc.Region.euw, summoner.AccountId, null, null, null, null, null, 0, 50));
-                                
-                                if(matchList?.Matches?.Count > 0)
+                                var summonerInDatabase = summonerRepository.GetSummonerByAccountId(summoner.AccountId);
+                                if (summoner != null && summonerInDatabase == null)
                                 {
-                                    _logging.LogEvent("Retrieved " + matchList?.Matches?.Count + " new matches to add to the database.");
 
-                                    foreach(var match in matchList?.Matches)
+                                    summonerRepository.InsertSummoner(new LccSummoner(summoner));
+                                    newSummonersAddedToDatabaseTotal++;
+                                    newSummonersAddedThisSession++;
+
+                                    var matchList = await _trottledRequestHelper.SendThrottledRequest<MatchList>(async () => await _riotApi.GetMatchListAsync(RiotSharp.Misc.Region.euw, summoner.AccountId, null, null, null, null, null, 0, 50));
+
+                                    if (matchList?.Matches != null && matchList?.Matches?.Count > 0)
                                     {
-                                        if(matchReferenceRepository.GetMatchReferenceByGameId(match.GameId) == null)
-                                        {
-                                            matchReferenceRepository.InsertMatchReference(new LccMatchReference(match));
-                                            matchesUpdatedThisSession++;
-                                            matchesUpdateTotal++;
-                                        }
-                                        else
-                                        {
-                                            _logging.LogEvent(match.GameId + " already exists in our database.");
-                                        }
-                                    }
-                                }
-                                else
-                                {
-                                    _logging.LogEvent("No Matches found for this summoner.");
-                                }
-                            }
-                            else
-                            {
-                                _logging.LogEvent("Summoner " + summoner.Name + " already exists in database.");
-
-                                DateTime lastUpdatedDate = summonerInDatabase.LastUpdated;
-                                DateTime lastRevisionDateFromRiot = summoner.RevisionDate;
-
-                                //If there's been a revision previously!
-                                if(lastRevisionDateFromRiot > lastUpdatedDate)
-                                {
-                                    //Get the new matches between the last revision date and the current date.
-                                    var newMatches = await _trottledRequestHelper.SendThrottledRequest<MatchList>(async () => await _riotApi.GetMatchListAsync(RiotSharp.Misc.Region.euw, summoner.AccountId, null, null, null, lastUpdatedDate, DateTime.Now, 0, 25));
-                                    if(newMatches?.Matches?.Count > 0)
-                                    {
-                                        _logging.LogEvent("Summoner " + summoner.Name + " has matches we didn't previously have adding " + newMatches.Matches.Count + " to the database");
-                                        foreach (var match in newMatches?.Matches)
+                                        foreach (var match in matchList?.Matches)
                                         {
                                             if (matchReferenceRepository.GetMatchReferenceByGameId(match.GameId) == null)
                                             {
                                                 matchReferenceRepository.InsertMatchReference(new LccMatchReference(match));
+                                                matchesUpdatedTotal++;
                                                 matchesUpdatedThisSession++;
-                                                matchesUpdateTotal++;
-                                            }
-                                            else
-                                            {
-                                                _logging.LogEvent(match.GameId + " already exists in our database.");
                                             }
                                         }
-                                    }
-                                    else
-                                    {
-                                        _logging.LogEvent("Updated the summoner but no new matches!");
                                     }
                                 }
                                 else
                                 {
-                                    _logging.LogEvent("Everything is all up to date!");
-                                }
-                            }
+                                    DateTime lastUpdatedDate = summonerInDatabase.LastUpdated;
+                                    DateTime lastRevisionDateFromRiot = summoner.RevisionDate;
 
-                            _logging.LogEvent("Saving changes.");
-                            summonerRepository.Save();
+                                    if (lastRevisionDateFromRiot > lastUpdatedDate)
+                                    {
+                                        if (summonerInDatabase.Level != summoner.Level)
+                                        {
+                                            Console.WriteLine("Revision included a level change");
+                                        }
+                                        summonerInDatabase.LastUpdated = summoner.RevisionDate;
+
+                                        summonerRepository.UpdateSummoner(summonerInDatabase);
+
+                                        var newMatchereferences = await _trottledRequestHelper.SendThrottledRequest<MatchList>(async () => await _riotApi.GetMatchListAsync(RiotSharp.Misc.Region.euw, summoner.AccountId, null, null, null, lastUpdatedDate, DateTime.Now, 0, 25));
+
+                                        if (newMatchereferences?.Matches != null && newMatchereferences?.Matches?.Count > 0)
+                                        {
+                                            foreach (var matchReference in newMatchereferences?.Matches)
+                                            {
+                                                if (matchReferenceRepository.GetMatchReferenceByGameId(matchReference.GameId) == null)
+                                                {
+                                                    matchReferenceRepository.InsertMatchReference(new LccMatchReference(matchReference));
+                                                    Console.WriteLine("Added match reference to our database.");
+
+                                                    var match = await _trottledRequestHelper.SendThrottledRequest<Match>(async () => await _riotApi.GetMatchAsync(RiotSharp.Misc.Region.euw, matchReference.GameId));
+
+                                                    var lccMatch = new LccMatchupInformation
+                                                    {
+                                                        GameId = match.GameId,
+                                                        ChampionIds = match.Participants.Select(x => Convert.ToInt64(x.ChampionId)).ToList()
+                                                    };
+
+                                                    matchesUpdatedTotal++;
+                                                    matchesUpdatedThisSession++;
+                                                }
+                                                else
+                                                {
+                                                    Console.WriteLine("Match already exists in our database.");
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+
+                                summonerRepository.Save();
+                                matchReferenceRepository.Save();
+                            }
                         }
-                    }
-                    catch (RiotSharpException e)
-                    {
-                        _logging.LogEvent("RiotSharpException encountered - " + e.Message + ".");
-                        if (e.HttpStatusCode == (HttpStatusCode)429)
+                        catch (RiotSharpException e)
                         {
-                            _logging.LogEvent("Sleeping for 50 seconds.");
-                            await Task.Run(() => Thread.Sleep(50 * 1000));
+                            _logging.LogEvent("RiotSharpException encountered - " + e.Message + ".");
+                            if (e.HttpStatusCode == (HttpStatusCode)429)
+                            {
+                                _logging.LogEvent("RateLimitExceeded exception - Sleeping for 50 seconds.");
+                                await Task.Run(() => Thread.Sleep(50 * 1000));
+                            }
                         }
-                    }
-                    catch (Exception e)
-                    {
-                        _logging.LogEvent("Exception encountered - " + e.Message + ".");
+                        catch (Exception e)
+                        {
+                            _logging.LogEvent("Exception encountered - " + e.Message + ".");
+                        }
                     }
                 }
 
                 PrintSummary();
+
                 matchesUpdatedThisSession = 0;
                 newSummonersAddedThisSession = 0;
 
-                _logging.LogEvent("MatchDataCollectionService finished, will wait 10 seconds and start again.");
-                await Task.Run(() => Thread.Sleep(10000));
+                _logging.LogEvent("MatchDataCollectionService finished, will wait 5 minutes and start again.");
+                await Task.Run(() => Thread.Sleep(300000));
             }
         }
     }

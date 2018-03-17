@@ -45,6 +45,9 @@ namespace LccWebAPI
             var matchReferenceConnection = @"Server=(localdb)\mssqllocaldb;Database=LccMatchReferenceDb;Trusted_Connection=True;ConnectRetryCount=0";
             services.AddDbContext<MatchReferenceContext>(options => options.UseSqlServer(matchReferenceConnection));
 
+            var matchConnection = @"Server=(localdb)\mssqllocaldb;Database=LccMatchDb;Trusted_Connection=True;ConnectRetryCount=0";
+            services.AddDbContext<MatchupInformationContext>(options => options.UseSqlServer(matchConnection));
+
             services.AddMvc();
         }
 
