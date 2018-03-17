@@ -38,8 +38,8 @@ namespace LccWebAPI.Controllers
             // So we don't care about which teams winning or losing
            
             // Get the id's in lists
-            List<long> teamOneIds = new List<long>(friendlyTeamChampions) { usersChampionId };
-            List<long> teamTwoIds = enemyTeamChampions.ToList();
+            List<long> friendlyTeamChampionIds = new List<long>(friendlyTeamChampions) { usersChampionId };
+            List<long> enemyTeamChampionIds = enemyTeamChampions.ToList();
 
             foreach(LccMatchupInformation match in matchesContainingUsersChampionAndLane)
             {
