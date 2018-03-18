@@ -30,30 +30,23 @@ namespace LccWebAPI.Controllers
         public async Task<JsonResult> GetMatchup(long usersChampionId, string usersLane, long[] friendlyTeamChampions, long[] enemyTeamChampions, int maxMatchLimit = 5)
         {
             var allMatchesInDatabase = _matchupInformationRepository.GetAllMatchupInformations();
-
+            IList<long> friendlyTeamChampionIds = new List<long>(friendlyTeamChampions) { usersChampionId };
+            IList<long> enemyTeamChampionIds = enemyTeamChampions.ToList();
             // All matches with the users champion in, losing or none losing team
             var matchesContainingUsersChampionAndLane 
                 = allMatchesInDatabase
                 .Where(x => x.LosingTeam.Any(p => p.ChampionId == usersChampionId && p.Lane.ToLower() == usersLane.ToLower() 
-                || x.WinningTeam.Any(u => u.ChampionId == usersChampionId && u.Lane.ToLower() == usersLane.ToLower()))).ToList();
-
-            // So we don't care about which teams winning or losing
-           
-            // Get the id's in lists
-            IList<long> friendlyTeamChampionIds = new List<long>(friendlyTeamChampions) { usersChampionId };
-            IList<long> enemyTeamChampionIds = enemyTeamChampions.ToList();
-
-            var compMatches = matchesContainingUsersChampionAndLane.Where(q =>
-            (enemyTeamChampionIds.All(e => q.LosingTeam.Any(l => l.ChampionId == e)) && friendlyTeamChampionIds.All(f => q.WinningTeam.Any(l => l.ChampionId == f)))
-            || (enemyTeamChampionIds.All(e => q.WinningTeam.Any(l => l.ChampionId == e)) && friendlyTeamChampionIds.All(f => q.LosingTeam.Any(l => l.ChampionId == f))));
+                || x.WinningTeam.Any(u => u.ChampionId == usersChampionId && u.Lane.ToLower() == usersLane.ToLower()))).ToList()
+                .Where(q => (enemyTeamChampionIds.All(e => q.LosingTeam.Any(l => l.ChampionId == e)) && friendlyTeamChampionIds.All(f => q.WinningTeam.Any(l => l.ChampionId == f)))
+                || (enemyTeamChampionIds.All(e => q.WinningTeam.Any(l => l.ChampionId == e)) && friendlyTeamChampionIds.All(f => q.LosingTeam.Any(l => l.ChampionId == f))));
 
             List<Match> matchesToReturnToUser = new List<Match>();
 
-            if (compMatches.Any())
+            if (matchesContainingUsersChampionAndLane.Any())
             {
                 int matchReturnCount = 0;
 
-                foreach(var match in compMatches)
+                foreach(var match in matchesContainingUsersChampionAndLane)
                 {
                     if(matchReturnCount <= maxMatchLimit)
                     {
