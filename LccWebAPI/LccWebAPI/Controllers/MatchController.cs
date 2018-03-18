@@ -45,7 +45,7 @@ namespace LccWebAPI.Controllers
                 .Where(q => (enemyTeamChampionIds.All(e => q.LosingTeam.Any(l => l.ChampionId == e)) && friendlyTeamChampionIds.All(f => q.WinningTeam.Any(l => l.ChampionId == f)))
                 || (enemyTeamChampionIds.All(e => q.WinningTeam.Any(l => l.ChampionId == e)) && friendlyTeamChampionIds.All(f => q.LosingTeam.Any(l => l.ChampionId == f))));
 
-            List<LccMatchupInformation> matchesToReturnToUser = new List<LccMatchupInformation>();
+            List<Match> matchesToReturnToUser = new List<Match>();
 
             if (matchesContainingUsersChampionAndLane.Any())
             {
@@ -55,8 +55,8 @@ namespace LccWebAPI.Controllers
                 {
                     if(matchReturnCount <= maxMatchLimit)
                     {
-                        //var matchToReturn = await _riotApi.GetMatchAsync(RiotSharp.Misc.Region.euw, match.GameId);
-                        matchesToReturnToUser.Add(match);
+                        var matchToReturn = await _riotApi.GetMatchAsync(RiotSharp.Misc.Region.euw, match.GameId);
+                        matchesToReturnToUser.Add(matchToReturn);
 
                         matchReturnCount++;
                     }
