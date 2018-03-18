@@ -5,6 +5,7 @@ using RiotSharp.Interfaces;
 using RiotSharp.MatchEndpoint;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace LccWebAPI.Controllers
 {
@@ -26,31 +27,49 @@ namespace LccWebAPI.Controllers
         }
 
         [HttpGet("GetMatchup")]
-        public JsonResult GetMatchup(long usersChampionId, string usersLane, long[] friendlyTeamChampions, long[] enemyTeamChampions)
+        public async Task<JsonResult> GetMatchup(long usersChampionId, string usersLane, long[] friendlyTeamChampions, long[] enemyTeamChampions, int maxMatchLimit = 5)
         {
             var allMatchesInDatabase = _matchupInformationRepository.GetAllMatchupInformations();
 
             // All matches with the users champion in, losing or none losing team
             var matchesContainingUsersChampionAndLane 
                 = allMatchesInDatabase
-                .Where(x => x.LosingTeam.Any(p => p.ChampionId == usersChampionId) || x.WinningTeam.Any(u => u.ChampionId == usersChampionId)).ToList();
+                .Where(x => x.LosingTeam.Any(p => p.ChampionId == usersChampionId && p.Lane.ToLower() == usersLane.ToLower() 
+                || x.WinningTeam.Any(u => u.ChampionId == usersChampionId && u.Lane.ToLower() == usersLane.ToLower()))).ToList();
 
             // So we don't care about which teams winning or losing
            
             // Get the id's in lists
             IList<long> friendlyTeamChampionIds = new List<long>(friendlyTeamChampions) { usersChampionId };
-            List<long> enemyTeamChampionIds = enemyTeamChampions.ToList();
+            IList<long> enemyTeamChampionIds = enemyTeamChampions.ToList();
 
             var compMatches = matchesContainingUsersChampionAndLane.Where(q =>
             (enemyTeamChampionIds.All(e => q.LosingTeam.Any(l => l.ChampionId == e)) && friendlyTeamChampionIds.All(f => q.WinningTeam.Any(l => l.ChampionId == f)))
             || (enemyTeamChampionIds.All(e => q.WinningTeam.Any(l => l.ChampionId == e)) && friendlyTeamChampionIds.All(f => q.LosingTeam.Any(l => l.ChampionId == f))));
+
+            List<Match> matchesToReturnToUser = new List<Match>();
+
             if (compMatches.Any())
             {
-                // if you want to edit any of the matches in any way, do it here
-            }
+                int matchReturnCount = 0;
 
-            //matches to return
-            return new JsonResult(compMatches);
+                foreach(var match in compMatches)
+                {
+                    if(matchReturnCount <= maxMatchLimit)
+                    {
+                        var matchToReturn = await _riotApi.GetMatchAsync(RiotSharp.Misc.Region.euw, match.GameId);
+                        matchesToReturnToUser.Add(matchToReturn);
+
+                        matchReturnCount++;
+                    }
+                    else
+                    {
+                        break;
+                    }
+                }
+            }
+            
+            return new JsonResult(matchesToReturnToUser);
         }
     }
 }
