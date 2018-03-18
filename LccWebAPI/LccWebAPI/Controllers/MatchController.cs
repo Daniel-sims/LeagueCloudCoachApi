@@ -32,7 +32,12 @@ namespace LccWebAPI.Controllers
             var allMatchesInDatabase = _matchupInformationRepository.GetAllMatchupInformations();
             IList<long> friendlyTeamChampionIds = new List<long>(friendlyTeamChampions) { usersChampionId };
             IList<long> enemyTeamChampionIds = enemyTeamChampions.ToList();
-            // All matches with the users champion in, losing or none losing team
+
+
+            // This is looks horrible but works....
+            // first .Where finds if users champion + lane is on winning team or losing team
+            // second .Where checks to see if all of the specified champions are on either team, winning or losing
+            // Basically it gets the matches the user specified...
             var matchesContainingUsersChampionAndLane 
                 = allMatchesInDatabase
                 .Where(x => x.LosingTeam.Any(p => p.ChampionId == usersChampionId && p.Lane.ToLower() == usersLane.ToLower() 
@@ -40,7 +45,7 @@ namespace LccWebAPI.Controllers
                 .Where(q => (enemyTeamChampionIds.All(e => q.LosingTeam.Any(l => l.ChampionId == e)) && friendlyTeamChampionIds.All(f => q.WinningTeam.Any(l => l.ChampionId == f)))
                 || (enemyTeamChampionIds.All(e => q.WinningTeam.Any(l => l.ChampionId == e)) && friendlyTeamChampionIds.All(f => q.LosingTeam.Any(l => l.ChampionId == f))));
 
-            List<Match> matchesToReturnToUser = new List<Match>();
+            List<LccMatchupInformation> matchesToReturnToUser = new List<LccMatchupInformation>();
 
             if (matchesContainingUsersChampionAndLane.Any())
             {
@@ -50,8 +55,8 @@ namespace LccWebAPI.Controllers
                 {
                     if(matchReturnCount <= maxMatchLimit)
                     {
-                        var matchToReturn = await _riotApi.GetMatchAsync(RiotSharp.Misc.Region.euw, match.GameId);
-                        matchesToReturnToUser.Add(matchToReturn);
+                        //var matchToReturn = await _riotApi.GetMatchAsync(RiotSharp.Misc.Region.euw, match.GameId);
+                        matchesToReturnToUser.Add(match);
 
                         matchReturnCount++;
                     }
