@@ -101,6 +101,12 @@ namespace LccWebAPI.Controllers
                 friendlyTeamInformation.Players.Add(CreatePlayerInfo(friendlyParticipant, friendlyParticipantIdentity));
             }
 
+            var friendlyTeam = match.Teams.FirstOrDefault(x => x.TeamId == usersTeamId);
+            friendlyTeamInformation.DragonKills = friendlyTeam.DragonKills;
+            friendlyTeamInformation.BaronKills = friendlyTeam.BaronKills;
+            friendlyTeamInformation.RiftHeraldKills = friendlyTeam.RiftHeraldKills;
+            friendlyTeamInformation.InhibitorKills = friendlyTeam.InhibitorKills;
+
             matchupInformation.FriendlyTeam = friendlyTeamInformation;
 
             // Get enemy players
@@ -119,6 +125,12 @@ namespace LccWebAPI.Controllers
                 var enemyParticipantIdentity = enemyPartidipantIdentitys.FirstOrDefault(x => x.ParticipantId == enemyParticipant.ParticipantId);
                 enemyTeamInformation.Players.Add(CreatePlayerInfo(enemyParticipant, enemyParticipantIdentity));
             }
+
+            var enemyTeam = match.Teams.FirstOrDefault(x => x.TeamId != usersTeamId);
+            enemyTeamInformation.DragonKills = enemyTeam.DragonKills;
+            enemyTeamInformation.BaronKills = enemyTeam.BaronKills;
+            enemyTeamInformation.RiftHeraldKills = enemyTeam.RiftHeraldKills;
+            enemyTeamInformation.InhibitorKills = enemyTeam.InhibitorKills;
 
             matchupInformation.EnemyTeam = enemyTeamInformation;
 
