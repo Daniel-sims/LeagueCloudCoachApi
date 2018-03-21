@@ -53,7 +53,7 @@ namespace LccWebAPI.Controllers
 
                 foreach(var match in matchesContainingUsersChampionAndLane)
                 {
-                    if(matchReturnCount <= maxMatchLimit)
+                    if(matchReturnCount != maxMatchLimit)
                     {
                         var matchToReturn = await _riotApi.GetMatchAsync(RiotSharp.Misc.Region.euw, match.GameId);
                         matchesToReturnToUser.Add(matchToReturn);
