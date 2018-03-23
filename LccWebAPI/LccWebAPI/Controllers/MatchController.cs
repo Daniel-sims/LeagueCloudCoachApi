@@ -56,7 +56,7 @@ namespace LccWebAPI.Controllers
                 {
                     if(matchReturnCount != maxMatchLimit)
                     {
-                        var riotMatchInformation = await _riotApi.GetMatchAsync(RiotSharp.Misc.Region.euw, match.GameId);
+                        Match riotMatchInformation = await _riotApi.GetMatchAsync(RiotSharp.Misc.Region.euw, match.GameId);
                         matchesToReturnToUser.Add(CreateLccMatchupInformation(riotMatchInformation, usersChampionId));
 
                         matchReturnCount++;
@@ -80,8 +80,8 @@ namespace LccWebAPI.Controllers
                 MatchPatch = match.GameVersion
             };
 
-            var usersTeamId = match.Participants.FirstOrDefault(x => x.ChampionId == usersChampionId).TeamId;
-            matchupInformation.FriendlyTeamWon =  matchupInformation.FriendlyTeamWon = match.Teams.FirstOrDefault(x => x.TeamId == usersTeamId).Win == "Win";
+            int usersTeamId = match.Participants.FirstOrDefault(x => x.ChampionId == usersChampionId).TeamId;
+            matchupInformation.FriendlyTeamWon = match.Teams.FirstOrDefault(x => x.TeamId == usersTeamId).Win == "Win";
 
             // Friendly players
 
@@ -93,15 +93,15 @@ namespace LccWebAPI.Controllers
             };
 
             var friendlyParticipants = match.Participants.Where(x => x.TeamId == usersTeamId);
-            var friendlyPartidipantIdentits = match.ParticipantIdentities.Where(x => friendlyParticipants.Any(u => u.ParticipantId == x.ParticipantId));
+            var friendlyPartidipantIdentitys = match.ParticipantIdentities.Where(x => friendlyParticipants.Any(u => u.ParticipantId == x.ParticipantId));
 
-            foreach (var friendlyParticipant in friendlyParticipants)
+            foreach (Participant friendlyParticipant in friendlyParticipants)
             {
-                var friendlyParticipantIdentity = friendlyPartidipantIdentits.FirstOrDefault(x => x.ParticipantId == friendlyParticipant.ParticipantId);
+                ParticipantIdentity friendlyParticipantIdentity = friendlyPartidipantIdentitys.FirstOrDefault(x => x.ParticipantId == friendlyParticipant.ParticipantId);
                 friendlyTeamInformation.Players.Add(CreatePlayerInfo(friendlyParticipant, friendlyParticipantIdentity));
             }
 
-            var friendlyTeam = match.Teams.FirstOrDefault(x => x.TeamId == usersTeamId);
+            TeamStats friendlyTeam = match.Teams.FirstOrDefault(x => x.TeamId == usersTeamId);
             friendlyTeamInformation.DragonKills = friendlyTeam.DragonKills;
             friendlyTeamInformation.BaronKills = friendlyTeam.BaronKills;
             friendlyTeamInformation.RiftHeraldKills = friendlyTeam.RiftHeraldKills;
@@ -120,9 +120,9 @@ namespace LccWebAPI.Controllers
             var enemyParticipants = match.Participants.Where(x => x.TeamId != usersTeamId);
             var enemyPartidipantIdentitys = match.ParticipantIdentities.Where(x => enemyParticipants.Any(u => u.ParticipantId == x.ParticipantId));
 
-            foreach (var enemyParticipant in enemyParticipants)
+            foreach (Participant enemyParticipant in enemyParticipants)
             {
-                var enemyParticipantIdentity = enemyPartidipantIdentitys.FirstOrDefault(x => x.ParticipantId == enemyParticipant.ParticipantId);
+                ParticipantIdentity enemyParticipantIdentity = enemyPartidipantIdentitys.FirstOrDefault(x => x.ParticipantId == enemyParticipant.ParticipantId);
                 enemyTeamInformation.Players.Add(CreatePlayerInfo(enemyParticipant, enemyParticipantIdentity));
             }
 
@@ -142,7 +142,7 @@ namespace LccWebAPI.Controllers
             return new LccMatchplayerInformation()
             {
                 SummonerName = participantIdentity.Player.SummonerName,
-                Division = participant.HighestAchievedSeasonTier.ToString(),
+                LastSeasonRank = participant.HighestAchievedSeasonTier.ToString(),
 
                 Kills = participant.Stats.Kills,
                 Deaths = participant.Stats.Deaths,
@@ -157,7 +157,9 @@ namespace LccWebAPI.Controllers
                 TrinketId = participant.Stats.Item6,
                 FirstItemsBought = new List<long>(),
                 SummonerOne = participant.Spell1Id,
-                SummonerTwo = participant.Spell2Id
+                SummonerTwo = participant.Spell2Id,
+                ChampionId = participant.ChampionId,
+                ChampionLevel = participant.Stats.ChampLevel
             };
         }
     }

@@ -12,42 +12,15 @@ using System;
 namespace LccWebAPI.Migrations
 {
     [DbContext(typeof(LccDatabaseContext))]
-    partial class LccDatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20180322133230_NewRankFields")]
+    partial class NewRankFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "2.0.2-rtm-10011")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
-
-            modelBuilder.Entity("LccWebAPI.Models.DatabaseModels.LccChampionInformation", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<int>("ChampionId");
-
-                    b.Property<string>("ChampionName");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Champions");
-                });
-
-            modelBuilder.Entity("LccWebAPI.Models.DatabaseModels.LccItemInformation", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<int>("ItemId");
-
-                    b.Property<string>("ItemName");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Items");
-                });
 
             modelBuilder.Entity("LccWebAPI.Models.DatabaseModels.LccMatchupInformation", b =>
                 {
@@ -70,13 +43,21 @@ namespace LccWebAPI.Migrations
 
                     b.Property<long>("ChampionId");
 
+                    b.Property<string>("CurrentLp");
+
+                    b.Property<string>("CurrentRank");
+
                     b.Property<string>("Lane");
 
                     b.Property<int?>("LccMatchupInformationId");
 
                     b.Property<int?>("LccMatchupInformationId1");
 
+                    b.Property<string>("Losses");
+
                     b.Property<string>("SummonerName");
+
+                    b.Property<string>("Wins");
 
                     b.HasKey("Id");
 
@@ -109,20 +90,6 @@ namespace LccWebAPI.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Summoners");
-                });
-
-            modelBuilder.Entity("LccWebAPI.Models.DatabaseModels.LccSummonerSpellInformation", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<int>("SummonerId");
-
-                    b.Property<string>("SummonerName");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("SummonerSpells");
                 });
 
             modelBuilder.Entity("LccWebAPI.Models.DatabaseModels.LccMatchupInformationPlayer", b =>

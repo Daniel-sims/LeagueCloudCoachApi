@@ -17,6 +17,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using RiotSharp;
 using RiotSharp.Interfaces;
+using LccWebAPI.Repository.StaticData;
 
 namespace LccWebAPI
 {
@@ -35,10 +36,15 @@ namespace LccWebAPI
             services.AddSingleton<IHostedService, MatchDataCollectionService>();
             services.AddSingleton<ILogging, Logging>();
             services.AddSingleton<IThrottledRequestHelper, ThrottledRequestHelper>();
-            services.AddSingleton<IRiotApi>(RiotApi.GetDevelopmentInstance("RGAPI-294a77aa-ebc0-418a-820f-8e22327f7ee0"));
+
+            services.AddSingleton<IRiotApi>(RiotApi.GetDevelopmentInstance("RGAPI-41867b58-78da-4c5f-b227-2f9033fcf293"));
+            services.AddSingleton<IStaticRiotApi>(StaticRiotApi.GetInstance("RGAPI-41867b58-78da-4c5f-b227-2f9033fcf293"));
 
             services.AddTransient<ISummonerRepository, SummonerRepository>();
             services.AddTransient<IMatchupInformationRepository, MatchupInformationRepository>();
+            services.AddTransient<IChampionStaticDataRepository, ChampionStaticDataRepository>();
+            services.AddTransient<IItemStaticDataRepository, ItemStaticDataRepository>();
+            services.AddTransient<ISummonerSpellStaticDataRepository, SummonerSpellStaticDataRepository>();
 
             var dbConn = @"Server=(localdb)\mssqllocaldb;Database=LccDb;Trusted_Connection=True;ConnectRetryCount=0";
             services.AddDbContext<LccDatabaseContext>(options => options.UseSqlServer(dbConn));

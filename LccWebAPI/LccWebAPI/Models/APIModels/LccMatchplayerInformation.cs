@@ -9,7 +9,15 @@ namespace LccWebAPI.Models.APIModels
     {
         public string SummonerName { get; set; }
 
-        public string Division { get; set; }
+        public string LastSeasonRank { get; set; }
+
+        public string CurrentSeasonRank { get; set; }
+
+        public string CurrentLp { get; set; }
+
+        public string Wins { get; set; }
+
+        public string Losses { get; set; }
 
         public long Kills { get; set; }
         
@@ -38,5 +46,9 @@ namespace LccWebAPI.Models.APIModels
         public long SummonerOne { get; set; }
 
         public long SummonerTwo { get; set; }
+
+        public long ChampionId { get; set; }
+
+        public long ChampionLevel { get; set; }
     }
 }

@@ -17,6 +17,9 @@ namespace LccWebAPI.DatabaseContexts
 
         public DbSet<LccSummoner> Summoners { get; set; }
         public DbSet<LccMatchupInformation> Matches { get; set; }
+        public DbSet<LccChampionInformation> Champions { get; set; }
+        public DbSet<LccItemInformation> Items { get; set; }
+        public DbSet<LccSummonerSpellInformation> SummonerSpells { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

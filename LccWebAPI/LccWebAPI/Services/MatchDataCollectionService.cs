@@ -62,6 +62,7 @@ namespace LccWebAPI.Services
             while(!cancellationToken.IsCancellationRequested)
             {
                 _logging.LogEvent("MatchDataCollectionService started.");
+
                 using (var scope = _serviceScopeFactory.CreateScope())
                 {
                     using (var matchupInformationRepository = scope.ServiceProvider.GetRequiredService<IMatchupInformationRepository>())
@@ -69,6 +70,7 @@ namespace LccWebAPI.Services
                     {
                         try
                         {
+                            _logging.LogEvent("Current matches count - " + matchupInformationRepository.GetAllMatchupInformations().Count());
                             var challengerPlayers = await _throttledRequestHelper.SendThrottledRequest<League>(async () => await _riotApi.GetChallengerLeagueAsync(RiotSharp.Misc.Region.euw, LeagueQueue.RankedSolo));
                             var mastersPlayers = await _throttledRequestHelper.SendThrottledRequest<League>(async () => await _riotApi.GetMasterLeagueAsync(RiotSharp.Misc.Region.euw, LeagueQueue.RankedSolo));
 
@@ -93,7 +95,7 @@ namespace LccWebAPI.Services
                                     var matchList = await _throttledRequestHelper.SendThrottledRequest<MatchList>(async () => await _riotApi.GetMatchListAsync(RiotSharp.Misc.Region.euw, summoner.AccountId, null, null, null, null, null, 0, 25));
                                     if (matchList != null && matchList?.Matches != null)
                                     {
-                                        await GetRiotMatchupInformationAndAddIfNotExisting(matchupInformationRepository, matchList);
+                                        await GetRiotMatchupInformationAndAddIfNotExisting(matchupInformationRepository, matchList, highEloPlayerEntires);
                                     }
                                 }
                                 else
@@ -109,7 +111,7 @@ namespace LccWebAPI.Services
                                         var newMatches = await _throttledRequestHelper.SendThrottledRequest<MatchList>(async () => await _riotApi.GetMatchListAsync(RiotSharp.Misc.Region.euw, summoner.AccountId, null, null, null, lastUpdatedDate, DateTime.Now, 0, 25));
                                         if (newMatches != null && newMatches?.Matches != null)
                                         {
-                                            await GetRiotMatchupInformationAndAddIfNotExisting(matchupInformationRepository, newMatches);
+                                            await GetRiotMatchupInformationAndAddIfNotExisting(matchupInformationRepository, newMatches, highEloPlayerEntires);
                                         }
                                     }
                                 }
@@ -144,51 +146,44 @@ namespace LccWebAPI.Services
             }
         }
 
-        private async Task GetRiotMatchupInformationAndAddIfNotExisting(IMatchupInformationRepository matchupInformationRepository, MatchList matchlist)
+        private async Task GetRiotMatchupInformationAndAddIfNotExisting(IMatchupInformationRepository matchupInformationRepository, MatchList matchlist, IList<LeaguePosition> highEloPlayerEntires)
         {
             foreach (var match in matchlist?.Matches)
             {
                 // If we currently don't have information about this game in our Database
                 if (matchupInformationRepository.GetMatchupInformationByGameId(match.GameId) == null)
                 {
-
                     //Get riots detailed information about this game
-                    var riotMatchInformation = await _throttledRequestHelper.SendThrottledRequest<Match>(async () => await _riotApi.GetMatchAsync(RiotSharp.Misc.Region.euw, match.GameId));
+                    // Contains information such as Runes, Masteries, participants 
+                    Match riotMatchInformation = await _throttledRequestHelper.SendThrottledRequest<Match>(async () => await _riotApi.GetMatchAsync(RiotSharp.Misc.Region.euw, match.GameId));
 
                     //If we got it successfully and there's participants 
                     if (riotMatchInformation != null & riotMatchInformation?.Participants != null)
                     {
-
-                        // Create a new match with GameId and a list of championIds
-                        // This means we can quickly find matchups based on championIds and
-                        // do a riot lookup for the match again
-
                         var winningTeamId = riotMatchInformation.Teams.Find(x => x.Win == "Win").TeamId;
 
                         List<LccMatchupInformationPlayer> winningTeam = new List<LccMatchupInformationPlayer>();
                         List<LccMatchupInformationPlayer> losingTeam = new List<LccMatchupInformationPlayer>();
 
-                        foreach (var player in riotMatchInformation.Participants)
+                        foreach (Participant player in riotMatchInformation.Participants)
                         {
+                            Player matchPlayer = riotMatchInformation.ParticipantIdentities.FirstOrDefault(x => x.ParticipantId == player.ParticipantId).Player;
+
+                            LccMatchupInformationPlayer lccMatchupInformationPlayer = new LccMatchupInformationPlayer()
+                            {
+                                ChampionId = player.ChampionId,
+                                Lane = player.Timeline.Lane,
+                                AccountId = matchPlayer.AccountId,
+                                SummonerName = matchPlayer.SummonerName
+                            };
+
                             if(player.TeamId == winningTeamId)
                             {
-                                winningTeam.Add(new LccMatchupInformationPlayer()
-                                {
-                                    ChampionId = player.ChampionId,
-                                    Lane = riotMatchInformation.Participants.FirstOrDefault(x => x.ParticipantId == player.ParticipantId).Timeline.Lane,
-                                    AccountId = riotMatchInformation.ParticipantIdentities.FirstOrDefault(x => x.ParticipantId == player.ParticipantId).Player.AccountId,
-                                    SummonerName = riotMatchInformation.ParticipantIdentities.FirstOrDefault(x => x.ParticipantId == player.ParticipantId).Player.SummonerName
-                                });
+                                winningTeam.Add(lccMatchupInformationPlayer);
                             }
                             else
                             {
-                                losingTeam.Add(new LccMatchupInformationPlayer()
-                                {
-                                    ChampionId = player.ChampionId,
-                                    Lane = riotMatchInformation.Participants.FirstOrDefault(x => x.ParticipantId == player.ParticipantId).Timeline.Lane,
-                                    AccountId = riotMatchInformation.ParticipantIdentities.FirstOrDefault(x => x.ParticipantId == player.ParticipantId).Player.AccountId,
-                                    SummonerName = riotMatchInformation.ParticipantIdentities.FirstOrDefault(x => x.ParticipantId == player.ParticipantId).Player.SummonerName
-                                });
+                                losingTeam.Add(lccMatchupInformationPlayer);
                             }
                         }
                         
