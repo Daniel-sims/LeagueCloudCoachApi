@@ -149,7 +149,7 @@ namespace LccWebAPI.Controllers
                 Kills = participant.Stats.Kills,
                 Deaths = participant.Stats.Deaths,
                 Assists = participant.Stats.Assists,
-                MinionKills = participant.Stats.TotalMinionsKilled,
+                MinionKills = participant.Stats.TotalMinionsKilled + participant.Stats.NeutralMinionsKilled,
                 Item1Id = participant.Stats.Item0,
                 Item2Id = participant.Stats.Item1,
                 Item3Id = participant.Stats.Item2,
@@ -161,7 +161,15 @@ namespace LccWebAPI.Controllers
                 SummonerOne = participant.Spell1Id,
                 SummonerTwo = participant.Spell2Id,
                 ChampionId = participant.ChampionId,
-                ChampionLevel = participant.Stats.ChampLevel
+                ChampionLevel = participant.Stats.ChampLevel,
+                PrimaryMasteryId = 1,
+                SubPrimaryMasteryOneId = 2,
+                SubPrimaryMasteryTwoId = 3,
+                SubPrimaryMasteryThreeId = 4,
+                SecondaryMasteryId = 5,
+                SubSecondaryMasteryOneId = 6,
+                SubSecondaryMasteryTwoId = 7
+                
             };
         }
     }

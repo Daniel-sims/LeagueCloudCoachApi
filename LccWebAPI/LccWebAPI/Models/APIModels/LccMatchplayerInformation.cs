@@ -50,5 +50,19 @@ namespace LccWebAPI.Models.APIModels
         public long ChampionId { get; set; }
 
         public long ChampionLevel { get; set; }
+        
+        public int PrimaryMasteryId { get; set; }
+        
+        public int SubPrimaryMasteryOneId { get; set; }
+        
+        public int SubPrimaryMasteryTwoId { get; set; }
+        
+        public int SubPrimaryMasteryThreeId { get; set; }
+        
+        public int SecondaryMasteryId { get; set; }
+        
+        public int SubSecondaryMasteryOneId { get; set; }
+        
+        public int SubSecondaryMasteryTwoId { get; set; }
     }
 }
