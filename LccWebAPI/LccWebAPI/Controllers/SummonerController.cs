@@ -20,7 +20,7 @@ namespace LccWebAPI.Controllers
         [HttpGet("Summoner/{summonerName}")]
         public async Task<JsonResult> GetSummonerByName(string summonerName)
         {
-            var summoner = await _riotApi.GetSummonerByNameAsync(RiotSharp.Misc.Region.euw, summonerName);
+            var summoner = await _riotApi.Summoner.GetSummonerByNameAsync(RiotSharp.Misc.Region.euw, summonerName);
 
             return new JsonResult(summoner);
         }

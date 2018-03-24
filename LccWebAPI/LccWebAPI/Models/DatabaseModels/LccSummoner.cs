@@ -1,10 +1,7 @@
-﻿using RiotSharp.Misc;
-using RiotSharp.SummonerEndpoint;
+﻿using RiotSharp.Endpoints.SummonerEndpoint;
+using RiotSharp.Misc;
 using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace LccWebAPI.Models.DatabaseModels
 {

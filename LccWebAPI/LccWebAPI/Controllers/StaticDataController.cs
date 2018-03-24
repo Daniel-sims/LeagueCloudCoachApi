@@ -1,21 +1,20 @@
-﻿using System;
+﻿using LccWebAPI.Models.DatabaseModels;
+using LccWebAPI.Repository.StaticData;
+using Microsoft.AspNetCore.Mvc;
+using RiotSharp.Endpoints.StaticDataEndpoint.Champion;
+using RiotSharp.Endpoints.StaticDataEndpoint.Item;
+using RiotSharp.Endpoints.StaticDataEndpoint.SummonerSpell;
+using RiotSharp.Interfaces;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using LccWebAPI.Models.DatabaseModels;
-using LccWebAPI.Repository.StaticData;
-using Microsoft.AspNetCore.Mvc;
-using RiotSharp.Interfaces;
-using RiotSharp.StaticDataEndpoint.Champion;
-using RiotSharp.StaticDataEndpoint.Item;
-using RiotSharp.StaticDataEndpoint.SummonerSpell;
 
 namespace LccWebAPI.Controllers
 {
     [Route("api/[controller]")]
     public class StaticDataController : Controller
     {
-        private IStaticRiotApi _staticRiotApi;
+        private IRiotApi _riotApi;
         private IChampionStaticDataRepository _championStaticDataRepository;
         private IItemStaticDataRepository _itemStaticDataRepository;
         private ISummonerSpellStaticDataRepository _summonerSpellStaticDataRepository;
@@ -24,12 +23,12 @@ namespace LccWebAPI.Controllers
         private bool _getUpdatedItemData = true;
         private bool _getUpdatedSummonerSpellData = true;
 
-        public StaticDataController(IStaticRiotApi staticRiotApi,
+        public StaticDataController(IRiotApi riotApi,
             IChampionStaticDataRepository championStaticDataRepository, 
             IItemStaticDataRepository itemStaticDataRepository, 
             ISummonerSpellStaticDataRepository summonerSpellStaticDataRepository)
         {
-            _staticRiotApi = staticRiotApi;
+            _riotApi = riotApi;
             _championStaticDataRepository = championStaticDataRepository;
             _itemStaticDataRepository = itemStaticDataRepository;
             _summonerSpellStaticDataRepository = summonerSpellStaticDataRepository;
@@ -43,7 +42,7 @@ namespace LccWebAPI.Controllers
                 var currentChampions = _championStaticDataRepository.GetAllChampions();
                 if (currentChampions.Count() == 0)
                 {
-                    ChampionListStatic championData = await _staticRiotApi.GetChampionsAsync(RiotSharp.Misc.Region.euw);
+                    ChampionListStatic championData = await _riotApi.Static.Champion.GetChampionsAsync(RiotSharp.Misc.Region.euw);
                     foreach (var champion in championData.Champions)
                     {
                         _championStaticDataRepository.InsertChampionInformation(new LccChampionInformation(champion.Value.Id, champion.Value.Name));
@@ -63,13 +62,17 @@ namespace LccWebAPI.Controllers
         {
             if (_getUpdatedItemData)
             {
-                ItemListStatic itemData = await _staticRiotApi.GetItemsAsync(RiotSharp.Misc.Region.euw);
-                foreach(var item in itemData.Items)
+                var currentItems = _itemStaticDataRepository.GetAllItems();
+                if(currentItems.Count() == 0)
                 {
-                    _itemStaticDataRepository.InsertItemInformation(new LccItemInformation(item.Key, item.Value.Name));
-                }
+                    ItemListStatic itemData = await _riotApi.Static.Item.GetItemsAsync(RiotSharp.Misc.Region.euw);
+                    foreach (var item in itemData.Items)
+                    {
+                        _itemStaticDataRepository.InsertItemInformation(new LccItemInformation(item.Key, item.Value.Name));
+                    }
 
-                _itemStaticDataRepository.Save();
+                    _itemStaticDataRepository.Save();
+                }
             }
 
             List<LccItemInformation> lccItemInformation = _itemStaticDataRepository.GetAllItems().ToList();
@@ -82,13 +85,17 @@ namespace LccWebAPI.Controllers
         {
             if (_getUpdatedSummonerSpellData)
             {
-                SummonerSpellListStatic summonerSpellData = await _staticRiotApi.GetSummonerSpellsAsync(RiotSharp.Misc.Region.euw);
-                foreach (var summonerSpell in summonerSpellData.SummonerSpells)
+                var currentSummonerSpellData = _summonerSpellStaticDataRepository.GetAllSummonerSpells();
+                if(currentSummonerSpellData.Count() == 0)
                 {
-                    _summonerSpellStaticDataRepository.InsertSummonerSpellInformation(new LccSummonerSpellInformation(summonerSpell.Value.Id, summonerSpell.Value.Name));
-                }
+                    SummonerSpellListStatic summonerSpellData = await _riotApi.Static.SummonerSpell.GetSummonerSpellsAsync(RiotSharp.Misc.Region.euw);
+                    foreach (var summonerSpell in summonerSpellData.SummonerSpells)
+                    {
+                        _summonerSpellStaticDataRepository.InsertSummonerSpellInformation(new LccSummonerSpellInformation(summonerSpell.Value.Id, summonerSpell.Value.Name));
+                    }
 
-                _summonerSpellStaticDataRepository.Save();
+                    _summonerSpellStaticDataRepository.Save();
+                }
             }
 
             List<LccSummonerSpellInformation> lccSummonerSpellInformation = _summonerSpellStaticDataRepository.GetAllSummonerSpells().ToList();

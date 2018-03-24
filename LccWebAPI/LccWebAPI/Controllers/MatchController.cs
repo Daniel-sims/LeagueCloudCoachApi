@@ -1,9 +1,8 @@
 ﻿using LccWebAPI.Models.APIModels;
-using LccWebAPI.Models.DatabaseModels;
 using LccWebAPI.Repository.Match;
 using Microsoft.AspNetCore.Mvc;
+using RiotSharp.Endpoints.MatchEndpoint;
 using RiotSharp.Interfaces;
-using RiotSharp.MatchEndpoint;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -59,7 +58,7 @@ namespace LccWebAPI.Controllers
                 {
                     if(matchReturnCount != maxMatchLimit)
                     {
-                        Match riotMatchInformation = await _riotApi.GetMatchAsync(RiotSharp.Misc.Region.euw, match.GameId);
+                        Match riotMatchInformation = await _riotApi.Match.GetMatchAsync(RiotSharp.Misc.Region.euw, match.GameId);
                         matchesToReturnToUser.Add(CreateLccMatchupInformation(riotMatchInformation, usersChampionId));
 
                         matchReturnCount++;
@@ -150,7 +149,7 @@ namespace LccWebAPI.Controllers
                 Kills = participant.Stats.Kills,
                 Deaths = participant.Stats.Deaths,
                 Assists = participant.Stats.Assists,
-                MinionKills = participant.Stats.MinionsKilled,
+                MinionKills = participant.Stats.TotalMinionsKilled,
                 Item1Id = participant.Stats.Item0,
                 Item2Id = participant.Stats.Item1,
                 Item3Id = participant.Stats.Item2,

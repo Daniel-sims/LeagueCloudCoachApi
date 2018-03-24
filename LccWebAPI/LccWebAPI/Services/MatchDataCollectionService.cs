@@ -1,18 +1,14 @@
 ﻿using LccWebAPI.Constants;
-using LccWebAPI.DatabaseContexts;
-using LccWebAPI.Models;
 using LccWebAPI.Models.DatabaseModels;
 using LccWebAPI.Repository.Match;
 using LccWebAPI.Repository.Summoner;
 using LccWebAPI.Utils;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using RiotSharp;
+using RiotSharp.Endpoints.LeagueEndpoint;
+using RiotSharp.Endpoints.MatchEndpoint;
+using RiotSharp.Endpoints.SummonerEndpoint;
 using RiotSharp.Interfaces;
-using RiotSharp.LeagueEndpoint;
-using RiotSharp.MatchEndpoint;
-using RiotSharp.Misc;
-using RiotSharp.SummonerEndpoint;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -72,8 +68,8 @@ namespace LccWebAPI.Services
                         {
                             _logging.LogEvent("Current matches count - " + matchupInformationRepository.GetAllMatchupInformations().Count());
                       
-                            var challengerPlayers = await _throttledRequestHelper.SendThrottledRequest<League>(async () => await _riotApi.GetChallengerLeagueAsync(RiotSharp.Misc.Region.euw, LeagueQueue.RankedSolo));
-                            var mastersPlayers = await _throttledRequestHelper.SendThrottledRequest<League>(async () => await _riotApi.GetMasterLeagueAsync(RiotSharp.Misc.Region.euw, LeagueQueue.RankedSolo));
+                            var challengerPlayers = await _throttledRequestHelper.SendThrottledRequest<League>(async () => await _riotApi.League.GetChallengerLeagueAsync(RiotSharp.Misc.Region.euw, LeagueQueue.RankedSolo));
+                            var mastersPlayers = await _throttledRequestHelper.SendThrottledRequest<League>(async () => await _riotApi.League.GetMasterLeagueAsync(RiotSharp.Misc.Region.euw, LeagueQueue.RankedSolo));
 
                             IList<LeaguePosition> highEloPlayerEntires = challengerPlayers.Entries.Concat(mastersPlayers.Entries).ToList();
 
@@ -84,7 +80,7 @@ namespace LccWebAPI.Services
                             {
                                 _logging.LogEvent(++currentCount + "/" + totalPlayers + " - " + highEloPlayer.PlayerOrTeamName);
 
-                                var summoner = await _throttledRequestHelper.SendThrottledRequest<Summoner>(async () => await _riotApi.GetSummonerBySummonerIdAsync(RiotSharp.Misc.Region.euw, Convert.ToInt64(highEloPlayer.PlayerOrTeamId)));
+                                var summoner = await _throttledRequestHelper.SendThrottledRequest<Summoner>(async () => await _riotApi.Summoner.GetSummonerBySummonerIdAsync(RiotSharp.Misc.Region.euw, Convert.ToInt64(highEloPlayer.PlayerOrTeamId)));
 
                                 var summonerInDatabase = summonerRepository.GetSummonerByAccountId(summoner.AccountId);
                                 if (summoner != null && summonerInDatabase == null)
@@ -93,7 +89,7 @@ namespace LccWebAPI.Services
                                     newSummonersAddedToDatabaseTotal++;
                                     newSummonersAddedThisSession++;
 
-                                    var matchList = await _throttledRequestHelper.SendThrottledRequest<MatchList>(async () => await _riotApi.GetMatchListAsync(RiotSharp.Misc.Region.euw, summoner.AccountId, null, null, null, null, null, 0, 25));
+                                    var matchList = await _throttledRequestHelper.SendThrottledRequest<MatchList>(async () => await _riotApi.Match.GetMatchListAsync(RiotSharp.Misc.Region.euw, summoner.AccountId, null, null, null, null, null, 0, 25));
                                     if (matchList != null && matchList?.Matches != null)
                                     {
                                         await GetRiotMatchupInformationAndAddIfNotExisting(matchupInformationRepository, matchList, highEloPlayerEntires);
@@ -109,7 +105,7 @@ namespace LccWebAPI.Services
                                         summonerInDatabase.LastUpdated = summoner.RevisionDate;
                                         summonerRepository.UpdateSummoner(summonerInDatabase);
 
-                                        var newMatches = await _throttledRequestHelper.SendThrottledRequest<MatchList>(async () => await _riotApi.GetMatchListAsync(RiotSharp.Misc.Region.euw, summoner.AccountId, null, null, null, lastUpdatedDate, DateTime.Now, 0, 25));
+                                        var newMatches = await _throttledRequestHelper.SendThrottledRequest<MatchList>(async () => await _riotApi.Match.GetMatchListAsync(RiotSharp.Misc.Region.euw, summoner.AccountId, null, null, null, lastUpdatedDate, DateTime.Now, 0, 25));
                                         if (newMatches != null && newMatches?.Matches != null)
                                         {
                                             await GetRiotMatchupInformationAndAddIfNotExisting(matchupInformationRepository, newMatches, highEloPlayerEntires);
@@ -156,7 +152,7 @@ namespace LccWebAPI.Services
                 {
                     //Get riots detailed information about this game
                     // Contains information such as Runes, Masteries, participants 
-                    Match riotMatchInformation = await _throttledRequestHelper.SendThrottledRequest<Match>(async () => await _riotApi.GetMatchAsync(RiotSharp.Misc.Region.euw, match.GameId));
+                    Match riotMatchInformation = await _throttledRequestHelper.SendThrottledRequest<Match>(async () => await _riotApi.Match.GetMatchAsync(RiotSharp.Misc.Region.euw, match.GameId));
 
                     //If we got it successfully and there's participants 
                     if (riotMatchInformation != null & riotMatchInformation?.Participants != null)
