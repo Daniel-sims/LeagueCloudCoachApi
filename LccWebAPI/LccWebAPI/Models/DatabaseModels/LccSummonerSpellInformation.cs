@@ -8,17 +8,17 @@ namespace LccWebAPI.Models.DatabaseModels
     public class LccSummonerSpellInformation
     {
         public LccSummonerSpellInformation() { }
-        public LccSummonerSpellInformation(int summonerId, string summonerName)
+        public LccSummonerSpellInformation(int summonerSpellId, string summonerSpellName)
         {
-            SummonerId = summonerId;
-            SummonerName = summonerName;
+            SummonerSpellId = summonerSpellId;
+            SummonerSpellName = summonerSpellName;
         }
 
         // Primary key
         public int Id { get; set; }
 
-        public int SummonerId { get; set; }
-        public string SummonerName { get; set; }
+        public int SummonerSpellId { get; set; }
+        public string SummonerSpellName { get; set; }
 
         //More information about champions if needed
     }

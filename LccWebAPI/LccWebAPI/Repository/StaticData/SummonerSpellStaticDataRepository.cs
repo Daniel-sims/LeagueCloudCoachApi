@@ -23,7 +23,7 @@ namespace LccWebAPI.Repository.StaticData
 
         public LccSummonerSpellInformation GetSummonerSpellById(int summonerSpellId)
         {
-            return _lccDatabaseContext.SummonerSpells.FirstOrDefault(x => x.SummonerId == summonerSpellId);
+            return _lccDatabaseContext.SummonerSpells.FirstOrDefault(x => x.SummonerSpellId == summonerSpellId);
         }
 
         public void InsertSummonerSpellInformation(LccSummonerSpellInformation summonerSpellInformation)
@@ -34,6 +34,13 @@ namespace LccWebAPI.Repository.StaticData
         public void UpdateSummonerSpellInformation(LccSummonerSpellInformation summonerSpellInformation)
         {
             _lccDatabaseContext.Entry(summonerSpellInformation).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+        }
+
+        public void DeleteSummonerSpellInformation(long summonerSpellId)
+        {
+            LccSummonerSpellInformation summonerSpellInformation = _lccDatabaseContext.SummonerSpells.FirstOrDefault(x => x.SummonerSpellId == summonerSpellId);
+            if (summonerSpellInformation != null)
+                _lccDatabaseContext.SummonerSpells.Remove(summonerSpellInformation);
         }
 
         public void Save()

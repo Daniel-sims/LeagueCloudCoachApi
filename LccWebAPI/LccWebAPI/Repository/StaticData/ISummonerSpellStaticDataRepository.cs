@@ -12,6 +12,7 @@ namespace LccWebAPI.Repository.StaticData
         LccSummonerSpellInformation GetSummonerSpellById(int summonerSpellId);
         void InsertSummonerSpellInformation(LccSummonerSpellInformation summonerSpellInformation);
         void UpdateSummonerSpellInformation(LccSummonerSpellInformation summonerSpellInformation);
+        void DeleteSummonerSpellInformation(long summonerSpellId);
         void Save();
     }
 }

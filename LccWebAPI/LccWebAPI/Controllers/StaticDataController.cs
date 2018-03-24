@@ -20,7 +20,9 @@ namespace LccWebAPI.Controllers
         private IItemStaticDataRepository _itemStaticDataRepository;
         private ISummonerSpellStaticDataRepository _summonerSpellStaticDataRepository;
 
-        private bool _getUpdatedData = false;
+        private bool _getUpdatedChampionData = true;
+        private bool _getUpdatedItemData = true;
+        private bool _getUpdatedSummonerSpellData = true;
 
         public StaticDataController(IStaticRiotApi staticRiotApi,
             IChampionStaticDataRepository championStaticDataRepository, 
@@ -36,27 +38,30 @@ namespace LccWebAPI.Controllers
         [HttpGet("GetAllChampionsData")]
         public async Task<JsonResult> GetAllChampionsData()
         {
-            if (_getUpdatedData)
+            if (_getUpdatedChampionData)
             {
-                ChampionListStatic championData = await _staticRiotApi.GetChampionsAsync(RiotSharp.Misc.Region.euw);
-                foreach (var champion in championData.Champions)
+                var currentChampions = _championStaticDataRepository.GetAllChampions();
+                if (currentChampions.Count() == 0)
                 {
-                    _championStaticDataRepository.InsertChampionInformation(new LccChampionInformation(champion.Value.Id, champion.Value.Name));
-                }
+                    ChampionListStatic championData = await _staticRiotApi.GetChampionsAsync(RiotSharp.Misc.Region.euw);
+                    foreach (var champion in championData.Champions)
+                    {
+                        _championStaticDataRepository.InsertChampionInformation(new LccChampionInformation(champion.Value.Id, champion.Value.Name));
+                    }
 
-                _championStaticDataRepository.Save();
+                    _championStaticDataRepository.Save();
+                }
             }
 
             List<LccChampionInformation> championInformation = _championStaticDataRepository.GetAllChampions().ToList();
 
             return new JsonResult(championInformation);
         }
-
-
+        
         [HttpGet("GetAllItemData")]
         public async Task<JsonResult> GetAllItemData()
         {
-            if (_getUpdatedData)
+            if (_getUpdatedItemData)
             {
                 ItemListStatic itemData = await _staticRiotApi.GetItemsAsync(RiotSharp.Misc.Region.euw);
                 foreach(var item in itemData.Items)
@@ -75,7 +80,7 @@ namespace LccWebAPI.Controllers
         [HttpGet("GetAllSummonerSpellData")]
         public async Task<JsonResult> GetAllSummonerSpellData()
         {
-            if (_getUpdatedData)
+            if (_getUpdatedSummonerSpellData)
             {
                 SummonerSpellListStatic summonerSpellData = await _staticRiotApi.GetSummonerSpellsAsync(RiotSharp.Misc.Region.euw);
                 foreach (var summonerSpell in summonerSpellData.SummonerSpells)

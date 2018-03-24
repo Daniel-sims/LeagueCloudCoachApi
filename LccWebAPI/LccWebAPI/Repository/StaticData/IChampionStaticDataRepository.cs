@@ -12,6 +12,7 @@ namespace LccWebAPI.Repository.StaticData
         LccChampionInformation GetChampionById(int championId);
         void InsertChampionInformation(LccChampionInformation championInformation);
         void UpdateChampionInformation(LccChampionInformation championInformation);
+        void DeleteChampionInformation(long championId);
         void Save();
     }
 }

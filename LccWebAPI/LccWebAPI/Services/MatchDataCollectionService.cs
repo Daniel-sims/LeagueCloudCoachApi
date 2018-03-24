@@ -71,6 +71,7 @@ namespace LccWebAPI.Services
                         try
                         {
                             _logging.LogEvent("Current matches count - " + matchupInformationRepository.GetAllMatchupInformations().Count());
+                      
                             var challengerPlayers = await _throttledRequestHelper.SendThrottledRequest<League>(async () => await _riotApi.GetChallengerLeagueAsync(RiotSharp.Misc.Region.euw, LeagueQueue.RankedSolo));
                             var mastersPlayers = await _throttledRequestHelper.SendThrottledRequest<League>(async () => await _riotApi.GetMasterLeagueAsync(RiotSharp.Misc.Region.euw, LeagueQueue.RankedSolo));
 
@@ -187,17 +188,13 @@ namespace LccWebAPI.Services
                             }
                         }
                         
-                        matchupInformationRepository.InsertMatchupInformation(new LccMatchupInformation(match.GameId, winningTeam, losingTeam));
+                        matchupInformationRepository.InsertMatchupInformation(new LccMatchupInformation(match.GameId,match.Timestamp, winningTeam, losingTeam));
 
                         matchesUpdatedTotal++;
                         matchesUpdatedThisSession++;
 
                         _logging.LogEvent("Added new matchup No:" + matchesUpdatedTotal);
                     }
-                }
-                else
-                {
-                    _logging.LogEvent("Match already exists in our database.");
                 }
             }
         }

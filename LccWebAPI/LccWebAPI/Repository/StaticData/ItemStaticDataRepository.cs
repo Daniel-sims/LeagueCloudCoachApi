@@ -36,6 +36,13 @@ namespace LccWebAPI.Repository.StaticData
             _lccDatabaseContext.Entry(itemInformation).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
         }
 
+        public void DeleteItemInformation(long itemId)
+        {
+            LccItemInformation itemInformation = _lccDatabaseContext.Items.FirstOrDefault(x => x.ItemId == itemId);
+            if (itemInformation != null)
+                _lccDatabaseContext.Items.Remove(itemInformation);
+        }
+
         public void Save()
         {
             _lccDatabaseContext.SaveChanges();

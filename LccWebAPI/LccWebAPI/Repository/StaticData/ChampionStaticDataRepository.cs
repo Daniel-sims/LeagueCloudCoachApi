@@ -36,6 +36,13 @@ namespace LccWebAPI.Repository.StaticData
             _lccDatabaseContext.Entry(championInformation).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
         }
 
+        public void DeleteChampionInformation(long championId)
+        {
+            LccChampionInformation championInformation = _lccDatabaseContext.Champions.FirstOrDefault(x => x.ChampionId == championId);
+            if (championInformation != null)
+                _lccDatabaseContext.Champions.Remove(championInformation);
+        }
+
         public void Save()
         {
             _lccDatabaseContext.SaveChanges();

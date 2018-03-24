@@ -12,9 +12,10 @@ namespace LccWebAPI.Models.DatabaseModels
     public class LccMatchupInformation
     {
         public LccMatchupInformation() { }
-        public LccMatchupInformation(long gameId, List<LccMatchupInformationPlayer> winningTeam, List<LccMatchupInformationPlayer> losingTeam)
+        public LccMatchupInformation(long gameId, DateTime matchDate, List<LccMatchupInformationPlayer> winningTeam, List<LccMatchupInformationPlayer> losingTeam)
         {
             GameId = gameId;
+            MatchDate = matchDate;
             WinningTeam = winningTeam;
             LosingTeam = losingTeam;
         }
@@ -22,6 +23,8 @@ namespace LccWebAPI.Models.DatabaseModels
         public int Id { get; set; }
 
         public long GameId { get; set; }
+
+        public DateTime MatchDate { get; set; }
         
         public virtual IList<LccMatchupInformationPlayer> WinningTeam { get; set; } = new List<LccMatchupInformationPlayer>();
         

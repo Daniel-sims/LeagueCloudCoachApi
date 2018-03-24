@@ -12,9 +12,10 @@ using System;
 namespace LccWebAPI.Migrations
 {
     [DbContext(typeof(LccDatabaseContext))]
-    partial class LccDatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20180324134704_AddingMatchDate")]
+    partial class AddingMatchDate
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
