@@ -32,11 +32,7 @@ namespace LccWebAPI.Controllers
             _itemStaticDataRepository = itemStaticDataRepository;
             _summonerSpellStaticDataRepository = summonerSpellStaticDataRepository;
         }
-
-        //methods of retrieiving data in here need to be changed just too lazy atm
-
-
-
+        
         [HttpGet("GetAllChampionsData")]
         public async Task<JsonResult> GetAllChampionsData()
         {

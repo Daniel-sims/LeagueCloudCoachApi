@@ -141,8 +141,8 @@ namespace LccWebAPI.Services
                 matchesUpdatedThisSession = 0;
                 newSummonersAddedThisSession = 0;
 
-                _logging.LogEvent("MatchDataCollectionService finished, will wait 30 seconds and start again.");
-                await Task.Run(() => Thread.Sleep(30000));
+                _logging.LogEvent("MatchDataCollectionService finished, will wait 10 minutes and start again.");
+                await Task.Run(() => Thread.Sleep(600000));
             }
         }
 
@@ -151,7 +151,7 @@ namespace LccWebAPI.Services
             foreach (var match in matchlist?.Matches)
             {
                 // If we currently don't have information about this game in our Database
-                if (matchupInformationRepository.GetMatchupInformationByGameId(match.GameId) == null)
+                if (match.Queue == LeagueQueue.RankedSoloId && matchupInformationRepository.GetMatchupInformationByGameId(match.GameId) == null)
                 {
                     //Get riots detailed information about this game
                     // Contains information such as Runes, Masteries, participants 
