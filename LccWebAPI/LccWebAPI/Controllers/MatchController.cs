@@ -13,10 +13,10 @@ namespace LccWebAPI.Controllers
     [Route("api/[controller]")]
     public class MatchController : Controller
     {
-        private REPLACED_IMatchupInformationRepository _matchupInformationRepository;
+        private IMatchupInformationRepository _matchupInformationRepository;
         private IRiotApi _riotApi;
 
-        public MatchController(REPLACED_IMatchupInformationRepository matchupInformationRepository, IRiotApi riotApi)
+        public MatchController(IMatchupInformationRepository matchupInformationRepository, IRiotApi riotApi)
         {
             _matchupInformationRepository = matchupInformationRepository;
             _riotApi = riotApi;
@@ -77,105 +77,105 @@ namespace LccWebAPI.Controllers
         private LccCalculatedMatchupInformation CreateLccMatchupInformation(Match match, long usersChampionId)
         {
             // General info
-            LccCalculatedMatchupInformation matchupInformation = new LccCalculatedMatchupInformation
-            {
-                MatchDate = match.GameCreation,
-                MatchPatch = match.GameVersion
-            };
+            LccCalculatedMatchupInformation matchupInformation = new LccCalculatedMatchupInformation();
+            //{
+            //    MatchDate = match.GameCreation,
+            //    MatchPatch = match.GameVersion
+            //};
 
-            int usersTeamId = match.Participants.FirstOrDefault(x => x.ChampionId == usersChampionId).TeamId;
-            matchupInformation.FriendlyTeamWon = match.Teams.FirstOrDefault(x => x.TeamId == usersTeamId).Win == "Win";
+            //int usersTeamId = match.Participants.FirstOrDefault(x => x.ChampionId == usersChampionId).TeamId;
+            //matchupInformation.FriendlyTeamWon = match.Teams.FirstOrDefault(x => x.TeamId == usersTeamId).Win == "Win";
 
-            // Friendly players
+            //// Friendly players
 
-            LccTeamInformation friendlyTeamInformation = new LccTeamInformation
-            {
-                Kills = match.Participants.Where(x => x.TeamId == usersTeamId).Sum(x => x.Stats.Kills),
-                Deaths = match.Participants.Where(x => x.TeamId == usersTeamId).Sum(x => x.Stats.Deaths),
-                Assists = match.Participants.Where(x => x.TeamId == usersTeamId).Sum(x => x.Stats.Assists)
-            };
+            //LccTeamInformation friendlyTeamInformation = new LccTeamInformation
+            //{
+            //    Kills = match.Participants.Where(x => x.TeamId == usersTeamId).Sum(x => x.Stats.Kills),
+            //    Deaths = match.Participants.Where(x => x.TeamId == usersTeamId).Sum(x => x.Stats.Deaths),
+            //    Assists = match.Participants.Where(x => x.TeamId == usersTeamId).Sum(x => x.Stats.Assists)
+            //};
 
-            var friendlyParticipants = match.Participants.Where(x => x.TeamId == usersTeamId);
-            var friendlyPartidipantIdentitys = match.ParticipantIdentities.Where(x => friendlyParticipants.Any(u => u.ParticipantId == x.ParticipantId));
+            //var friendlyParticipants = match.Participants.Where(x => x.TeamId == usersTeamId);
+            //var friendlyPartidipantIdentitys = match.ParticipantIdentities.Where(x => friendlyParticipants.Any(u => u.ParticipantId == x.ParticipantId));
 
-            foreach (Participant friendlyParticipant in friendlyParticipants)
-            {
-                ParticipantIdentity friendlyParticipantIdentity = friendlyPartidipantIdentitys.FirstOrDefault(x => x.ParticipantId == friendlyParticipant.ParticipantId);
-                friendlyTeamInformation.Players.Add(CreatePlayerInfo(friendlyParticipant, friendlyParticipantIdentity));
-            }
+            //foreach (Participant friendlyParticipant in friendlyParticipants)
+            //{
+            //    ParticipantIdentity friendlyParticipantIdentity = friendlyPartidipantIdentitys.FirstOrDefault(x => x.ParticipantId == friendlyParticipant.ParticipantId);
+            //    friendlyTeamInformation.Players.Add(CreatePlayerInfo(friendlyParticipant, friendlyParticipantIdentity));
+            //}
 
-            TeamStats friendlyTeam = match.Teams.FirstOrDefault(x => x.TeamId == usersTeamId);
-            friendlyTeamInformation.DragonKills = friendlyTeam.DragonKills;
-            friendlyTeamInformation.BaronKills = friendlyTeam.BaronKills;
-            friendlyTeamInformation.RiftHeraldKills = friendlyTeam.RiftHeraldKills;
-            friendlyTeamInformation.InhibitorKills = friendlyTeam.InhibitorKills;
+            //TeamStats friendlyTeam = match.Teams.FirstOrDefault(x => x.TeamId == usersTeamId);
+            //friendlyTeamInformation.DragonKills = friendlyTeam.DragonKills;
+            //friendlyTeamInformation.BaronKills = friendlyTeam.BaronKills;
+            //friendlyTeamInformation.RiftHeraldKills = friendlyTeam.RiftHeraldKills;
+            //friendlyTeamInformation.InhibitorKills = friendlyTeam.InhibitorKills;
 
-            matchupInformation.FriendlyTeam = friendlyTeamInformation;
+            //matchupInformation.FriendlyTeam = friendlyTeamInformation;
 
-            // Get enemy players
-            LccTeamInformation enemyTeamInformation = new LccTeamInformation
-            {
-                Kills = match.Participants.Where(x => x.TeamId != usersTeamId).Sum(x => x.Stats.Kills),
-                Deaths = match.Participants.Where(x => x.TeamId != usersTeamId).Sum(x => x.Stats.Deaths),
-                Assists = match.Participants.Where(x => x.TeamId != usersTeamId).Sum(x => x.Stats.Assists)
-            };
+            //// Get enemy players
+            //LccTeamInformation enemyTeamInformation = new LccTeamInformation
+            //{
+            //    Kills = match.Participants.Where(x => x.TeamId != usersTeamId).Sum(x => x.Stats.Kills),
+            //    Deaths = match.Participants.Where(x => x.TeamId != usersTeamId).Sum(x => x.Stats.Deaths),
+            //    Assists = match.Participants.Where(x => x.TeamId != usersTeamId).Sum(x => x.Stats.Assists)
+            //};
 
-            var enemyParticipants = match.Participants.Where(x => x.TeamId != usersTeamId);
-            var enemyPartidipantIdentitys = match.ParticipantIdentities.Where(x => enemyParticipants.Any(u => u.ParticipantId == x.ParticipantId));
+            //var enemyParticipants = match.Participants.Where(x => x.TeamId != usersTeamId);
+            //var enemyPartidipantIdentitys = match.ParticipantIdentities.Where(x => enemyParticipants.Any(u => u.ParticipantId == x.ParticipantId));
 
-            foreach (Participant enemyParticipant in enemyParticipants)
-            {
-                ParticipantIdentity enemyParticipantIdentity = enemyPartidipantIdentitys.FirstOrDefault(x => x.ParticipantId == enemyParticipant.ParticipantId);
-                enemyTeamInformation.Players.Add(CreatePlayerInfo(enemyParticipant, enemyParticipantIdentity));
-            }
+            //foreach (Participant enemyParticipant in enemyParticipants)
+            //{
+            //    ParticipantIdentity enemyParticipantIdentity = enemyPartidipantIdentitys.FirstOrDefault(x => x.ParticipantId == enemyParticipant.ParticipantId);
+            //    enemyTeamInformation.Players.Add(CreatePlayerInfo(enemyParticipant, enemyParticipantIdentity));
+            //}
 
-            var enemyTeam = match.Teams.FirstOrDefault(x => x.TeamId != usersTeamId);
-            enemyTeamInformation.DragonKills = enemyTeam.DragonKills;
-            enemyTeamInformation.BaronKills = enemyTeam.BaronKills;
-            enemyTeamInformation.RiftHeraldKills = enemyTeam.RiftHeraldKills;
-            enemyTeamInformation.InhibitorKills = enemyTeam.InhibitorKills;
+            //var enemyTeam = match.Teams.FirstOrDefault(x => x.TeamId != usersTeamId);
+            //enemyTeamInformation.DragonKills = enemyTeam.DragonKills;
+            //enemyTeamInformation.BaronKills = enemyTeam.BaronKills;
+            //enemyTeamInformation.RiftHeraldKills = enemyTeam.RiftHeraldKills;
+            //enemyTeamInformation.InhibitorKills = enemyTeam.InhibitorKills;
 
-            matchupInformation.EnemyTeam = enemyTeamInformation;
+            //matchupInformation.EnemyTeam = enemyTeamInformation;
 
             return matchupInformation;
         }
 
         private LccMatchplayerInformation CreatePlayerInfo(Participant participant, ParticipantIdentity participantIdentity)
         {
-            return new LccMatchplayerInformation()
-            {
-                SummonerName = participantIdentity.Player.SummonerName,
-                LastSeasonRank = participant.HighestAchievedSeasonTier.ToString(),
+            return new LccMatchplayerInformation();
+            //{
+            //    SummonerName = participantIdentity.Player.SummonerName,
+            //    LastSeasonRank = participant.HighestAchievedSeasonTier.ToString(),
 
-                Kills = participant.Stats.Kills,
-                Deaths = participant.Stats.Deaths,
-                Assists = participant.Stats.Assists,
-                MinionKills = participant.Stats.TotalMinionsKilled + participant.Stats.NeutralMinionsKilled,
-                Item1Id = participant.Stats.Item0,
-                Item2Id = participant.Stats.Item1,
-                Item3Id = participant.Stats.Item2,
-                Item4Id = participant.Stats.Item3,
-                Item5Id = participant.Stats.Item4,
-                Item6Id = participant.Stats.Item5,
-                TrinketId = participant.Stats.Item6,
-                FirstItemsBought = new List<long>(),
-                SummonerOne = participant.Spell1Id,
-                SummonerTwo = participant.Spell2Id,
-                ChampionId = participant.ChampionId,
-                ChampionLevel = participant.Stats.ChampLevel,
-                Masterys = new LccPlayerMasterys
-                {
-                    PrimaryMasteryStyleId = participant.Stats.PerkPrimaryStyle,
-                    SubPrimaryMasteryOneId = participant.Stats.Perk0,
-                    SubPrimaryMasteryTwoId = participant.Stats.Perk1,
-                    SubPrimaryMasteryThreeId = participant.Stats.Perk2,
-                    SubPrimaryMasteryFourId = participant.Stats.Perk3,
+            //    Kills = participant.Stats.Kills,
+            //    Deaths = participant.Stats.Deaths,
+            //    Assists = participant.Stats.Assists,
+            //    MinionKills = participant.Stats.TotalMinionsKilled + participant.Stats.NeutralMinionsKilled,
+            //    Item1Id = participant.Stats.Item0,
+            //    Item2Id = participant.Stats.Item1,
+            //    Item3Id = participant.Stats.Item2,
+            //    Item4Id = participant.Stats.Item3,
+            //    Item5Id = participant.Stats.Item4,
+            //    Item6Id = participant.Stats.Item5,
+            //    TrinketId = participant.Stats.Item6,
+            //    FirstItemsBought = new List<long>(),
+            //    SummonerOne = participant.Spell1Id,
+            //    SummonerTwo = participant.Spell2Id,
+            //    ChampionId = participant.ChampionId,
+            //    ChampionLevel = participant.Stats.ChampLevel,
+            //    Masterys = new LccPlayerMasterys
+            //    {
+            //        PrimaryMasteryStyleId = participant.Stats.PerkPrimaryStyle,
+            //        SubPrimaryMasteryOneId = participant.Stats.Perk0,
+            //        SubPrimaryMasteryTwoId = participant.Stats.Perk1,
+            //        SubPrimaryMasteryThreeId = participant.Stats.Perk2,
+            //        SubPrimaryMasteryFourId = participant.Stats.Perk3,
 
-                    SecondaryMasteryStyleId = participant.Stats.PerkSubStyle,
-                    SubSecondaryMasteryOneId = participant.Stats.Perk4,
-                    SubSecondaryMasteryTwoId = participant.Stats.Perk5
-                }
-            };
+            //        SecondaryMasteryStyleId = participant.Stats.PerkSubStyle,
+            //        SubSecondaryMasteryOneId = participant.Stats.Perk4,
+            //        SubSecondaryMasteryTwoId = participant.Stats.Perk5
+            //    }
+            //};
         }
     }
 }
