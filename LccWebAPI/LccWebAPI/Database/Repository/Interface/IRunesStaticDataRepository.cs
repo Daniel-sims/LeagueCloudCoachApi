@@ -1,4 +1,5 @@
-﻿using LccWebAPI.Models.APIModels;
+﻿using LccWebAPI.Database.Models.StaticData;
+using LccWebAPI.Models.APIModels;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -8,11 +9,15 @@ namespace LccWebAPI.Repository.StaticData.Interfaces
 {
     public interface IRunesStaticDataRepository : IDisposable
     {
-        //IEnumerable<LccRuneReforged> GetAllRunes();
-        //LccRuneReforged GetItemById(int runeId);
-        //void InsertRune(LccRuneReforged rune);
-        //void UpdateRune(LccRuneReforged rune);
-        //void DeleteRune(long rune);
-        //void Save();
+        void InsertRune(Db_LccRune rune);
+
+        IEnumerable<Db_LccRune> GetAllRunes();
+        Db_LccRune GetRuneById(int runeId);
+
+        void UpdateRune(Db_LccRune rune);
+
+        void DeleteRune(long runeId);
+
+        void Save();
     }
 }

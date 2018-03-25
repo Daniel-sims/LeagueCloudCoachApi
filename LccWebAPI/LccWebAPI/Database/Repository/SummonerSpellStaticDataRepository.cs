@@ -1,6 +1,9 @@
 ﻿using LccWebAPI.Database.Context;
+using LccWebAPI.Database.Models.StaticData;
 using LccWebAPI.Repository.StaticData.Interfaces;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace LccWebAPI.Repository.StaticData
 {
@@ -11,6 +14,40 @@ namespace LccWebAPI.Repository.StaticData
         public SummonerSpellStaticDataRepository(LccDatabaseContext lccDatabaseContext)
         {
             _lccDatabaseContext = lccDatabaseContext;
+        }
+        
+        public void InsertSummonerSpell(Db_LccSummonerSpell summonerSpell)
+        {
+            _lccDatabaseContext.SummonerSpells.Add(summonerSpell);
+        }
+
+        public IEnumerable<Db_LccSummonerSpell> GetAllSummonerSpells()
+        {
+            return _lccDatabaseContext.SummonerSpells.ToList();
+        }
+
+        public Db_LccSummonerSpell GetSummonerSpellById(int summonerSpellId)
+        {
+            return _lccDatabaseContext.SummonerSpells.FirstOrDefault(x => x.SummonerSpellId == summonerSpellId);
+        }
+
+        public void UpdateSummonerSpell(Db_LccSummonerSpell summonerSpell)
+        {
+            _lccDatabaseContext.Entry(summonerSpell).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+        }
+
+        public void DeleteSummonerSpell(long summonerSpellId)
+        {
+            Db_LccSummonerSpell summonerSpell = _lccDatabaseContext.SummonerSpells.FirstOrDefault(x => x.SummonerSpellId == summonerSpellId);
+            if (summonerSpell != null)
+            {
+                _lccDatabaseContext.SummonerSpells.Remove(summonerSpell);
+            }
+        }
+
+        public void Save()
+        {
+            _lccDatabaseContext.SaveChanges();
         }
         
         private bool disposed = false;

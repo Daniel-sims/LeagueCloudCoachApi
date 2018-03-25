@@ -28,7 +28,7 @@ namespace RiotSharp
 
         private static RiotApi _instance;
 
-        private ICache _cache;
+        private ICache _cache = new PassThroughCache();
 
         public ISummonerEndpoint Summoner { get; }
 

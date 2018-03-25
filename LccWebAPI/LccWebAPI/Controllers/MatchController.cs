@@ -13,10 +13,10 @@ namespace LccWebAPI.Controllers
     [Route("api/[controller]")]
     public class MatchController : Controller
     {
-        private IMatchupInformationRepository _matchupInformationRepository;
+        private IBasicMatchupInformationRepository _matchupInformationRepository;
         private IRiotApi _riotApi;
 
-        public MatchController(IMatchupInformationRepository matchupInformationRepository, IRiotApi riotApi)
+        public MatchController(IBasicMatchupInformationRepository matchupInformationRepository, IRiotApi riotApi)
         {
             _matchupInformationRepository = matchupInformationRepository;
             _riotApi = riotApi;

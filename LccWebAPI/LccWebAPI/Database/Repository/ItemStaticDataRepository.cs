@@ -1,6 +1,9 @@
 ﻿using LccWebAPI.Database.Context;
+using LccWebAPI.Database.Models.StaticData;
 using LccWebAPI.Repository.StaticData.Interfaces;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace LccWebAPI.Repository.StaticData
 {
@@ -12,7 +15,41 @@ namespace LccWebAPI.Repository.StaticData
         {
             _lccDatabaseContext = lccDatabaseContext;
         }
-        
+
+        public void InsertItem(Db_LccItem item)
+        {
+            _lccDatabaseContext.Items.Add(item);
+        }
+
+        public IEnumerable<Db_LccItem> GetAllItems()
+        {
+            return _lccDatabaseContext.Items.ToList();
+        }
+
+        public Db_LccItem GetItemById(int itemId)
+        {
+            return _lccDatabaseContext.Items.FirstOrDefault(x => x.ItemId == itemId);
+        }
+
+        public void UpdateItem(Db_LccItem item)
+        {
+            _lccDatabaseContext.Entry(item).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
+        }
+
+        public void DeleteItem(long itemId)
+        {
+            Db_LccItem item = _lccDatabaseContext.Items.FirstOrDefault(x => x.ItemId == itemId);
+            if (item != null)
+            {
+                _lccDatabaseContext.Items.Remove(item);
+            }
+        }
+
+        public void Save()
+        {
+            _lccDatabaseContext.SaveChanges();
+        }
+
         private bool disposed = false;
 
         protected virtual void Dispose(bool disposing)

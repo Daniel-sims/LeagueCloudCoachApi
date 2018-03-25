@@ -14,7 +14,7 @@ namespace LccWebAPI.Database.Context
         public LccDatabaseContext(DbContextOptions<LccDatabaseContext> options) : base(options) { }
         
         //Basic information stored for quick match lookup
-        public DbSet<Db_LccBasicMatchInfo> Matches { get; set; }
+        public DbSet<Db_LccBasicMatchInfo> Matchups { get; set; }
 
         //Static Data
         public DbSet<Db_LccChampion> Champions { get; set; }

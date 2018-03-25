@@ -1,12 +1,19 @@
-﻿namespace LccWebAPI.Repository.StaticData.Interfaces
+﻿using LccWebAPI.Database.Models.StaticData;
+using System.Collections.Generic;
+
+namespace LccWebAPI.Repository.StaticData.Interfaces
 {
     public interface IItemStaticDataRepository
     {
-        //IEnumerable<LccItemInformation> GetAllItems();
-        //LccItemInformation GetItemById(int itemId);
-        //void InsertItemInformation(LccItemInformation itemInformation);
-        //void UpdateItemInformation(LccItemInformation itemInformation);
-        //void DeleteItemInformation(long itemId);
-        //void Save();
+        void InsertItem(Db_LccItem item);
+
+        IEnumerable<Db_LccItem> GetAllItems();
+        Db_LccItem GetItemById(int itemId);
+
+        void UpdateItem(Db_LccItem item);
+
+        void DeleteItem(long itemId);
+
+        void Save();
     }
 }
