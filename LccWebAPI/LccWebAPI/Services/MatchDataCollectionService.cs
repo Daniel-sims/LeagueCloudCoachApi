@@ -193,6 +193,7 @@ namespace LccWebAPI.Services
                             new Db_LccBasicMatchInfo()
                             {
                                 GameId = match.GameId,
+                                MatchDate = match.Timestamp,
                                 WinningTeamChampions = winningTeam,
                                 LosingTeamChampions = losingTeam
                             });

@@ -1,6 +1,9 @@
-﻿using LccWebAPI.Repository.Interfaces.StaticData;
+﻿using LccWebAPI.Controllers.Models.StaticData;
+using LccWebAPI.Repository.Interfaces.StaticData;
 using Microsoft.AspNetCore.Mvc;
 using RiotSharp.Interfaces;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace LccWebAPI.Controllers
 {
@@ -25,38 +28,38 @@ namespace LccWebAPI.Controllers
             _summonerSpellStaticDataRepository = summonerSpellStaticDataRepository;
             _runesStaticDataRepository = runesStaticDataRepository;
         }
-        
-        //[HttpGet("GetAllChampionsData")]
-        //public async Task<JsonResult> GetAllChampionsData()
-        //{
-        //    List<LccChampionInformation> championInformation = null;
 
-        //    return new JsonResult(championInformation);
-        //}
-        
-        //[HttpGet("GetAllItemData")]
-        //public async Task<JsonResult> GetAllItemData()
-        //{
-        //    List<LccItemInformation> lccItemInformation = null;
+        [HttpGet("GetAllChampionsData")]
+        public async Task<JsonResult> GetAllChampionsData()
+        {
+            List<LccChampionInformation> championInformation = null;
 
-        //    return new JsonResult(lccItemInformation);
-        //}
+            return new JsonResult(championInformation);
+        }
 
-        //[HttpGet("GetAllSummonerSpellData")]
-        //public async Task<JsonResult> GetAllSummonerSpellData()
-        //{
-        //    List<LccSummonerSpellInformation> lccSummonerSpellInformation = null;
+        [HttpGet("GetAllItemData")]
+        public async Task<JsonResult> GetAllItemData()
+        {
+            List<LccItemInformation> lccItemInformation = null;
 
-        //    return new JsonResult(lccSummonerSpellInformation);
-        //}
+            return new JsonResult(lccItemInformation);
+        }
 
-        //[HttpGet("GetAllRunesReforgedData")]
-        //public async Task<JsonResult> GetAllRunesReforgedData()
-        //{
-        //    List<LccRuneReforged> lccSummonerSpellInformation = null;
+        [HttpGet("GetAllSummonerSpellData")]
+        public async Task<JsonResult> GetAllSummonerSpellData()
+        {
+            List<LccSummonerSpellInformation> lccSummonerSpellInformation = null;
 
-        //    return new JsonResult(lccSummonerSpellInformation);
-        //}
+            return new JsonResult(lccSummonerSpellInformation);
+        }
+
+        [HttpGet("GetAllRunesReforgedData")]
+        public async Task<JsonResult> GetAllRunesReforgedData()
+        {
+            List<LccRuneInformation> lccSummonerSpellInformation = null;
+
+            return new JsonResult(lccSummonerSpellInformation);
+        }
 
     }
 }
