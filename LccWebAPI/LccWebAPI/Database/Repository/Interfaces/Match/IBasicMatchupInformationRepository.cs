@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace LccWebAPI.Repository.Match.Interfaces
+namespace LccWebAPI.Repository.Interfaces.Match
 {
     public interface IBasicMatchupInformationRepository : IDisposable
     {

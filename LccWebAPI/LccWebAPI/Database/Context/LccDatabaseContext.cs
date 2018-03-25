@@ -1,6 +1,7 @@
 ﻿using LccWebAPI.Database.Models;
 using LccWebAPI.Database.Models.Match;
 using LccWebAPI.Database.Models.StaticData;
+using LccWebAPI.Database.Models.Summoner;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -15,6 +16,9 @@ namespace LccWebAPI.Database.Context
         
         //Basic information stored for quick match lookup
         public DbSet<Db_LccBasicMatchInfo> Matchups { get; set; }
+
+        //Information about summoners to keep track of matchups we've gotten (for now)
+        public DbSet<Db_LccSummoner> Summoners { get; set; }
 
         //Static Data
         public DbSet<Db_LccChampion> Champions { get; set; }

@@ -2,7 +2,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace LccWebAPI.Repository.StaticData.Interfaces
+namespace LccWebAPI.Repository.Interfaces.StaticData
 {
     public interface IChampionStaticDataRepository : IDisposable
     {

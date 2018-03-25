@@ -1,8 +1,6 @@
-﻿using LccWebAPI.Repository.StaticData.Interfaces;
+﻿using LccWebAPI.Repository.Interfaces.StaticData;
 using Microsoft.AspNetCore.Mvc;
 using RiotSharp.Interfaces;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace LccWebAPI.Controllers
 {

@@ -1,4 +1,5 @@
-﻿using LccWebAPI.Repository.Match.Interfaces;
+﻿using LccWebAPI.Database.Repository.Interface.Summoner;
+using LccWebAPI.Repository.Interfaces.Match;
 using LccWebAPI.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using RiotSharp.Endpoints.LeagueEndpoint;
@@ -54,9 +55,9 @@ namespace LccWebAPI.Services
 
                 using (var scope = _serviceScopeFactory.CreateScope())
                 {
-                    //using (var matchupInformationRepository = scope.ServiceProvider.GetRequiredService<REPLACED_IMatchupInformationRepository>())
-                    //using (var summonerRepository = scope.ServiceProvider.GetRequiredService<REPLACED_ISummonerRepository>())
-                    //{
+                    using (var matchupInformationRepository = scope.ServiceProvider.GetRequiredService<IBasicMatchupInformationRepository>())
+                    using (var summonerRepository = scope.ServiceProvider.GetRequiredService<ISummonerRepository>())
+                    {
                     //    try
                     //    {
                     //        _logging.LogEvent("Current matches count - " + matchupInformationRepository.GetAllMatchupInformations().Count());
@@ -122,7 +123,7 @@ namespace LccWebAPI.Services
                     //    catch (Exception e)
                     //    {
                     //        _logging.LogEvent("Exception encountered - " + e.Message + ".");
-                    //    }
+                        }
                     }
                 }
 

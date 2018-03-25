@@ -1,6 +1,6 @@
 ﻿using LccWebAPI.Database.Context;
 using LccWebAPI.Database.Models.Match;
-using LccWebAPI.Repository.Match.Interfaces;
+using LccWebAPI.Repository.Interfaces.Match;
 using System;
 using System.Collections.Generic;
 using System.Linq;

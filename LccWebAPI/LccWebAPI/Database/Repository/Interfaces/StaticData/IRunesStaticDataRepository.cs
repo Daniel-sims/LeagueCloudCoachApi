@@ -1,11 +1,8 @@
 ﻿using LccWebAPI.Database.Models.StaticData;
-using LccWebAPI.Models.APIModels;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
-namespace LccWebAPI.Repository.StaticData.Interfaces
+namespace LccWebAPI.Repository.Interfaces.StaticData
 {
     public interface IRunesStaticDataRepository : IDisposable
     {

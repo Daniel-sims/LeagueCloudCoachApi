@@ -1,8 +1,10 @@
 ﻿using LccWebAPI.Database.Context;
+using LccWebAPI.Database.Repository.Interface.Summoner;
+using LccWebAPI.Database.Repository.Summoner;
+using LccWebAPI.Repository.Interfaces.Match;
+using LccWebAPI.Repository.Interfaces.StaticData;
 using LccWebAPI.Repository.Match;
-using LccWebAPI.Repository.Match.Interfaces;
 using LccWebAPI.Repository.StaticData;
-using LccWebAPI.Repository.StaticData.Interfaces;
 using LccWebAPI.Services;
 using LccWebAPI.Utils;
 using Microsoft.AspNetCore.Builder;
@@ -34,14 +36,13 @@ namespace LccWebAPI
 
             services.AddSingleton<IRiotApi>(RiotApi.GetDevelopmentInstance("RGAPI-495503df-5078-4696-8355-4ea78620bd57"));
 
-            //services.AddTransient<ISummonerRepository, REPLACED_SummonerRepository>();
+            services.AddTransient<ISummonerRepository, SummonerRepository>();
             services.AddTransient<IBasicMatchupInformationRepository, BasicMatchupInformationRepository>();
             services.AddTransient<IChampionStaticDataRepository, ChampionStaticDataRepository>();
             services.AddTransient<IItemStaticDataRepository, ItemStaticDataRepository>();
             services.AddTransient<ISummonerSpellStaticDataRepository,SummonerSpellStaticDataRepository>();
             services.AddTransient<IRunesStaticDataRepository, RunesStaticDataRepository>();
-
-
+            
             var dbConn = @"Server=(localdb)\mssqllocaldb;Database=LccDb;Trusted_Connection=True;ConnectRetryCount=0";
             services.AddDbContext<LccDatabaseContext>(options => options.UseSqlServer(dbConn));
 
