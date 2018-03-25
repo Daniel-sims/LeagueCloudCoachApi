@@ -11,11 +11,11 @@ namespace LccWebAPI.Database.Repository.Interface.Summoner
         void InsertSummoner(Db_LccSummoner summoner);
 
         IEnumerable<Db_LccSummoner> GetAllSummoner();
-        Db_LccSummoner GetSummonerById(int summonerId);
+        Db_LccSummoner GetSummonerByAccountId(long accountId);
 
         void UpdateSummoner(Db_LccSummoner summoner);
 
-        void DeleteSummoner(long summonerId);
+        void DeleteSummoner(long accountId);
 
         void Save();
     }

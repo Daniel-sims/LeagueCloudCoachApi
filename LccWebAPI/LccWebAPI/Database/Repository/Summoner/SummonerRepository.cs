@@ -26,9 +26,9 @@ namespace LccWebAPI.Database.Repository.Summoner
             return _lccDatabaseContext.Summoners.ToList();
         }
 
-        public Db_LccSummoner GetSummonerById(int summonerId)
+        public Db_LccSummoner GetSummonerByAccountId(long accountId)
         {
-            return _lccDatabaseContext.Summoners.FirstOrDefault(x => x.SummonerId == summonerId);
+            return _lccDatabaseContext.Summoners.FirstOrDefault(x => x.AccountId == accountId);
         }
 
         public void UpdateSummoner(Db_LccSummoner summoner)
@@ -36,9 +36,9 @@ namespace LccWebAPI.Database.Repository.Summoner
             _lccDatabaseContext.Entry(summoner).State = Microsoft.EntityFrameworkCore.EntityState.Modified;
         }
 
-        public void DeleteSummoner(long summonerId)
+        public void DeleteSummoner(long accountId)
         {
-            Db_LccSummoner summoner = _lccDatabaseContext.Summoners.FirstOrDefault(x => x.SummonerId == summonerId);
+            Db_LccSummoner summoner = _lccDatabaseContext.Summoners.FirstOrDefault(x => x.AccountId == accountId);
             if (summoner != null)
             {
                 _lccDatabaseContext.Summoners.Remove(summoner);

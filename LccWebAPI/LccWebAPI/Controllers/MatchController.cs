@@ -1,11 +1,9 @@
 ﻿using LccWebAPI.Models.APIModels;
-using LccWebAPI.Repository.Match;
-using LccWebAPI.Repository.Match.Interfaces;
+using LccWebAPI.Repository.Interfaces.Match;
 using Microsoft.AspNetCore.Mvc;
 using RiotSharp.Endpoints.MatchEndpoint;
 using RiotSharp.Interfaces;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace LccWebAPI.Controllers

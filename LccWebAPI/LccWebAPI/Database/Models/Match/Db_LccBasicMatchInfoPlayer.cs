@@ -14,5 +14,11 @@ namespace LccWebAPI.Database.Models.Match
         public int Id { get; set; }
 
         public int ChampionId { get; set; }
+
+        public long PlayerAccountId { get; set; }
+
+        public string SummonerName { get; set; }
+
+        public string Lane { get; set; }
     }
 }

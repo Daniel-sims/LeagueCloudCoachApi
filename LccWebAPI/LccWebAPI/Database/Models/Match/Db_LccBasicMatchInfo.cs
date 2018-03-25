@@ -12,11 +12,7 @@ namespace LccWebAPI.Database.Models.Match
         public int Id { get; set; }
 
         public long GameId { get; set; }
-
-        public DateTime MatchDate { get; set; }
-
-        public string MatchPatch { get; set; }
-
+        
         public virtual IList<Db_LccBasicMatchInfoPlayer> WinningTeamChampions { get; set; }
 
         public virtual IList<Db_LccBasicMatchInfoPlayer> LosingTeamChampions { get; set; }

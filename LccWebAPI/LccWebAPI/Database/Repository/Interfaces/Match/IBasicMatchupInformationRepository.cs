@@ -9,7 +9,7 @@ namespace LccWebAPI.Repository.Interfaces.Match
         void InsertMatchup(Db_LccBasicMatchInfo match);
 
         IEnumerable<Db_LccBasicMatchInfo> GetAllMatchups();
-        Db_LccBasicMatchInfo GetMatchupByGameId(int gameId);
+        Db_LccBasicMatchInfo GetMatchupByGameId(long gameId);
 
         void UpdateMatchup(Db_LccBasicMatchInfo matchup);
 

@@ -11,9 +11,10 @@ using System;
 namespace LccWebAPI.Migrations
 {
     [DbContext(typeof(LccDatabaseContext))]
-    partial class LccDatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20180325201256_AddedSummonerTable_3")]
+    partial class AddedSummonerTable_3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

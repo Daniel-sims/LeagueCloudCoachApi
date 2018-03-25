@@ -11,9 +11,10 @@ using System;
 namespace LccWebAPI.Migrations
 {
     [DbContext(typeof(LccDatabaseContext))]
-    partial class LccDatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20180325200123_AddedSummonerTable_2")]
+    partial class AddedSummonerTable_2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -26,6 +27,10 @@ namespace LccWebAPI.Migrations
                         .ValueGeneratedOnAdd();
 
                     b.Property<long>("GameId");
+
+                    b.Property<DateTime>("MatchDate");
+
+                    b.Property<string>("MatchPatch");
 
                     b.HasKey("Id");
 
@@ -42,12 +47,6 @@ namespace LccWebAPI.Migrations
                     b.Property<int?>("Db_LccBasicMatchInfoId");
 
                     b.Property<int?>("Db_LccBasicMatchInfoId1");
-
-                    b.Property<string>("Lane");
-
-                    b.Property<long>("PlayerAccountId");
-
-                    b.Property<string>("SummonerName");
 
                     b.HasKey("Id");
 

@@ -13,7 +13,7 @@ namespace LccWebAPI.Database.Models.Summoner
         [Key]
         public int Id { get; set; }
 
-        public int SummonerId { get; set; }
+        public long AccountId { get; set; }
         
         public string SummonerName { get; set; }
 
