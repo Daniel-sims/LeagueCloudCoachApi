@@ -1,5 +1,6 @@
 ﻿using LccWebAPI.Models.APIModels;
 using LccWebAPI.Repository.Match;
+using LccWebAPI.Repository.Match.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using RiotSharp.Endpoints.MatchEndpoint;
 using RiotSharp.Interfaces;
@@ -12,10 +13,10 @@ namespace LccWebAPI.Controllers
     [Route("api/[controller]")]
     public class MatchController : Controller
     {
-        private IMatchupInformationRepository _matchupInformationRepository;
+        private REPLACED_IMatchupInformationRepository _matchupInformationRepository;
         private IRiotApi _riotApi;
 
-        public MatchController(IMatchupInformationRepository matchupInformationRepository, IRiotApi riotApi)
+        public MatchController(REPLACED_IMatchupInformationRepository matchupInformationRepository, IRiotApi riotApi)
         {
             _matchupInformationRepository = matchupInformationRepository;
             _riotApi = riotApi;
@@ -29,46 +30,46 @@ namespace LccWebAPI.Controllers
         [HttpGet("GetMatchup")]
         public async Task<JsonResult> GetMatchup(long usersChampionId, string usersLane, long[] friendlyTeamChampions, long[] enemyTeamChampions, int maxMatchLimit = 5)
         {
-            var allMatchesInDatabase = _matchupInformationRepository.GetAllMatchupInformations();
-            IList<long> friendlyTeamChampionIds = new List<long>(friendlyTeamChampions) { usersChampionId };
-            IList<long> enemyTeamChampionIds = enemyTeamChampions.ToList();
+            //var allMatchesInDatabase = _matchupInformationRepository.GetAllMatchupInformations();
+            //IList<long> friendlyTeamChampionIds = new List<long>(friendlyTeamChampions) { usersChampionId };
+            //IList<long> enemyTeamChampionIds = enemyTeamChampions.ToList();
 
 
-            // This is looks horrible but works....
-            // first .Where finds if users champion + lane is on winning team or losing team
-            // second .Where checks to see if all of the specified champions are on either team, winning or losing
-            // Basically it gets the matches the user specified...
-            var allMatchesContainingUsersChampion = allMatchesInDatabase.Where(x => x.LosingTeam.Any(p => p.ChampionId == usersChampionId || x.WinningTeam.Any(u => u.ChampionId == usersChampionId))).ToList();
-            var allMatchesWithRequestedTeams = 
-                allMatchesContainingUsersChampion.Where
-                //Check to see if the Enemys team Ids are the losing team, and the friendly team are the winning team
-                (q => (enemyTeamChampionIds.All(e => q.LosingTeam.Any(l => l.ChampionId == e)) 
-                && friendlyTeamChampionIds.All(f => q.WinningTeam.Any(l => l.ChampionId == f)))
-                //Check to see if the winning team Ids are the losing team, and the enemy team are the winning team
-                || (enemyTeamChampionIds.All(e => q.WinningTeam.Any(l => l.ChampionId == e)) 
-                && friendlyTeamChampionIds.All(f => q.LosingTeam.Any(l => l.ChampionId == f))));
+            //// This is looks horrible but works....
+            //// first .Where finds if users champion + lane is on winning team or losing team
+            //// second .Where checks to see if all of the specified champions are on either team, winning or losing
+            //// Basically it gets the matches the user specified...
+            //var allMatchesContainingUsersChampion = allMatchesInDatabase.Where(x => x.LosingTeam.Any(p => p.ChampionId == usersChampionId || x.WinningTeam.Any(u => u.ChampionId == usersChampionId))).ToList();
+            //var allMatchesWithRequestedTeams = 
+            //    allMatchesContainingUsersChampion.Where
+            //    //Check to see if the Enemys team Ids are the losing team, and the friendly team are the winning team
+            //    (q => (enemyTeamChampionIds.All(e => q.LosingTeam.Any(l => l.ChampionId == e)) 
+            //    && friendlyTeamChampionIds.All(f => q.WinningTeam.Any(l => l.ChampionId == f)))
+            //    //Check to see if the winning team Ids are the losing team, and the enemy team are the winning team
+            //    || (enemyTeamChampionIds.All(e => q.WinningTeam.Any(l => l.ChampionId == e)) 
+            //    && friendlyTeamChampionIds.All(f => q.LosingTeam.Any(l => l.ChampionId == f))));
 
             List<LccCalculatedMatchupInformation> matchesToReturnToUser = new List<LccCalculatedMatchupInformation>();
             
-            if (allMatchesWithRequestedTeams.Any())
-            {
-                int matchReturnCount = 0;
+            //if (allMatchesWithRequestedTeams.Any())
+            //{
+            //    int matchReturnCount = 0;
 
-                foreach(var match in allMatchesWithRequestedTeams.OrderByDescending( x => x.MatchDate))
-                {
-                    if(matchReturnCount != maxMatchLimit)
-                    {
-                        Match riotMatchInformation = await _riotApi.Match.GetMatchAsync(RiotSharp.Misc.Region.euw, match.GameId);
-                        matchesToReturnToUser.Add(CreateLccMatchupInformation(riotMatchInformation, usersChampionId));
+            //    foreach(var match in allMatchesWithRequestedTeams.OrderByDescending( x => x.MatchDate))
+            //    {
+            //        if(matchReturnCount != maxMatchLimit)
+            //        {
+            //            Match riotMatchInformation = await _riotApi.Match.GetMatchAsync(RiotSharp.Misc.Region.euw, match.GameId);
+            //            matchesToReturnToUser.Add(CreateLccMatchupInformation(riotMatchInformation, usersChampionId));
 
-                        matchReturnCount++;
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-            }
+            //            matchReturnCount++;
+            //        }
+            //        else
+            //        {
+            //            break;
+            //        }
+            //    }
+            //}
             
             return new JsonResult(matchesToReturnToUser);
         }

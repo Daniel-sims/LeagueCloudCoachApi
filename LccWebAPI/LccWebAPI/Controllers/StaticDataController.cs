@@ -21,45 +21,25 @@ namespace LccWebAPI.Controllers
         private IChampionStaticDataRepository _championStaticDataRepository;
         private IItemStaticDataRepository _itemStaticDataRepository;
         private ISummonerSpellStaticDataRepository _summonerSpellStaticDataRepository;
-        private IRunesReforgedStaticDataRepository _runesReforgedStaticDataRepository;
-
-        private bool _getUpdatedChampionData = true;
-        private bool _getUpdatedItemData = true;
-        private bool _getUpdatedSummonerSpellData = true;
-        private bool _getUpdatedRunesReforgedData = true;
-
+        private IRunesStaticDataRepository _runesStaticDataRepository;
+        
         public StaticDataController(IRiotApi riotApi,
             IChampionStaticDataRepository championStaticDataRepository, 
             IItemStaticDataRepository itemStaticDataRepository, 
             ISummonerSpellStaticDataRepository summonerSpellStaticDataRepository,
-            IRunesReforgedStaticDataRepository runesReforgedStaticDataRepository)
+            IRunesStaticDataRepository runesStaticDataRepository)
         {
             _riotApi = riotApi;
             _championStaticDataRepository = championStaticDataRepository;
             _itemStaticDataRepository = itemStaticDataRepository;
             _summonerSpellStaticDataRepository = summonerSpellStaticDataRepository;
-            _runesReforgedStaticDataRepository = runesReforgedStaticDataRepository;
+            _runesStaticDataRepository = runesStaticDataRepository;
         }
         
         [HttpGet("GetAllChampionsData")]
         public async Task<JsonResult> GetAllChampionsData()
         {
-            if (_getUpdatedChampionData)
-            {
-                var currentChampions = _championStaticDataRepository.GetAllChampions();
-                if (currentChampions.Count() == 0)
-                {
-                    ChampionListStatic championData = await _riotApi.Static.Champion.GetChampionsAsync(RiotSharp.Misc.Region.euw);
-                    foreach (var champion in championData.Champions)
-                    {
-                        _championStaticDataRepository.InsertChampionInformation(new LccChampionInformation(champion.Value.Id, champion.Value.Name));
-                    }
-
-                    _championStaticDataRepository.Save();
-                }
-            }
-
-            List<LccChampionInformation> championInformation = _championStaticDataRepository.GetAllChampions().ToList();
+            List<LccChampionInformation> championInformation = null;
 
             return new JsonResult(championInformation);
         }
@@ -67,22 +47,7 @@ namespace LccWebAPI.Controllers
         [HttpGet("GetAllItemData")]
         public async Task<JsonResult> GetAllItemData()
         {
-            if (_getUpdatedItemData)
-            {
-                var currentItems = _itemStaticDataRepository.GetAllItems();
-                if(currentItems.Count() == 0)
-                {
-                    ItemListStatic itemData = await _riotApi.Static.Item.GetItemsAsync(RiotSharp.Misc.Region.euw);
-                    foreach (var item in itemData.Items)
-                    {
-                        _itemStaticDataRepository.InsertItemInformation(new LccItemInformation(item.Key, item.Value.Name));
-                    }
-
-                    _itemStaticDataRepository.Save();
-                }
-            }
-
-            List<LccItemInformation> lccItemInformation = _itemStaticDataRepository.GetAllItems().ToList();
+            List<LccItemInformation> lccItemInformation = null;
 
             return new JsonResult(lccItemInformation);
         }
@@ -90,22 +55,7 @@ namespace LccWebAPI.Controllers
         [HttpGet("GetAllSummonerSpellData")]
         public async Task<JsonResult> GetAllSummonerSpellData()
         {
-            if (_getUpdatedSummonerSpellData)
-            {
-                var currentSummonerSpellData = _summonerSpellStaticDataRepository.GetAllSummonerSpells();
-                if(currentSummonerSpellData.Count() == 0)
-                {
-                    SummonerSpellListStatic summonerSpellData = await _riotApi.Static.SummonerSpell.GetSummonerSpellsAsync(RiotSharp.Misc.Region.euw);
-                    foreach (var summonerSpell in summonerSpellData.SummonerSpells)
-                    {
-                        _summonerSpellStaticDataRepository.InsertSummonerSpellInformation(new LccSummonerSpellInformation(summonerSpell.Value.Id, summonerSpell.Value.Name));
-                    }
-
-                    _summonerSpellStaticDataRepository.Save();
-                }
-            }
-
-            List<LccSummonerSpellInformation> lccSummonerSpellInformation = _summonerSpellStaticDataRepository.GetAllSummonerSpells().ToList();
+            List<LccSummonerSpellInformation> lccSummonerSpellInformation = null;
 
             return new JsonResult(lccSummonerSpellInformation);
         }
@@ -113,32 +63,7 @@ namespace LccWebAPI.Controllers
         [HttpGet("GetAllRunesReforgedData")]
         public async Task<JsonResult> GetAllRunesReforgedData()
         {
-            if (_getUpdatedRunesReforgedData)
-            {
-                var currentRunes = _runesReforgedStaticDataRepository.GetAllRunes();
-                if (currentRunes.Count() == 0)
-                {
-                    List<RuneReforgedStatic> runesReforgedData = await _riotApi.Static.Rune.GetRunesReforgedAsync(RiotSharp.Misc.Region.euw);
-                    foreach (var rune in runesReforgedData)
-                    {
-                        _runesReforgedStaticDataRepository.InsertRune(new LccRuneReforged
-                            (
-                                rune.RunePathName,
-                                rune.RunePathId,
-                                rune.Name,
-                                rune.Id,
-                                rune.Key,
-                                rune.ShortDesc,
-                                rune.LongDesc,
-                                rune.Icon
-                            ));
-                    }
-
-                    _runesReforgedStaticDataRepository.Save();
-                }
-            }
-
-            List<LccRuneReforged> lccSummonerSpellInformation = _runesReforgedStaticDataRepository.GetAllRunes().ToList();
+            List<LccRuneReforged> lccSummonerSpellInformation = null;
 
             return new JsonResult(lccSummonerSpellInformation);
         }

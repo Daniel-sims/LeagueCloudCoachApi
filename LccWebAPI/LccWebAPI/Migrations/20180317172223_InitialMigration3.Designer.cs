@@ -11,7 +11,7 @@ using System;
 
 namespace LccWebAPI.Migrations
 {
-    [DbContext(typeof(LccDatabaseContext))]
+    [DbContext(typeof(REPLACED_LccDatabaseContext))]
     [Migration("20180317172223_InitialMigration3")]
     partial class InitialMigration3
     {

@@ -19,6 +19,7 @@ using RiotSharp;
 using RiotSharp.Interfaces;
 using LccWebAPI.Repository.StaticData;
 using LccWebAPI.Repository.StaticData.Interfaces;
+using LccWebAPI.Repository.Match.Interfaces;
 
 namespace LccWebAPI
 {
@@ -40,16 +41,16 @@ namespace LccWebAPI
 
             services.AddSingleton<IRiotApi>(RiotApi.GetDevelopmentInstance("RGAPI-495503df-5078-4696-8355-4ea78620bd57"));
 
-            services.AddTransient<ISummonerRepository, SummonerRepository>();
-            services.AddTransient<IMatchupInformationRepository, MatchupInformationRepository>();
-            services.AddTransient<IChampionStaticDataRepository, ChampionStaticDataRepository>();
-            services.AddTransient<IItemStaticDataRepository, ItemStaticDataRepository>();
-            services.AddTransient<ISummonerSpellStaticDataRepository, SummonerSpellStaticDataRepository>();
-            services.AddTransient<IRunesReforgedStaticDataRepository, RunesReforgedStaticDataRepository>();
+            services.AddTransient<REPLACED_ISummonerRepository, REPLACED_SummonerRepository>();
+            services.AddTransient<REPLACED_IMatchupInformationRepository, REPLACED_MatchupInformationRepository>();
+            services.AddTransient<REPLACED_IChampionStaticDataRepository, REPLACED_ChampionStaticDataRepository>();
+            services.AddTransient<REPLACED_IItemStaticDataRepository, REPLACED_ItemStaticDataRepository>();
+            services.AddTransient<REPLACED_ISummonerSpellStaticDataRepository, REPLACED_SummonerSpellStaticDataRepository>();
+            services.AddTransient<REPLACED_IRunesReforgedStaticDataRepository, REPLACED_RunesReforgedStaticDataRepository>();
 
 
             var dbConn = @"Server=(localdb)\mssqllocaldb;Database=LccDb;Trusted_Connection=True;ConnectRetryCount=0";
-            services.AddDbContext<LccDatabaseContext>(options => options.UseSqlServer(dbConn));
+            services.AddDbContext<REPLACED_LccDatabaseContext>(options => options.UseSqlServer(dbConn));
 
             services.AddMvc();
         }

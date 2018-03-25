@@ -11,7 +11,7 @@ using System;
 
 namespace LccWebAPI.Migrations
 {
-    [DbContext(typeof(LccDatabaseContext))]
+    [DbContext(typeof(REPLACED_LccDatabaseContext))]
     partial class LccDatabaseContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
