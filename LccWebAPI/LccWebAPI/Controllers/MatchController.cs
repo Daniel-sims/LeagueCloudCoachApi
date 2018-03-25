@@ -162,14 +162,18 @@ namespace LccWebAPI.Controllers
                 SummonerTwo = participant.Spell2Id,
                 ChampionId = participant.ChampionId,
                 ChampionLevel = participant.Stats.ChampLevel,
-                PrimaryMasteryId = 1,
-                SubPrimaryMasteryOneId = 2,
-                SubPrimaryMasteryTwoId = 3,
-                SubPrimaryMasteryThreeId = 4,
-                SecondaryMasteryId = 5,
-                SubSecondaryMasteryOneId = 6,
-                SubSecondaryMasteryTwoId = 7
-                
+                Masterys = new LccPlayerMasterys
+                {
+                    PrimaryMasteryStyleId = participant.Stats.PerkPrimaryStyle,
+                    SubPrimaryMasteryOneId = participant.Stats.Perk0,
+                    SubPrimaryMasteryTwoId = participant.Stats.Perk1,
+                    SubPrimaryMasteryThreeId = participant.Stats.Perk2,
+                    SubPrimaryMasteryFourId = participant.Stats.Perk3,
+
+                    SecondaryMasteryStyleId = participant.Stats.PerkSubStyle,
+                    SubSecondaryMasteryOneId = participant.Stats.Perk4,
+                    SubSecondaryMasteryTwoId = participant.Stats.Perk5
+                }
             };
         }
     }

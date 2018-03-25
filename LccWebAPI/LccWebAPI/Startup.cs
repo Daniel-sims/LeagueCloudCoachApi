@@ -18,6 +18,7 @@ using Microsoft.Extensions.Options;
 using RiotSharp;
 using RiotSharp.Interfaces;
 using LccWebAPI.Repository.StaticData;
+using LccWebAPI.Repository.StaticData.Interfaces;
 
 namespace LccWebAPI
 {
@@ -44,6 +45,8 @@ namespace LccWebAPI
             services.AddTransient<IChampionStaticDataRepository, ChampionStaticDataRepository>();
             services.AddTransient<IItemStaticDataRepository, ItemStaticDataRepository>();
             services.AddTransient<ISummonerSpellStaticDataRepository, SummonerSpellStaticDataRepository>();
+            services.AddTransient<IRunesReforgedStaticDataRepository, RunesReforgedStaticDataRepository>();
+
 
             var dbConn = @"Server=(localdb)\mssqllocaldb;Database=LccDb;Trusted_Connection=True;ConnectRetryCount=0";
             services.AddDbContext<LccDatabaseContext>(options => options.UseSqlServer(dbConn));

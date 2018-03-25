@@ -12,8 +12,8 @@ using System;
 namespace LccWebAPI.Migrations
 {
     [DbContext(typeof(LccDatabaseContext))]
-    [Migration("20180324134704_AddingMatchDate")]
-    partial class AddingMatchDate
+    [Migration("20180325100827_newRunesReforged5")]
+    partial class newRunesReforged5
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -21,6 +21,32 @@ namespace LccWebAPI.Migrations
             modelBuilder
                 .HasAnnotation("ProductVersion", "2.0.2-rtm-10011")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+            modelBuilder.Entity("LccWebAPI.Models.APIModels.LccRuneReforged", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("Icon");
+
+                    b.Property<string>("Key");
+
+                    b.Property<string>("LongDesc");
+
+                    b.Property<string>("Name");
+
+                    b.Property<int>("RuneId");
+
+                    b.Property<int>("RunePathId");
+
+                    b.Property<string>("RunePathName");
+
+                    b.Property<string>("ShortDesc");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Runes");
+                });
 
             modelBuilder.Entity("LccWebAPI.Models.DatabaseModels.LccChampionInformation", b =>
                 {

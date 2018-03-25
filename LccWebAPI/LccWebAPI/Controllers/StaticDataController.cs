@@ -1,8 +1,11 @@
-﻿using LccWebAPI.Models.DatabaseModels;
+﻿using LccWebAPI.Models.APIModels;
+using LccWebAPI.Models.DatabaseModels;
 using LccWebAPI.Repository.StaticData;
+using LccWebAPI.Repository.StaticData.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using RiotSharp.Endpoints.StaticDataEndpoint.Champion;
 using RiotSharp.Endpoints.StaticDataEndpoint.Item;
+using RiotSharp.Endpoints.StaticDataEndpoint.Rune;
 using RiotSharp.Endpoints.StaticDataEndpoint.SummonerSpell;
 using RiotSharp.Interfaces;
 using System.Collections.Generic;
@@ -18,20 +21,24 @@ namespace LccWebAPI.Controllers
         private IChampionStaticDataRepository _championStaticDataRepository;
         private IItemStaticDataRepository _itemStaticDataRepository;
         private ISummonerSpellStaticDataRepository _summonerSpellStaticDataRepository;
+        private IRunesReforgedStaticDataRepository _runesReforgedStaticDataRepository;
 
         private bool _getUpdatedChampionData = true;
         private bool _getUpdatedItemData = true;
         private bool _getUpdatedSummonerSpellData = true;
+        private bool _getUpdatedRunesReforgedData = true;
 
         public StaticDataController(IRiotApi riotApi,
             IChampionStaticDataRepository championStaticDataRepository, 
             IItemStaticDataRepository itemStaticDataRepository, 
-            ISummonerSpellStaticDataRepository summonerSpellStaticDataRepository)
+            ISummonerSpellStaticDataRepository summonerSpellStaticDataRepository,
+            IRunesReforgedStaticDataRepository runesReforgedStaticDataRepository)
         {
             _riotApi = riotApi;
             _championStaticDataRepository = championStaticDataRepository;
             _itemStaticDataRepository = itemStaticDataRepository;
             _summonerSpellStaticDataRepository = summonerSpellStaticDataRepository;
+            _runesReforgedStaticDataRepository = runesReforgedStaticDataRepository;
         }
         
         [HttpGet("GetAllChampionsData")]
@@ -99,6 +106,39 @@ namespace LccWebAPI.Controllers
             }
 
             List<LccSummonerSpellInformation> lccSummonerSpellInformation = _summonerSpellStaticDataRepository.GetAllSummonerSpells().ToList();
+
+            return new JsonResult(lccSummonerSpellInformation);
+        }
+
+        [HttpGet("GetAllRunesReforgedData")]
+        public async Task<JsonResult> GetAllRunesReforgedData()
+        {
+            if (_getUpdatedRunesReforgedData)
+            {
+                var currentRunes = _runesReforgedStaticDataRepository.GetAllRunes();
+                if (currentRunes.Count() == 0)
+                {
+                    List<RuneReforgedStatic> runesReforgedData = await _riotApi.Static.Rune.GetRunesReforgedAsync(RiotSharp.Misc.Region.euw);
+                    foreach (var rune in runesReforgedData)
+                    {
+                        _runesReforgedStaticDataRepository.InsertRune(new LccRuneReforged
+                            (
+                                rune.RunePathName,
+                                rune.RunePathId,
+                                rune.Name,
+                                rune.Id,
+                                rune.Key,
+                                rune.ShortDesc,
+                                rune.LongDesc,
+                                rune.Icon
+                            ));
+                    }
+
+                    _runesReforgedStaticDataRepository.Save();
+                }
+            }
+
+            List<LccRuneReforged> lccSummonerSpellInformation = _runesReforgedStaticDataRepository.GetAllRunes().ToList();
 
             return new JsonResult(lccSummonerSpellInformation);
         }

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace LccWebAPI.Repository.StaticData
+namespace LccWebAPI.Repository.StaticData.Interfaces
 {
     public interface ISummonerSpellStaticDataRepository
     {
