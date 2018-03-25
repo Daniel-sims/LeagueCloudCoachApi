@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace LccWebAPI.Database.Models
+namespace LccWebAPI.Database.Models.Match
 {
     public class Db_LccBasicMatchInfo
     {
@@ -17,8 +17,8 @@ namespace LccWebAPI.Database.Models
 
         public string MatchPatch { get; set; }
 
-        public IList<int> WinningTeamChampionIds { get; set; }
+        public virtual IList<Db_LccBasicMatchInfoPlayer> WinningTeamChampions { get; set; }
 
-        public IList<int> LosingTeamChampionIds { get; set; }
+        public virtual IList<Db_LccBasicMatchInfoPlayer> LosingTeamChampions { get; set; }
     }
 }

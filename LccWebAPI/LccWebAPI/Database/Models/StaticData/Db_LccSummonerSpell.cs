@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace LccWebAPI.Database.Models
+namespace LccWebAPI.Database.Models.StaticData
 {
     public class Db_LccSummonerSpell
     {

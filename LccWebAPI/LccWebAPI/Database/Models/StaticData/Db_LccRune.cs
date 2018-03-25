@@ -4,17 +4,17 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace LccWebAPI.Database.Models
+namespace LccWebAPI.Database.Models.StaticData
 {
-    public class Db_LccChampion
+    public class Db_LccRune
     {
-        public Db_LccChampion() { }
+        public Db_LccRune() { }
 
         [Key]
         public int Id { get; set; }
 
-        public int ChampionId { get; set; }
+        public int RuneId { get; set; }
 
-        public string ChampionName { get; set; }
+        public string RuneName { get; set; }
     }
 }

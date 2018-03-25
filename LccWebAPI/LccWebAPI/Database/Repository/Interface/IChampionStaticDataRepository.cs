@@ -1,4 +1,4 @@
-﻿using LccWebAPI.Database.Models;
+﻿using LccWebAPI.Database.Models.StaticData;
 using System;
 using System.Collections.Generic;
 

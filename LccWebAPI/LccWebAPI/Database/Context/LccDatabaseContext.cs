@@ -1,4 +1,6 @@
 ﻿using LccWebAPI.Database.Models;
+using LccWebAPI.Database.Models.Match;
+using LccWebAPI.Database.Models.StaticData;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -22,7 +24,8 @@ namespace LccWebAPI.Database.Context
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-
+            modelBuilder.Entity<Db_LccBasicMatchInfo>().HasMany(x => x.WinningTeamChampions);
+            modelBuilder.Entity<Db_LccBasicMatchInfo>().HasMany(x => x.LosingTeamChampions);
         }
     }
 }

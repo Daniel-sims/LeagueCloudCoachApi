@@ -1,5 +1,5 @@
 ﻿using LccWebAPI.Database.Context;
-using LccWebAPI.Database.Models;
+using LccWebAPI.Database.Models.StaticData;
 using LccWebAPI.Repository.StaticData.Interfaces;
 using System;
 using System.Collections.Generic;
