@@ -1,20 +1,14 @@
-﻿using LccWebAPI.DatabaseContexts;
-using LccWebAPI.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using LccWebAPI.Models.DatabaseModels;
+﻿using LccWebAPI.Database.Context;
 using LccWebAPI.Repository.Match.Interfaces;
+using System;
 
 namespace LccWebAPI.Repository.Match
 {
     public class MatchupInformationRepository : IMatchupInformationRepository
     {
-        private REPLACED_LccDatabaseContext _lccDatabaseContext;
+        private LccDatabaseContext _lccDatabaseContext;
 
-        public MatchupInformationRepository(REPLACED_LccDatabaseContext lccDatabaseContext)
+        public MatchupInformationRepository(LccDatabaseContext lccDatabaseContext)
         {
             _lccDatabaseContext = lccDatabaseContext;
         }

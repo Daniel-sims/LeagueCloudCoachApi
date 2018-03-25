@@ -1,8 +1,4 @@
-﻿using LccWebAPI.Models.DatabaseModels;
-using System;
-using System.Collections.Generic;
-
-namespace LccWebAPI.Repository.Summoner
+﻿namespace LccWebAPI.Repository.Summoner
 {
     public interface REPLACED_ISummonerRepository
     {

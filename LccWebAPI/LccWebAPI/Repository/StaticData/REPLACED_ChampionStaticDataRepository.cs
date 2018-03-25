@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using LccWebAPI.DatabaseContexts;
-using LccWebAPI.Models.DatabaseModels;
-using LccWebAPI.Repository.StaticData.Interfaces;
+﻿using LccWebAPI.Repository.StaticData.Interfaces;
 
 namespace LccWebAPI.Repository.StaticData
 {

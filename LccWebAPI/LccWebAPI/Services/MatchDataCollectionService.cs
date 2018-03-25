@@ -1,19 +1,11 @@
-﻿using LccWebAPI.Constants;
-using LccWebAPI.Models.DatabaseModels;
-using LccWebAPI.Repository.Match;
-using LccWebAPI.Repository.Match.Interfaces;
-using LccWebAPI.Repository.Summoner;
+﻿using LccWebAPI.Repository.Match.Interfaces;
 using LccWebAPI.Utils;
 using Microsoft.Extensions.DependencyInjection;
-using RiotSharp;
 using RiotSharp.Endpoints.LeagueEndpoint;
 using RiotSharp.Endpoints.MatchEndpoint;
-using RiotSharp.Endpoints.SummonerEndpoint;
 using RiotSharp.Interfaces;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
 

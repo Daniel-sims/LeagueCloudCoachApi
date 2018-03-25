@@ -1,11 +1,4 @@
-﻿using LccWebAPI.Models;
-using LccWebAPI.Models.DatabaseModels;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace LccWebAPI.Repository.Match.Interfaces
+﻿namespace LccWebAPI.Repository.Match.Interfaces
 {
     public interface REPLACED_IMatchupInformationRepository
     {

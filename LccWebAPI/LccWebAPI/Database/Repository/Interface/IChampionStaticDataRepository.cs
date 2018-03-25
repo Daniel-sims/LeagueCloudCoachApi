@@ -1,18 +1,20 @@
-﻿using LccWebAPI.Models.DatabaseModels;
+﻿using LccWebAPI.Database.Models;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace LccWebAPI.Repository.StaticData.Interfaces
 {
     public interface IChampionStaticDataRepository : IDisposable
     {
-        //IEnumerable<LccChampionInformation> GetAllChampions();
-        //LccChampionInformation GetChampionById(int championId);
-        //void InsertChampionInformation(LccChampionInformation championInformation);
-        //void UpdateChampionInformation(LccChampionInformation championInformation);
-        //void DeleteChampionInformation(long championId);
-        //void Save();
+        void InsertChampionInformation(Db_LccChampion champion);
+
+        IEnumerable<Db_LccChampion> GetAllChampions();
+        Db_LccChampion GetChampionById(int championId);
+       
+        void UpdateChampion(Db_LccChampion champion);
+
+        void DeleteChampion(long championId);
+
+        void Save();
     }
 }

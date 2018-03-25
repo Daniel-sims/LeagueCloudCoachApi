@@ -1,12 +1,4 @@
-﻿using LccWebAPI.DatabaseContexts;
-using LccWebAPI.Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.EntityFrameworkCore;
-using LccWebAPI.Models.DatabaseModels;
-using LccWebAPI.Repository.Match.Interfaces;
+﻿using LccWebAPI.Repository.Match.Interfaces;
 
 namespace LccWebAPI.Repository.Match
 {

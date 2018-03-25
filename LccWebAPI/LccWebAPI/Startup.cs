@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using LccWebAPI.DatabaseContexts;
-using LccWebAPI.Repository.Summoner;
+﻿using LccWebAPI.Database.Context;
 using LccWebAPI.Repository.Match;
+using LccWebAPI.Repository.Match.Interfaces;
+using LccWebAPI.Repository.StaticData;
+using LccWebAPI.Repository.StaticData.Interfaces;
+using LccWebAPI.Repository.Summoner;
 using LccWebAPI.Services;
 using LccWebAPI.Utils;
 using Microsoft.AspNetCore.Builder;
@@ -13,13 +12,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
 using RiotSharp;
 using RiotSharp.Interfaces;
-using LccWebAPI.Repository.StaticData;
-using LccWebAPI.Repository.StaticData.Interfaces;
-using LccWebAPI.Repository.Match.Interfaces;
 
 namespace LccWebAPI
 {
@@ -50,7 +44,7 @@ namespace LccWebAPI
 
 
             var dbConn = @"Server=(localdb)\mssqllocaldb;Database=LccDb;Trusted_Connection=True;ConnectRetryCount=0";
-            services.AddDbContext<REPLACED_LccDatabaseContext>(options => options.UseSqlServer(dbConn));
+            services.AddDbContext<LccDatabaseContext>(options => options.UseSqlServer(dbConn));
 
             services.AddMvc();
         }
