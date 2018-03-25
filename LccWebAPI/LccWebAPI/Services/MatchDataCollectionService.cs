@@ -135,7 +135,7 @@ namespace LccWebAPI.Services
             await Task.Run(() => Thread.Sleep(600000));
         }
         
-        private async Task GetRiotMatchupInformationAndAddIfNotExisting(REPLACED_IMatchupInformationRepository matchupInformationRepository, MatchList matchlist, IList<LeaguePosition> highEloPlayerEntires)
+        private async Task GetRiotMatchupInformationAndAddIfNotExisting(IMatchupInformationRepository matchupInformationRepository, MatchList matchlist, IList<LeaguePosition> highEloPlayerEntires)
         {
             foreach (var match in matchlist?.Matches)
             {
