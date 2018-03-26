@@ -10,5 +10,16 @@ namespace LccWebAPI.Controllers.Models.StaticData
         public long RuneId { get; set; }
 
         public string RuneName { get; set; }
+
+        public string RunePathName { get; set; }
+
+        public string ShortDesc { get; set; }
+
+        public string LongDesc { get; set; }
+
+        public string Key { get; set; }
+
+        public string Icon { get; set; }
+
     }
 }

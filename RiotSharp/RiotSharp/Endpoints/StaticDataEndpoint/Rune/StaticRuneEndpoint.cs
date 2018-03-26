@@ -1,6 +1,7 @@
 ﻿using Newtonsoft.Json;
 using RiotSharp.Caching;
 using RiotSharp.Endpoints.Interfaces.Static;
+using RiotSharp.Endpoints.StaticDataEndpoint.ReforgedRune;
 using RiotSharp.Endpoints.StaticDataEndpoint.Rune.Cache;
 using RiotSharp.Http.Interfaces;
 using RiotSharp.Misc;
@@ -14,6 +15,7 @@ namespace RiotSharp.Endpoints.StaticDataEndpoint.Rune
     public class StaticRuneEndpoint : StaticEndpointBase, IStaticRuneEndpoint
     {
         private const string RunesUrl = "runes";
+        private const string RunesReforgedUrl = "reforged-runes";
         private const string RuneByIdUrl = "runes/{0}";
         private const string RunesCacheKey = "runes";
         private const string RuneByIdCacheKey = "rune";
@@ -72,6 +74,15 @@ namespace RiotSharp.Endpoints.StaticDataEndpoint.Rune
             var rune = JsonConvert.DeserializeObject<RuneStatic>(json);
             cache.Add(RuneByIdCacheKey + runeId, new RuneStaticWrapper(rune, language, runeData), SlidingExpirationTime);
             return rune;
+        }
+
+        public async Task<IList<RuneReforged>> GetRunesReforgedAsync(Region region)
+        {
+            var json = await requester.CreateGetRequestAsync(StaticDataRootUrl + RunesReforgedUrl, region).ConfigureAwait(false);
+
+            var runes = JsonConvert.DeserializeObject<IList<RuneReforged>>(json);
+
+            return runes;
         }
     }
 }

@@ -14,6 +14,8 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using RiotSharp;
+using RiotSharp.Endpoints.Interfaces.Static;
+using RiotSharp.Endpoints.StaticDataEndpoint;
 using RiotSharp.Interfaces;
 
 namespace LccWebAPI
@@ -35,6 +37,7 @@ namespace LccWebAPI
             services.AddSingleton<IThrottledRequestHelper, ThrottledRequestHelper>();
 
             services.AddSingleton<IRiotApi>(RiotApi.GetDevelopmentInstance("RGAPI-9ce8d7e3-9422-48e9-9fcb-b7ea6cdf48c0"));
+            services.AddSingleton<IStaticDataEndpoints>(StaticDataEndpoints.GetInstance("RGAPI-9ce8d7e3-9422-48e9-9fcb-b7ea6cdf48c0"));
 
             services.AddTransient<ISummonerRepository, SummonerRepository>();
             services.AddTransient<IBasicMatchupInformationRepository, BasicMatchupInformationRepository>();
