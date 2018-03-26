@@ -2,11 +2,14 @@
 using LccWebAPI.Controllers.Models.Match;
 using LccWebAPI.Controllers.Models.StaticData;
 using LccWebAPI.Database.Models.Match;
+using LccWebAPI.Database.Models.StaticData;
 using LccWebAPI.Repository.Interfaces.Match;
+using LccWebAPI.Repository.Interfaces.StaticData;
 using Microsoft.AspNetCore.Mvc;
 using RiotSharp.Endpoints.MatchEndpoint;
 using RiotSharp.Interfaces;
 using RiotSharp.Misc;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,13 +19,30 @@ namespace LccWebAPI.Controllers
     [Route("api/[controller]")]
     public class MatchController : Controller
     {
-        private IBasicMatchupInformationRepository _matchupInformationRepository;
         private IRiotApi _riotApi;
 
-        public MatchController(IBasicMatchupInformationRepository matchupInformationRepository, IRiotApi riotApi)
+        private IBasicMatchupInformationRepository _matchupInformationRepository;
+        
+        private readonly IItemStaticDataRepository _itemStaticDataRepository;
+        private readonly ISummonerSpellStaticDataRepository _summonerSpellStaticDataRepository;
+        private readonly IChampionStaticDataRepository _championStaticDataRepository;
+        private readonly IRunesStaticDataRepository _runeStaticDataReposistory;
+
+        public MatchController(IRiotApi riotApi,
+            IBasicMatchupInformationRepository matchupInformationRepository,
+            IItemStaticDataRepository itemStaticDataRepository,
+            ISummonerSpellStaticDataRepository summonerSpellStaticDataRepository,
+            IChampionStaticDataRepository championStaticDataRepository,
+            IRunesStaticDataRepository runeStaticDataReposistory)
         {
-            _matchupInformationRepository = matchupInformationRepository;
             _riotApi = riotApi;
+
+            _matchupInformationRepository = matchupInformationRepository;
+            
+            _itemStaticDataRepository = itemStaticDataRepository;
+            _summonerSpellStaticDataRepository = summonerSpellStaticDataRepository;
+            _championStaticDataRepository = championStaticDataRepository;
+            _runeStaticDataReposistory = runeStaticDataReposistory;
         }
 
         public IActionResult Index()
@@ -150,118 +170,138 @@ namespace LccWebAPI.Controllers
 
         private LccPlayerStats CreatePlayerStats(Participant participant, ParticipantIdentity participantIdentity)
         {
-            return new LccPlayerStats()
+            try
             {
-                SummonerName = participantIdentity.Player.SummonerName,
-                Kills = 0,
-                Deaths = 0,
-                Assists = 0,
-                MinionKills = 0,
-                Trinket = new LccItemInformation()
+                IList<Db_LccItem> itemStaticData = _itemStaticDataRepository.GetAllItems().ToList();
+                IList<Db_LccRune> runeStaticData = _runeStaticDataReposistory.GetAllRunes().ToList();
+                IList<Db_LccChampion> championStaticData = _championStaticDataRepository.GetAllChampions().ToList();
+                IList<Db_LccSummonerSpell> summonerSpellStaticData = _summonerSpellStaticDataRepository.GetAllSummonerSpells().ToList();
+
+                return new LccPlayerStats()
                 {
-                    ItemId = 0,
-                    ItemName =""
-                },
-                ItemOne = new LccItemInformation()
-                {
-                    ItemId = 0,
-                    ItemName = ""
-                },
-                ItemTwo = new LccItemInformation()
-                {
-                    ItemId = 0,
-                    ItemName = ""
-                },
-                ItemThree = new LccItemInformation()
-                {
-                    ItemId = 0,
-                    ItemName = ""
-                },
-                ItemFour = new LccItemInformation()
-                {
-                    ItemId = 0,
-                    ItemName = ""
-                },
-                ItemFive = new LccItemInformation()
-                {
-                    ItemId = 0,
-                    ItemName = ""
-                },
-                ItemSix = new LccItemInformation()
-                {
-                    ItemId = 0,
-                    ItemName = ""
-                },
-                FirstItems = new List<LccItemInformation>()
-                {
-                    new LccItemInformation()
+                    SummonerName = participantIdentity.Player.SummonerName,
+                    Kills = participant.Stats.Kills,
+                    Deaths = participant.Stats.Deaths,
+                    Assists = participant.Stats.Assists,
+                    MinionKills = participant.Stats.TotalMinionsKilled,
+                    ItemOne = new LccItemInformation()
                     {
-                        ItemId = 0,
-                        ItemName = ""
+                        ItemId = participant.Stats.Item0,
+                        ItemName = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item0)?.ItemName
                     },
-                    new LccItemInformation()
+                    ItemTwo = new LccItemInformation()
                     {
-                        ItemId = 0,
-                        ItemName = ""
+                        ItemId = participant.Stats.Item1,
+                        ItemName = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item1)?.ItemName
                     },
-                    new LccItemInformation()
+                    ItemThree = new LccItemInformation()
                     {
-                        ItemId = 0,
-                        ItemName = ""
+                        ItemId = participant.Stats.Item2,
+                        ItemName = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item2)?.ItemName
+                    },
+                    ItemFour = new LccItemInformation()
+                    {
+                        ItemId = participant.Stats.Item3,
+                        ItemName = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item3)?.ItemName
+                    },
+                    ItemFive = new LccItemInformation()
+                    {
+                        ItemId = participant.Stats.Item4,
+                        ItemName = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item4)?.ItemName
+                    },
+                    ItemSix = new LccItemInformation()
+                    {
+                        ItemId = participant.Stats.Item5,
+                        ItemName = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item5)?.ItemName
+                    },
+                    Trinket = new LccItemInformation()
+                    {
+                        ItemId = participant.Stats.Item6,
+                        ItemName = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item6)?.ItemName
+                    },
+                    FirstItems = new List<LccItemInformation>()
+                    {
+                        new LccItemInformation()
+                        {
+                            ItemId = 0,
+                            ItemName = ""
+                        },
+                        new LccItemInformation()
+                        {
+                            ItemId = 0,
+                            ItemName = ""
+                        },
+                        new LccItemInformation()
+                        {
+                            ItemId = 0,
+                            ItemName = ""
+                        }
+                    },
+                    SummonerOne = new LccSummonerSpellInformation()
+                    {
+                        SummonerSpellId = participant.Spell1Id,
+                        SummonerSpellName = summonerSpellStaticData.FirstOrDefault(x => x.SummonerSpellId == participant.Spell1Id)?.SummonerSpellName
+                    },
+                    SummonerTwo = new LccSummonerSpellInformation()
+                    {
+                        SummonerSpellId = participant.Spell2Id,
+                        SummonerSpellName = summonerSpellStaticData.FirstOrDefault(x => x.SummonerSpellId == participant.Spell2Id)?.SummonerSpellName
+                    },
+                    Champion = new LccChampionInformation()
+                    {
+                        ChampionId = participant.ChampionId,
+                        ChampionName = championStaticData.FirstOrDefault(x => x.ChampionId == participant.ChampionId)?.ChampionName,
+                        ImageFull = championStaticData.FirstOrDefault(x => x.ChampionId == participant.ChampionId)?.ImageFull
+                    },
+                    ChampionLevel = participant.Stats.ChampLevel,
+                    PrimaryRuneStyle = new LccRuneInformation()
+                    {
+                        RuneId = participant.Stats.PerkPrimaryStyle,
+                        RuneName = runeStaticData.FirstOrDefault(x => x.RuneId == participant.Stats.Perk0)?.RunePathName
+                    },
+                    PrimaryRuneSubOne = new LccRuneInformation()
+                    {
+                        RuneId = participant.Stats.Perk0,
+                        RuneName = runeStaticData.FirstOrDefault(x => x.RuneId == participant.Stats.Perk0)?.RuneName
+                    },
+                    PrimaryRuneSubTwo = new LccRuneInformation()
+                    {
+                        RuneId = participant.Stats.Perk1,
+                        RuneName = runeStaticData.FirstOrDefault(x => x.RuneId == participant.Stats.Perk1)?.RuneName
+                    },
+                    PrimaryRuneSubThree = new LccRuneInformation()
+                    {
+                        RuneId = participant.Stats.Perk2,
+                        RuneName = runeStaticData.FirstOrDefault(x => x.RuneId == participant.Stats.Perk2)?.RuneName
+                    },
+                    PrimaryRuneSubFour = new LccRuneInformation()
+                    {
+                        RuneId = participant.Stats.Perk3,
+                        RuneName = runeStaticData.FirstOrDefault(x => x.RuneId == participant.Stats.Perk3)?.RuneName
+                    },
+                    SecondaryRuneStyle = new LccRuneInformation()
+                    {
+                        RuneId = participant.Stats.PerkSubStyle,
+                        RuneName = runeStaticData.FirstOrDefault(x => x.RuneId == participant.Stats.Perk4)?.RunePathName
+                    },
+                    SecondaryRuneSubOne = new LccRuneInformation()
+                    {
+                        RuneId = participant.Stats.Perk4,
+                        RuneName = runeStaticData.FirstOrDefault(x => x.RuneId == participant.Stats.Perk4)?.RuneName
+                    },
+                    SecondaryRuneSubTwo = new LccRuneInformation()
+                    {
+                        RuneId = participant.Stats.Perk5,
+                        RuneName = runeStaticData.FirstOrDefault(x => x.RuneId == participant.Stats.Perk5)?.RuneName
                     }
-                },
-                SummonerOne = new LccSummonerSpellInformation()
-                {
-                    SummonerSpellId = 0,
-                    SummonerSpellName = ""
-                },
-                SummonerTwo = new LccSummonerSpellInformation()
-                {
-                    SummonerSpellId = 0,
-                    SummonerSpellName = ""
-                },
-                Champion = new LccChampionInformation()
-                {
-                    ChampionId = 0,
-                    ChampionName = ""
-                },
-                ChampionLevel = 0,
-                PrimaryRuneStyle = new LccRuneInformation()
-                {
-                    RuneId = 0,
-                    RuneName = ""
-                },
-                PrimaryRuneSubOne = new LccRuneInformation()
-                {
-                    RuneId = 0,
-                    RuneName = ""
-                },
-                PrimaryRuneSubTwo = new LccRuneInformation()
-                {
-                    RuneId = 0,
-                    RuneName = ""
-                },
-                PrimaryRuneSubThree = new LccRuneInformation()
-                {
-                    RuneId = 0,
-                    RuneName = ""
-                },
-                SecondaryRuneStyle = new LccRuneInformation()
-                {
-                    RuneId = 0,
-                    RuneName = ""
-                },
-                SecondaryRuneSubOne = new LccRuneInformation()
-                {
-                    RuneId = 0,
-                    RuneName = ""
-                },
-                SecondaryRuneSubTwo = new LccRuneInformation()
-                {
-                    RuneId = 0,
-                    RuneName = ""
-                }
-            };
+                };
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine("Exception hit creating the player stats!");
+            }
+
+            return new LccPlayerStats();
         }
     }
 }

@@ -7,7 +7,7 @@ namespace LccWebAPI.Controllers.Models.Match
 {
     public class LccTeamInformation
     {
-        public List<LccPlayerStats> Players { get; set; }
+        public List<LccPlayerStats> Players { get; set; } = new List<LccPlayerStats>();
 
         public long TotalKills { get; set; }
         

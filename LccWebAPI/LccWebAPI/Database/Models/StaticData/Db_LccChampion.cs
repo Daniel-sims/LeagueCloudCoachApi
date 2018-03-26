@@ -1,4 +1,5 @@
-﻿using System;
+﻿using RiotSharp.Endpoints.StaticDataEndpoint;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
@@ -16,5 +17,7 @@ namespace LccWebAPI.Database.Models.StaticData
         public int ChampionId { get; set; }
 
         public string ChampionName { get; set; }
+        
+        public string ImageFull { get; set; }
     }
 }

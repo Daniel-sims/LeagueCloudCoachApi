@@ -9,382 +9,307 @@ namespace RiotSharp.Endpoints.MatchEndpoint
     {
         internal ParticipantStats() { }
 
-        /// <summary>
-        /// Number of assists.
-        /// </summary>
-        [JsonProperty("assists")]
-        public long Assists { get; set; }
+        [JsonProperty("neutralMinionsKilledTeamJungle")]
+        public long NeutralMinionsKilledTeamJungle { get; set; }
 
-        /// <summary>
-        /// Champion level achieved.
-        /// </summary>
-        [JsonProperty("champLevel")]
-        public long ChampLevel { get; set; }
+        [JsonProperty("visionScore")]
+        public long VisionScore { get; set; }
 
-        /// <summary>
-        /// If game was a dominion game, player's combat score, otherwise 0.
-        /// </summary>
-        [JsonProperty("combatPlayerScore")]
-        public long CombatPlayerScore { get; set; }
-
-        /// <summary>
-        /// Number of deaths.
-        /// </summary>
-        [JsonProperty("deaths")]
-        public long Deaths { get; set; }
-
-        /// <summary>
-        /// Number of double kills.
-        /// </summary>
-        [JsonProperty("doubleKills")]
-        public long DoubleKills { get; set; }
-
-        /// <summary>
-        /// Flag indicating if participant got an assist on first blood.
-        /// </summary>
-        [JsonProperty("firstBloodAssist")]
-        public bool FirstBloodAssist { get; set; }
-
-        /// <summary>
-        /// Flag indicating if participant got first blood.
-        /// </summary>
-        [JsonProperty("firstBloodKill")]
-        public bool FirstBloodKill { get; set; }
-
-        /// <summary>
-        /// Flag indicating if participant got an assist on the first inhibitor.
-        /// </summary>
-        [JsonProperty("firstInhibitorAssist")]
-        public bool FirstInhibitorAssist { get; set; }
-
-        /// <summary>
-        /// Flag indicating if participant destroyed the first inhibitor.
-        /// </summary>
-        [JsonProperty("firstInhibitorKill")]
-        public bool FirstInhibitorKill { get; set; }
-
-        /// <summary>
-        /// Flag indicating if participant got an assist on the first tower.
-        /// </summary>
-        [JsonProperty("firstTowerAssist")]
-        public bool FirstTowerAssist { get; set; }
-
-        /// <summary>
-        /// Flag indicating if participant destroyed the first tower.
-        /// </summary>
-        [JsonProperty("firstTowerKill")]
-        public bool FirstTowerKill { get; set; }
-
-        /// <summary>
-        /// Gold earned.
-        /// </summary>
-        [JsonProperty("goldEarned")]
-        public long GoldEarned { get; set; }
-
-        /// <summary>
-        /// Gold spent.
-        /// </summary>
-        [JsonProperty("goldSpent")]
-        public long GoldSpent { get; set; }
-
-        /// <summary>
-        /// Numer of inhibitor kills.
-        /// </summary>
-        [JsonProperty("inhibitorKills")]
-        public long InhibitorKills { get; set; }
-
-        /// <summary>
-        /// First item ID.
-        /// </summary>
-        [JsonProperty("item0")]
-        public long Item0 { get; set; }
-
-        /// <summary>
-        /// Second item ID.
-        /// </summary>
-        [JsonProperty("item1")]
-        public long Item1 { get; set; }
-
-        /// <summary>
-        /// Third item ID.
-        /// </summary>
-        [JsonProperty("item2")]
-        public long Item2 { get; set; }
-
-        /// <summary>
-        /// Fourth item ID.
-        /// </summary>
-        [JsonProperty("item3")]
-        public long Item3 { get; set; }
-
-        /// <summary>
-        /// Fifth item ID.
-        /// </summary>
-        [JsonProperty("item4")]
-        public long Item4 { get; set; }
-
-        /// <summary>
-        /// Sixth item ID.
-        /// </summary>
-        [JsonProperty("item5")]
-        public long Item5 { get; set; }
-
-        /// <summary>
-        /// Seventh item ID.
-        /// </summary>
-        [JsonProperty("item6")]
-        public long Item6 { get; set; }
-
-        /// <summary>
-        /// Number of killing sprees.
-        /// </summary>
-        [JsonProperty("killingSprees")]
-        public long KillingSprees { get; set; }
-
-        /// <summary>
-        /// Number of kills.
-        /// </summary>
-        [JsonProperty("kills")]
-        public long Kills { get; set; }
-
-        /// <summary>
-        /// Largest critical strike.
-        /// </summary>
-        [JsonProperty("largestCriticalStrike")]
-        public long LargestCriticalStrike { get; set; }
-
-        /// <summary>
-        /// Largest killing spree.
-        /// </summary>
-        [JsonProperty("largestKillingSpree")]
-        public long LargestKillingSpree { get; set; }
-
-        /// <summary>
-        /// Largest multi kill.
-        /// </summary>
-        [JsonProperty("largestMultiKill")]
-        public long LargestMultiKill { get; set; }
-
-        /// <summary>
-        /// Magic damage dealt.
-        /// </summary>
-        [JsonProperty("magicDamageDealt")]
-        public long MagicDamageDealt { get; set; }
-
-        /// <summary>
-        /// Magic damage dealt to champions.
-        /// </summary>
         [JsonProperty("magicDamageDealtToChampions")]
         public long MagicDamageDealtToChampions { get; set; }
 
-        /// <summary>
-        /// Magic damage taken.
-        /// </summary>
-        [JsonProperty("magicDamageTaken")]
-        public long MagicDamageTaken { get; set; }
+        [JsonProperty("largestMultiKill")]
+        public long LargestMultiKill { get; set; }
 
-        /// <summary>
-        /// Minions kiled.
-        /// </summary>
-        [JsonProperty("minionsKilled")]
-        public long MinionsKilled { get; set; }
-
-        /// <summary>
-        /// Neutral minions killed.
-        /// </summary>
-        [JsonProperty("neutralMinionsKilled")]
-        public long NeutralMinionsKilled { get; set; }
-
-        /// <summary>
-        /// Neutral jungle minions killed in the enemy team's jungle.
-        /// </summary>
-        [JsonProperty("neutralMinionsKilledEnemyJungle")]
-        public long NeutralMinionsKilledEnemyJungle { get; set; }
-
-        /// <summary>
-        /// Neutral jungle minions killed in your team's jungle.
-        /// </summary>
-        [JsonProperty("neutralMinionsKilledTeamJungle")]
-        public long NeutralMinionsKilledJungle { get; set; }
-
-        /// <summary>
-        /// If game was a dominion game, number of node captures.
-        /// </summary>
-        [JsonProperty("nodeCapture")]
-        public long NodeCapture { get; set; }
-
-        /// <summary>
-        /// If game was a dominion game, number of node capture assists.
-        /// </summary>
-        [JsonProperty("nodeCaptureAssist")]
-        public long NodeCaptureAssist { get; set; }
-
-        /// <summary>
-        /// If game was a dominion game, number of node neutralizations.
-        /// </summary>
-        [JsonProperty("nodeNeutralize")]
-        public long NodeNeutralize { get; set; }
-
-        /// <summary>
-        /// If game was a dominion game, number of node neutralization assists.
-        /// </summary>
-        [JsonProperty("nodeNeutralizeAssist")]
-        public long NodeNeutralizeAssist { get; set; }
-
-        /// <summary>
-        /// If game was a dominion game, player's objectives score, otherwise 0.
-        /// </summary>
-        [JsonProperty("objectivePlayerScore")]
-        public long ObjectivePlayerScore { get; set; }
-
-        /// <summary>
-        /// Number of penta kills.
-        /// </summary>
-        [JsonProperty("pentaKills")]
-        public long PentaKills { get; set; }
-
-        /// <summary>
-        /// Physical damage dealt.
-        /// </summary>
-        [JsonProperty("physicalDamageDealt")]
-        public long PhysicalDamageDealt { get; set; }
-
-        /// <summary>
-        /// Physical damage dealt to champions.
-        /// </summary>
-        [JsonProperty("physicalDamageDealtToChampions")]
-        public long PhysicalDamageDealtToChampions { get; set; }
-
-        /// <summary>
-        /// Physical damage taken.
-        /// </summary>
-        [JsonProperty("physicalDamageTaken")]
-        public long PhysicalDamageTaken { get; set; }
-
-        /// <summary>
-        /// Number of quadra kills.
-        /// </summary>
-        [JsonProperty("quadraKills")]
-        public long QuadraKills { get; set; }
-
-        /// <summary>
-        /// Number of sight wards purchased.
-        /// </summary>
-        [JsonProperty("sightWardsBoughtInGame")]
-        public long SightWardsBoughtInGame { get; set; }
-
-        /// <summary>
-        /// If game was a dominion game, number of completed team objectives (i.e., quests).
-        /// </summary>
-        [JsonProperty("teamObjective")]
-        public long TeamObjective { get; set; }
-
-        /// <summary>
-        /// Total damage dealt.
-        /// </summary>
-        [JsonProperty("totalDamageDealt")]
-        public long TotalDamageDealt { get; set; }
-
-        /// <summary>
-        /// Total damage dealt to champions.
-        /// </summary>
-        [JsonProperty("totalDamageDealtToChampions")]
-        public long TotalDamageDealtToChampions { get; set; }
-
-        /// <summary>
-        /// Total damage taken.
-        /// </summary>
-        [JsonProperty("totalDamageTaken")]
-        public long TotalDamageTaken { get; set; }
-
-        /// <summary>
-        /// Total heal.
-        /// </summary>
-        [JsonProperty("totalHeal")]
-        public long TotalHeal { get; set; }
-
-        /// <summary>
-        /// If game was a dominion game, player's total score, otherwise 0.
-        /// </summary>
-        [JsonProperty("totalPlayerScore")]
-        public long TotalPlayerScore { get; set; }
-
-        /// <summary>
-        /// If game was a dominion game, team rank of the player's total score (e.g., 1-5).
-        /// </summary>
-        [JsonProperty("totalScoreRank")]
-        public long TotalScoreRank { get; set; }
-
-        /// <summary>
-        /// Total time crowd control dealt.
-        /// </summary>
         [JsonProperty("totalTimeCrowdControlDealt")]
         public long TotalTimeCrowdControlDealt { get; set; }
 
-        /// <summary>
-        /// Total units healed.
-        /// </summary>
-        [JsonProperty("totalUnitsHealed")]
-        public long TotalUnitsHealed { get; set; }
+        [JsonProperty("longestTimeSpentLiving")]
+        public long LongestTimeSpentLiving { get; set; }
 
-        /// <summary>
-        /// Number of tower kills.
-        /// </summary>
-        [JsonProperty("towerKills")]
-        public long TowerKills { get; set; }
+        [JsonProperty("perk1Var1")]
+        public long Perk1Var1 { get; set; }
 
-        /// <summary>
-        /// Number of triple kills.
-        /// </summary>
+        [JsonProperty("perk1Var3")]
+        public long Perk1Var3 { get; set; }
+
+        [JsonProperty("perk1Var2")]
+        public long Perk1Var2 { get; set; }
+
         [JsonProperty("tripleKills")]
         public long TripleKills { get; set; }
 
-        /// <summary>
-        /// True damage dealt.
-        /// </summary>
-        [JsonProperty("trueDamageDealt")]
-        public long TrueDamageDealt { get; set; }
+        [JsonProperty("perk5")]
+        public long Perk5 { get; set; }
 
-        /// <summary>
-        /// True damage dealt to champions.
-        /// </summary>
-        [JsonProperty("trueDamageDealtToChampions")]
-        public long TrueDamageDealtToChampions { get; set; }
+        [JsonProperty("perk4")]
+        public long Perk4 { get; set; }
 
-        /// <summary>
-        /// True damage taken.
-        /// </summary>
-        [JsonProperty("trueDamageTaken")]
-        public long TrueDamageTaken { get; set; }
+        [JsonProperty("playerScore9")]
+        public long PlayerScore9 { get; set; }
 
-        /// <summary>
-        /// Number of unreal kills.
-        /// </summary>
-        [JsonProperty("unrealKills")]
-        public long UnrealKills { get; set; }
+        [JsonProperty("playerScore8")]
+        public long PlayerScore8 { get; set; }
 
-        /// <summary>
-        /// Number of vision wards purchased.
-        /// </summary>
-        [JsonProperty("visionWardsBoughtInGame")]
-        public long VisionWardsBoughtInGame { get; set; }
+        [JsonProperty("kills")]
+        public long Kills { get; set; }
 
-        /// <summary>
-        /// Number of wards killed.
-        /// </summary>
+        [JsonProperty("playerScore1")]
+        public long PlayerScore1 { get; set; }
+
+        [JsonProperty("playerScore0")]
+        public long PlayerScore0 { get; set; }
+
+        [JsonProperty("playerScore3")]
+        public long PlayerScore3 { get; set; }
+
+        [JsonProperty("playerScore2")]
+        public long PlayerScore2 { get; set; }
+
+        [JsonProperty("playerScore5")]
+        public long PlayerScore5 { get; set; }
+
+        [JsonProperty("playerScore4")]
+        public long PlayerScore4 { get; set; }
+
+        [JsonProperty("playerScore7")]
+        public long PlayerScore7 { get; set; }
+
+        [JsonProperty("playerScore6")]
+        public long PlayerScore6 { get; set; }
+
+        [JsonProperty("perk5Var1")]
+        public long Perk5Var1 { get; set; }
+
+        [JsonProperty("perk5Var3")]
+        public long Perk5Var3 { get; set; }
+
+        [JsonProperty("perk5Var2")]
+        public long Perk5Var2 { get; set; }
+
+        [JsonProperty("totalScoreRank")]
+        public long TotalScoreRank { get; set; }
+
+        [JsonProperty("neutralMinionsKilled")]
+        public long NeutralMinionsKilled { get; set; }
+
+        [JsonProperty("damageDealtToTurrets")]
+        public long DamageDealtToTurrets { get; set; }
+
+        [JsonProperty("physicalDamageDealtToChampions")]
+        public long PhysicalDamageDealtToChampions { get; set; }
+
+        [JsonProperty("damageDealtToObjectives")]
+        public long DamageDealtToObjectives { get; set; }
+
+        [JsonProperty("perk2Var2")]
+        public long Perk2Var2 { get; set; }
+
+        [JsonProperty("perk2Var3")]
+        public long Perk2Var3 { get; set; }
+
+        [JsonProperty("totalUnitsHealed")]
+        public long TotalUnitsHealed { get; set; }
+
+        [JsonProperty("perk2Var1")]
+        public long Perk2Var1 { get; set; }
+
+        [JsonProperty("perk4Var1")]
+        public long Perk4Var1 { get; set; }
+
+        [JsonProperty("totalDamageTaken")]
+        public long TotalDamageTaken { get; set; }
+
+        [JsonProperty("perk4Var3")]
+        public long Perk4Var3 { get; set; }
+
         [JsonProperty("wardsKilled")]
         public long WardsKilled { get; set; }
 
-        /// <summary>
-        /// Number of wards placed.
-        /// </summary>
+        [JsonProperty("largestCriticalStrike")]
+        public long LargestCriticalStrike { get; set; }
+
+        [JsonProperty("largestKillingSpree")]
+        public long LargestKillingSpree { get; set; }
+
+        [JsonProperty("quadraKills")]
+        public long QuadraKills { get; set; }
+
+        [JsonProperty("magicDamageDealt")]
+        public long MagicDamageDealt { get; set; }
+
+        [JsonProperty("firstBloodAssist")]
+        public bool FirstBloodAssist { get; set; }
+
+        [JsonProperty("item2")]
+        public long Item2 { get; set; }
+
+        [JsonProperty("item3")]
+        public long Item3 { get; set; }
+
+        [JsonProperty("item0")]
+        public long Item0 { get; set; }
+
+        [JsonProperty("item1")]
+        public long Item1 { get; set; }
+
+        [JsonProperty("item6")]
+        public long Item6 { get; set; }
+
+        [JsonProperty("item4")]
+        public long Item4 { get; set; }
+
+        [JsonProperty("item5")]
+        public long Item5 { get; set; }
+
+        [JsonProperty("perk1")]
+        public long Perk1 { get; set; }
+
+        [JsonProperty("perk0")]
+        public long Perk0 { get; set; }
+
+        [JsonProperty("perk3")]
+        public long Perk3 { get; set; }
+
+        [JsonProperty("perk2")]
+        public long Perk2 { get; set; }
+
+        [JsonProperty("perk3Var3")]
+        public long Perk3Var3 { get; set; }
+
+        [JsonProperty("perk3Var2")]
+        public long Perk3Var2 { get; set; }
+
+        [JsonProperty("perk3Var1")]
+        public long Perk3Var1 { get; set; }
+
+        [JsonProperty("damageSelfMitigated")]
+        public long DamageSelfMitigated { get; set; }
+
+        [JsonProperty("magicalDamageTaken")]
+        public long MagicalDamageTaken { get; set; }
+
+        [JsonProperty("perk0Var2")]
+        public long Perk0Var2 { get; set; }
+
+        [JsonProperty("firstInhibitorKill")]
+        public bool FirstInhibitorKill { get; set; }
+
+        [JsonProperty("trueDamageTaken")]
+        public long TrueDamageTaken { get; set; }
+
+        [JsonProperty("assists")]
+        public long Assists { get; set; }
+
+        [JsonProperty("perk4Var2")]
+        public long Perk4Var2 { get; set; }
+
+        [JsonProperty("goldSpent")]
+        public long GoldSpent { get; set; }
+
+        [JsonProperty("trueDamageDealt")]
+        public long TrueDamageDealt { get; set; }
+
+        [JsonProperty("participantId")]
+        public long ParticipantId { get; set; }
+
+        [JsonProperty("physicalDamageDealt")]
+        public long PhysicalDamageDealt { get; set; }
+
+        [JsonProperty("sightWardsBoughtInGame")]
+        public long SightWardsBoughtInGame { get; set; }
+
+        [JsonProperty("totalDamageDealtToChampions")]
+        public long TotalDamageDealtToChampions { get; set; }
+
+        [JsonProperty("physicalDamageTaken")]
+        public long PhysicalDamageTaken { get; set; }
+
+        [JsonProperty("totalPlayerScore")]
+        public long TotalPlayerScore { get; set; }
+
+        [JsonProperty("win")]
+        public bool Win { get; set; }
+
+        [JsonProperty("objectivePlayerScore")]
+        public long ObjectivePlayerScore { get; set; }
+
+        [JsonProperty("totalDamageDealt")]
+        public long TotalDamageDealt { get; set; }
+
+        [JsonProperty("neutralMinionsKilledEnemyJungle")]
+        public long NeutralMinionsKilledEnemyJungle { get; set; }
+
+        [JsonProperty("deaths")]
+        public long Deaths { get; set; }
+
         [JsonProperty("wardsPlaced")]
         public long WardsPlaced { get; set; }
 
-        /// <summary>
-        /// Flag indicating whether or not the participant won.
-        /// </summary>
-        [JsonProperty("winner")]
-        public bool Winner { get; set; }
+        [JsonProperty("perkPrimaryStyle")]
+        public long PerkPrimaryStyle { get; set; }
+
+        [JsonProperty("perkSubStyle")]
+        public long PerkSubStyle { get; set; }
+
+        [JsonProperty("turretKills")]
+        public long TurretKills { get; set; }
+
+        [JsonProperty("firstBloodKill")]
+        public bool FirstBloodKill { get; set; }
+
+        [JsonProperty("trueDamageDealtToChampions")]
+        public long TrueDamageDealtToChampions { get; set; }
+
+        [JsonProperty("goldEarned")]
+        public long GoldEarned { get; set; }
+
+        [JsonProperty("killingSprees")]
+        public long KillingSprees { get; set; }
+
+        [JsonProperty("unrealKills")]
+        public long UnrealKills { get; set; }
+
+        [JsonProperty("firstTowerAssist")]
+        public bool FirstTowerAssist { get; set; }
+
+        [JsonProperty("firstTowerKill")]
+        public bool FirstTowerKill { get; set; }
+
+        [JsonProperty("champLevel")]
+        public long ChampLevel { get; set; }
+
+        [JsonProperty("doubleKills")]
+        public long DoubleKills { get; set; }
+
+        [JsonProperty("inhibitorKills")]
+        public long InhibitorKills { get; set; }
+
+        [JsonProperty("firstInhibitorAssist")]
+        public bool FirstInhibitorAssist { get; set; }
+
+        [JsonProperty("perk0Var1")]
+        public long Perk0Var1 { get; set; }
+
+        [JsonProperty("combatPlayerScore")]
+        public long CombatPlayerScore { get; set; }
+
+        [JsonProperty("perk0Var3")]
+        public long Perk0Var3 { get; set; }
+
+        [JsonProperty("visionWardsBoughtInGame")]
+        public long VisionWardsBoughtInGame { get; set; }
+
+        [JsonProperty("pentaKills")]
+        public long PentaKills { get; set; }
+
+        [JsonProperty("totalHeal")]
+        public long TotalHeal { get; set; }
+
+        [JsonProperty("totalMinionsKilled")]
+        public long TotalMinionsKilled { get; set; }
+
+        [JsonProperty("timeCCingOthers")]
+        public long TimeCCingOthers { get; set; }
     }
 }

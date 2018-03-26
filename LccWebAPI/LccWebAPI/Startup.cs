@@ -36,8 +36,8 @@ namespace LccWebAPI
             services.AddSingleton<ILogging, Logging>();
             services.AddSingleton<IThrottledRequestHelper, ThrottledRequestHelper>();
 
-            services.AddSingleton<IRiotApi>(RiotApi.GetDevelopmentInstance("RGAPI-9ce8d7e3-9422-48e9-9fcb-b7ea6cdf48c0"));
-            services.AddSingleton<IStaticDataEndpoints>(StaticDataEndpoints.GetInstance("RGAPI-9ce8d7e3-9422-48e9-9fcb-b7ea6cdf48c0"));
+            services.AddSingleton<IRiotApi>(RiotApi.GetDevelopmentInstance("RGAPI-99c7b7a6-b658-4a1b-b7e6-9df53ed89b3c"));
+            services.AddSingleton<IStaticDataEndpoints>(StaticDataEndpoints.GetInstance("RGAPI-99c7b7a6-b658-4a1b-b7e6-9df53ed89b3c"));
 
             services.AddTransient<ISummonerRepository, SummonerRepository>();
             services.AddTransient<IBasicMatchupInformationRepository, BasicMatchupInformationRepository>();

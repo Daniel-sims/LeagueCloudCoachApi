@@ -50,10 +50,11 @@ namespace LccWebAPI.Controllers
 
                 foreach(ChampionStatic champion in championsListFromRiot.Champions.Values)
                 {
-                    _championStaticDataRepository.InsertChampionInformation(new Database.Models.StaticData.Db_LccChampion()
+                    _championStaticDataRepository.InsertChampionInformation(new Db_LccChampion()
                     {
                         ChampionId = champion.Id,
-                        ChampionName = champion.Name
+                        ChampionName = champion.Name,
+                        ImageFull = champion.Image.Full
                     });
                 }
 
@@ -67,7 +68,8 @@ namespace LccWebAPI.Controllers
                 championInformationList.Add(new LccChampionInformation()
                 {
                     ChampionId = dbChampion.ChampionId,
-                    ChampionName = dbChampion.ChampionName
+                    ChampionName = dbChampion.ChampionName,
+                    ImageFull = dbChampion.ImageFull
                 });
             }
 

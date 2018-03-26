@@ -50,6 +50,8 @@ namespace LccWebAPI.Controllers.Models.Match
 
         public LccRuneInformation PrimaryRuneSubThree { get; set; }
 
+        public LccRuneInformation PrimaryRuneSubFour { get; set; }
+
         public LccRuneInformation SecondaryRuneStyle { get; set; }
 
         public LccRuneInformation SecondaryRuneSubOne { get; set; }

@@ -91,7 +91,9 @@ namespace LccWebAPI.Services
                                         new Db_LccSummoner()
                                         {
                                             AccountId = summoner.AccountId,
-                                            SummonerName = summoner.Name
+                                            SummonerName = summoner.Name,
+                                            LastUpdatedTime = DateTime.Now
+                                            
                                         });
 
                                     newSummonersAddedToDatabaseTotal++;
