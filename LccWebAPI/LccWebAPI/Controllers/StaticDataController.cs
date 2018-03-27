@@ -40,27 +40,8 @@ namespace LccWebAPI.Controllers
         }
 
         [HttpGet("GetAllChampionsData")]
-        public async Task<JsonResult> GetAllChampionsData()
+        public JsonResult GetAllChampionsData()
         {
-            IList<Db_LccChampion> championsInDatabase = _championStaticDataRepository.GetAllChampions().ToList();
-
-            if (championsInDatabase.Count() == 0)
-            {
-                ChampionListStatic championsListFromRiot = await _staticDataEndpoints.Champion.GetChampionsAsync(Region.euw);
-
-                foreach(ChampionStatic champion in championsListFromRiot.Champions.Values)
-                {
-                    _championStaticDataRepository.InsertChampionInformation(new Db_LccChampion()
-                    {
-                        ChampionId = champion.Id,
-                        ChampionName = champion.Name,
-                        ImageFull = champion.Image.Full
-                    });
-                }
-
-                _championStaticDataRepository.Save();
-            }
-
             List<LccChampionInformation> championInformationList = new List<LccChampionInformation>();
 
             foreach (Db_LccChampion dbChampion in _championStaticDataRepository.GetAllChampions().ToList())
@@ -77,26 +58,8 @@ namespace LccWebAPI.Controllers
         }
 
         [HttpGet("GetAllItemData")]
-        public async Task<JsonResult> GetAllItemData()
+        public JsonResult GetAllItemData()
         {
-            IList<Db_LccItem> itemsInDatabase = _itemStaticDataRepository.GetAllItems().ToList();
-
-            if (itemsInDatabase.Count() == 0)
-            {
-                ItemListStatic itemsListFromRiot = await _staticDataEndpoints.Item.GetItemsAsync(Region.euw);
-
-                foreach (ItemStatic item in itemsListFromRiot.Items.Values)
-                {
-                    _itemStaticDataRepository.InsertItem(new Db_LccItem()
-                    {
-                        ItemId = item.Id,
-                        ItemName = item.Name
-                    });
-                }
-
-                _itemStaticDataRepository.Save();
-            }
-
             IList<LccItemInformation> itemInformationList = new List<LccItemInformation>();
 
             foreach (Db_LccItem dbItem in _itemStaticDataRepository.GetAllItems().ToList())
@@ -114,24 +77,6 @@ namespace LccWebAPI.Controllers
         [HttpGet("GetAllSummonerSpellsData")]
         public async Task<JsonResult> GetAllSummonerSpellData()
         {
-            IList<Db_LccSummonerSpell> lccSummonerSpellInformation = _summonerSpellStaticDataRepository.GetAllSummonerSpells().ToList();
-
-            if (lccSummonerSpellInformation.Count() == 0)
-            {
-                SummonerSpellListStatic summonerSpellListFromRiot = await _staticDataEndpoints.SummonerSpell.GetSummonerSpellsAsync(Region.euw);
-
-                foreach (SummonerSpellStatic summoner in summonerSpellListFromRiot.SummonerSpells.Values)
-                {
-                    _summonerSpellStaticDataRepository.InsertSummonerSpell(new Db_LccSummonerSpell()
-                    {
-                        SummonerSpellId = summoner.Id,
-                        SummonerSpellName = summoner.Name
-                    });
-                }
-
-                _summonerSpellStaticDataRepository.Save();
-            }
-
             List<LccSummonerSpellInformation> summonerSpellInformationList = new List<LccSummonerSpellInformation>();
 
             foreach (Db_LccSummonerSpell dbSummonerSpell in _summonerSpellStaticDataRepository.GetAllSummonerSpells().ToList())
@@ -144,36 +89,12 @@ namespace LccWebAPI.Controllers
 
             }
 
-            return new JsonResult(lccSummonerSpellInformation);
+            return new JsonResult(summonerSpellInformationList);
         }
 
         [HttpGet("GetAllRunesData")]
-        public async Task<JsonResult> GetAllRunesData()
+        public JsonResult GetAllRunesData()
         {
-            IList<Db_LccRune> lccRuneInformation = _runesStaticDataRepository.GetAllRunes().ToList();
-
-            if (lccRuneInformation.Count() == 0)
-            {
-                IList<RuneReforged> runeListFromRiot = await _staticDataEndpoints.Rune.GetRunesReforgedAsync(Region.euw);
-
-                foreach (RuneReforged rune in runeListFromRiot)
-                {
-                    _runesStaticDataRepository.InsertRune(new Db_LccRune()
-                    {
-                        RuneId = rune.Id,
-                        RuneName = rune.Name,
-                        RunePathName = rune.RunePathName,
-                        Key = rune.Key,
-                        ShortDesc = rune.ShortDesc,
-                        LongDesc = rune.LongDesc,
-                        Icon = rune.Icon
-                       
-                    });
-                }
-
-                _runesStaticDataRepository.Save();
-            }
-
             List<LccRuneInformation> runeInformationList = new List<LccRuneInformation>();
 
             foreach (Db_LccRune dbRune in _runesStaticDataRepository.GetAllRunes().ToList())

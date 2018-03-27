@@ -11,8 +11,8 @@ using System;
 namespace LccWebAPI.Migrations
 {
     [DbContext(typeof(LccDatabaseContext))]
-    [Migration("20180326120349_addedNewRuneFields")]
-    partial class addedNewRuneFields
+    [Migration("20180327122055_InitialMigration")]
+    partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -69,6 +69,8 @@ namespace LccWebAPI.Migrations
                     b.Property<int>("ChampionId");
 
                     b.Property<string>("ChampionName");
+
+                    b.Property<string>("ImageFull");
 
                     b.HasKey("Id");
 

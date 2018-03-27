@@ -16,7 +16,8 @@ namespace LccWebAPI.Migrations
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     ChampionId = table.Column<int>(nullable: false),
-                    ChampionName = table.Column<string>(nullable: true)
+                    ChampionName = table.Column<string>(nullable: true),
+                    ImageFull = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
@@ -38,18 +39,17 @@ namespace LccWebAPI.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Matches",
+                name: "Matchups",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     GameId = table.Column<long>(nullable: false),
-                    MatchDate = table.Column<DateTime>(nullable: false),
-                    MatchPatch = table.Column<string>(nullable: true)
+                    MatchDate = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Matches", x => x.Id);
+                    table.PrimaryKey("PK_Matchups", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -58,12 +58,32 @@ namespace LccWebAPI.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Icon = table.Column<string>(nullable: true),
+                    Key = table.Column<string>(nullable: true),
+                    LongDesc = table.Column<string>(nullable: true),
                     RuneId = table.Column<int>(nullable: false),
-                    RuneName = table.Column<string>(nullable: true)
+                    RuneName = table.Column<string>(nullable: true),
+                    RunePathName = table.Column<string>(nullable: true),
+                    ShortDesc = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Runes", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Summoners",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    AccountId = table.Column<long>(nullable: false),
+                    LastUpdatedTime = table.Column<DateTime>(nullable: false),
+                    SummonerName = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Summoners", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -88,21 +108,24 @@ namespace LccWebAPI.Migrations
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     ChampionId = table.Column<int>(nullable: false),
                     Db_LccBasicMatchInfoId = table.Column<int>(nullable: true),
-                    Db_LccBasicMatchInfoId1 = table.Column<int>(nullable: true)
+                    Db_LccBasicMatchInfoId1 = table.Column<int>(nullable: true),
+                    Lane = table.Column<string>(nullable: true),
+                    PlayerAccountId = table.Column<long>(nullable: false),
+                    SummonerName = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Db_LccBasicMatchInfoPlayer", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Db_LccBasicMatchInfoPlayer_Matches_Db_LccBasicMatchInfoId",
+                        name: "FK_Db_LccBasicMatchInfoPlayer_Matchups_Db_LccBasicMatchInfoId",
                         column: x => x.Db_LccBasicMatchInfoId,
-                        principalTable: "Matches",
+                        principalTable: "Matchups",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
-                        name: "FK_Db_LccBasicMatchInfoPlayer_Matches_Db_LccBasicMatchInfoId1",
+                        name: "FK_Db_LccBasicMatchInfoPlayer_Matchups_Db_LccBasicMatchInfoId1",
                         column: x => x.Db_LccBasicMatchInfoId1,
-                        principalTable: "Matches",
+                        principalTable: "Matchups",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -133,10 +156,13 @@ namespace LccWebAPI.Migrations
                 name: "Runes");
 
             migrationBuilder.DropTable(
+                name: "Summoners");
+
+            migrationBuilder.DropTable(
                 name: "SummonerSpells");
 
             migrationBuilder.DropTable(
-                name: "Matches");
+                name: "Matchups");
         }
     }
 }
