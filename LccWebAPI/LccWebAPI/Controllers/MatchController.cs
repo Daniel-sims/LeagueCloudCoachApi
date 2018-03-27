@@ -187,37 +187,44 @@ namespace LccWebAPI.Controllers
                     ItemOne = new LccItemInformation()
                     {
                         ItemId = participant.Stats.Item0,
-                        ItemName = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item0)?.ItemName
+                        ItemName = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item0)?.ItemName,
+                        ImageFull = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item0)?.ImageFull
                     },
                     ItemTwo = new LccItemInformation()
                     {
                         ItemId = participant.Stats.Item1,
-                        ItemName = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item1)?.ItemName
+                        ItemName = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item1)?.ItemName,
+                        ImageFull = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item1)?.ImageFull
                     },
                     ItemThree = new LccItemInformation()
                     {
                         ItemId = participant.Stats.Item2,
-                        ItemName = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item2)?.ItemName
+                        ItemName = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item2)?.ItemName,
+                        ImageFull = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item2)?.ImageFull
                     },
                     ItemFour = new LccItemInformation()
                     {
                         ItemId = participant.Stats.Item3,
-                        ItemName = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item3)?.ItemName
+                        ItemName = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item3)?.ItemName,
+                        ImageFull = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item3)?.ImageFull
                     },
                     ItemFive = new LccItemInformation()
                     {
                         ItemId = participant.Stats.Item4,
-                        ItemName = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item4)?.ItemName
+                        ItemName = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item4)?.ItemName,
+                        ImageFull = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item4)?.ImageFull
                     },
                     ItemSix = new LccItemInformation()
                     {
                         ItemId = participant.Stats.Item5,
-                        ItemName = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item5)?.ItemName
+                        ItemName = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item5)?.ItemName,
+                        ImageFull = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item5)?.ImageFull
                     },
                     Trinket = new LccItemInformation()
                     {
                         ItemId = participant.Stats.Item6,
-                        ItemName = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item6)?.ItemName
+                        ItemName = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item6)?.ItemName,
+                        ImageFull = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item6)?.ImageFull
                     },
                     FirstItems = new List<LccItemInformation>()
                     {
