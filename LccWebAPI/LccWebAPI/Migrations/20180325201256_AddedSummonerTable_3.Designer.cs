@@ -11,9 +11,10 @@ using System;
 namespace LccWebAPI.Migrations
 {
     [DbContext(typeof(LccDatabaseContext))]
-    partial class LccDatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20180325201256_AddedSummonerTable_3")]
+    partial class AddedSummonerTable_3
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -26,8 +27,6 @@ namespace LccWebAPI.Migrations
                         .ValueGeneratedOnAdd();
 
                     b.Property<long>("GameId");
-
-                    b.Property<DateTime>("MatchDate");
 
                     b.HasKey("Id");
 
@@ -69,8 +68,6 @@ namespace LccWebAPI.Migrations
 
                     b.Property<string>("ChampionName");
 
-                    b.Property<string>("ImageFull");
-
                     b.HasKey("Id");
 
                     b.ToTable("Champions");
@@ -95,19 +92,9 @@ namespace LccWebAPI.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<string>("Icon");
-
-                    b.Property<string>("Key");
-
-                    b.Property<string>("LongDesc");
-
                     b.Property<int>("RuneId");
 
                     b.Property<string>("RuneName");
-
-                    b.Property<string>("RunePathName");
-
-                    b.Property<string>("ShortDesc");
 
                     b.HasKey("Id");
 

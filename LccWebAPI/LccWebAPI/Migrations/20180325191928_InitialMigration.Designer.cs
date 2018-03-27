@@ -11,9 +11,10 @@ using System;
 namespace LccWebAPI.Migrations
 {
     [DbContext(typeof(LccDatabaseContext))]
-    partial class LccDatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20180325191928_InitialMigration")]
+    partial class InitialMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -29,9 +30,11 @@ namespace LccWebAPI.Migrations
 
                     b.Property<DateTime>("MatchDate");
 
+                    b.Property<string>("MatchPatch");
+
                     b.HasKey("Id");
 
-                    b.ToTable("Matchups");
+                    b.ToTable("Matches");
                 });
 
             modelBuilder.Entity("LccWebAPI.Database.Models.Match.Db_LccBasicMatchInfoPlayer", b =>
@@ -44,12 +47,6 @@ namespace LccWebAPI.Migrations
                     b.Property<int?>("Db_LccBasicMatchInfoId");
 
                     b.Property<int?>("Db_LccBasicMatchInfoId1");
-
-                    b.Property<string>("Lane");
-
-                    b.Property<long>("PlayerAccountId");
-
-                    b.Property<string>("SummonerName");
 
                     b.HasKey("Id");
 
@@ -68,8 +65,6 @@ namespace LccWebAPI.Migrations
                     b.Property<int>("ChampionId");
 
                     b.Property<string>("ChampionName");
-
-                    b.Property<string>("ImageFull");
 
                     b.HasKey("Id");
 
@@ -95,19 +90,9 @@ namespace LccWebAPI.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<string>("Icon");
-
-                    b.Property<string>("Key");
-
-                    b.Property<string>("LongDesc");
-
                     b.Property<int>("RuneId");
 
                     b.Property<string>("RuneName");
-
-                    b.Property<string>("RunePathName");
-
-                    b.Property<string>("ShortDesc");
 
                     b.HasKey("Id");
 
@@ -126,22 +111,6 @@ namespace LccWebAPI.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("SummonerSpells");
-                });
-
-            modelBuilder.Entity("LccWebAPI.Database.Models.Summoner.Db_LccSummoner", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<long>("AccountId");
-
-                    b.Property<DateTime>("LastUpdatedTime");
-
-                    b.Property<string>("SummonerName");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Summoners");
                 });
 
             modelBuilder.Entity("LccWebAPI.Database.Models.Match.Db_LccBasicMatchInfoPlayer", b =>

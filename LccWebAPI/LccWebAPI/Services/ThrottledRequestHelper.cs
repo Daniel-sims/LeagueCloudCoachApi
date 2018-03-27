@@ -34,7 +34,7 @@ namespace LccWebAPI.Services
             }
             catch (RiotSharpException e)
             {
-                _logging.LogEvent("######RiotSharpException encountered when sending throttle request - " + e.Message + ".");
+                _logging.LogEvent("######RiotSharpException encountered when sending throttle request - " + e.Message + "." + " Action: " + action.ToString());
                 if (e.HttpStatusCode == (HttpStatusCode)429)
                 {
                     _logging.LogEvent("Sleeping for 50 seconds.");
@@ -43,7 +43,7 @@ namespace LccWebAPI.Services
             }
             catch(Exception e)
             {
-                _logging.LogEvent("######Exception encountered when trying to send throttled request - " + e.Message);
+                _logging.LogEvent("######Exception encountered when trying to send throttled request - " + e.Message + ". Action: " + action.ToString());
             }
 
 

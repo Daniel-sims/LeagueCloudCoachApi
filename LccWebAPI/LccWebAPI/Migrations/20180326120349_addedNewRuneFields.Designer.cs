@@ -11,9 +11,10 @@ using System;
 namespace LccWebAPI.Migrations
 {
     [DbContext(typeof(LccDatabaseContext))]
-    partial class LccDatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20180326120349_addedNewRuneFields")]
+    partial class addedNewRuneFields
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -68,8 +69,6 @@ namespace LccWebAPI.Migrations
                     b.Property<int>("ChampionId");
 
                     b.Property<string>("ChampionName");
-
-                    b.Property<string>("ImageFull");
 
                     b.HasKey("Id");
 

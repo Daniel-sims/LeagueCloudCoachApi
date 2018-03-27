@@ -11,9 +11,10 @@ using System;
 namespace LccWebAPI.Migrations
 {
     [DbContext(typeof(LccDatabaseContext))]
-    partial class LccDatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20180325212011_AnotherQuickOne")]
+    partial class AnotherQuickOne
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -69,8 +70,6 @@ namespace LccWebAPI.Migrations
 
                     b.Property<string>("ChampionName");
 
-                    b.Property<string>("ImageFull");
-
                     b.HasKey("Id");
 
                     b.ToTable("Champions");
@@ -95,19 +94,9 @@ namespace LccWebAPI.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<string>("Icon");
-
-                    b.Property<string>("Key");
-
-                    b.Property<string>("LongDesc");
-
                     b.Property<int>("RuneId");
 
                     b.Property<string>("RuneName");
-
-                    b.Property<string>("RunePathName");
-
-                    b.Property<string>("ShortDesc");
 
                     b.HasKey("Id");
 

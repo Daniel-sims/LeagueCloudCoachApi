@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Folder Include="Controllers\Models\Summoner\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 
@@ -20,7 +21,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\..\RiotSharp\RiotSharp\RiotSharp.csproj" />
+    <ProjectReference Include="..\..\RiotSharp\RiotSharp\RiotSharp.csproj" />
   </ItemGroup>
-
 </Project>

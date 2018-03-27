@@ -1,6 +1,8 @@
 ﻿using RiotSharp.Endpoints.StaticDataEndpoint;
+using RiotSharp.Endpoints.StaticDataEndpoint.ReforgedRune;
 using RiotSharp.Endpoints.StaticDataEndpoint.Rune;
 using RiotSharp.Misc;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace RiotSharp.Endpoints.Interfaces.Static
@@ -27,5 +29,8 @@ namespace RiotSharp.Endpoints.Interfaces.Static
         /// <returns>A RuneListStatic object containing all runes.</returns>
         Task<RuneListStatic> GetRunesAsync(Region region, RuneData runeData = RuneData.All,
             Language language = Language.en_US);
+
+
+        Task<IList<RuneReforged>> GetRunesReforgedAsync(Region region);
     }
 }

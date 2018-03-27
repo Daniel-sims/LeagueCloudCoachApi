@@ -1,7 +1,8 @@
 ﻿using LccWebAPI.Constants;
-using LccWebAPI.Models.DatabaseModels;
-using LccWebAPI.Repository.Match;
-using LccWebAPI.Repository.Summoner;
+using LccWebAPI.Database.Models.Match;
+using LccWebAPI.Database.Models.Summoner;
+using LccWebAPI.Database.Repository.Interface.Summoner;
+using LccWebAPI.Repository.Interfaces.Match;
 using LccWebAPI.Utils;
 using Microsoft.Extensions.DependencyInjection;
 using RiotSharp;
@@ -9,6 +10,7 @@ using RiotSharp.Endpoints.LeagueEndpoint;
 using RiotSharp.Endpoints.MatchEndpoint;
 using RiotSharp.Endpoints.SummonerEndpoint;
 using RiotSharp.Interfaces;
+using RiotSharp.Misc;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -55,21 +57,21 @@ namespace LccWebAPI.Services
         // This task is not optmised in any way and has lots of code duplication
         protected override async Task ExecuteAsync(CancellationToken cancellationToken)
         {
-            while(!cancellationToken.IsCancellationRequested)
+            while (!cancellationToken.IsCancellationRequested)
             {
                 _logging.LogEvent("MatchDataCollectionService started.");
 
                 using (var scope = _serviceScopeFactory.CreateScope())
                 {
-                    using (var matchupInformationRepository = scope.ServiceProvider.GetRequiredService<IMatchupInformationRepository>())
+                    using (var matchupInformationRepository = scope.ServiceProvider.GetRequiredService<IBasicMatchupInformationRepository>())
                     using (var summonerRepository = scope.ServiceProvider.GetRequiredService<ISummonerRepository>())
                     {
                         try
                         {
-                            _logging.LogEvent("Current matches count - " + matchupInformationRepository.GetAllMatchupInformations().Count());
-                      
-                            var challengerPlayers = await _throttledRequestHelper.SendThrottledRequest<League>(async () => await _riotApi.League.GetChallengerLeagueAsync(RiotSharp.Misc.Region.euw, LeagueQueue.RankedSolo));
-                            var mastersPlayers = await _throttledRequestHelper.SendThrottledRequest<League>(async () => await _riotApi.League.GetMasterLeagueAsync(RiotSharp.Misc.Region.euw, LeagueQueue.RankedSolo));
+                            _logging.LogEvent("Current matches count - " + matchupInformationRepository.GetAllMatchups().Count());
+
+                            League challengerPlayers = await _throttledRequestHelper.SendThrottledRequest(async () => await _riotApi.League.GetChallengerLeagueAsync(Region.euw, LeagueQueue.RankedSolo));
+                            League mastersPlayers = await _throttledRequestHelper.SendThrottledRequest(async () => await _riotApi.League.GetMasterLeagueAsync(Region.euw, LeagueQueue.RankedSolo));
 
                             IList<LeaguePosition> highEloPlayerEntires = challengerPlayers.Entries.Concat(mastersPlayers.Entries).ToList();
 
@@ -80,16 +82,24 @@ namespace LccWebAPI.Services
                             {
                                 _logging.LogEvent(++currentCount + "/" + totalPlayers + " - " + highEloPlayer.PlayerOrTeamName);
 
-                                var summoner = await _throttledRequestHelper.SendThrottledRequest<Summoner>(async () => await _riotApi.Summoner.GetSummonerBySummonerIdAsync(RiotSharp.Misc.Region.euw, Convert.ToInt64(highEloPlayer.PlayerOrTeamId)));
+                                Summoner summoner = await _throttledRequestHelper.SendThrottledRequest(async () => await _riotApi.Summoner.GetSummonerBySummonerIdAsync(RiotSharp.Misc.Region.euw, Convert.ToInt64(highEloPlayer.PlayerOrTeamId)));
 
-                                var summonerInDatabase = summonerRepository.GetSummonerByAccountId(summoner.AccountId);
+                                Db_LccSummoner summonerInDatabase = summonerRepository.GetSummonerByAccountId(summoner.AccountId);
                                 if (summoner != null && summonerInDatabase == null)
                                 {
-                                    summonerRepository.InsertSummoner(new LccSummoner(summoner));
+                                    summonerRepository.InsertSummoner(
+                                        new Db_LccSummoner()
+                                        {
+                                            AccountId = summoner.AccountId,
+                                            SummonerName = summoner.Name,
+                                            LastUpdatedTime = DateTime.Now
+                                            
+                                        });
+
                                     newSummonersAddedToDatabaseTotal++;
                                     newSummonersAddedThisSession++;
 
-                                    var matchList = await _throttledRequestHelper.SendThrottledRequest<MatchList>(async () => await _riotApi.Match.GetMatchListAsync(RiotSharp.Misc.Region.euw, summoner.AccountId, null, null, null, null, null, 0, 25));
+                                    MatchList matchList = await _throttledRequestHelper.SendThrottledRequest(async () => await _riotApi.Match.GetMatchListAsync(Region.euw, summoner.AccountId, null, null, null, null, null, 0, 25));
                                     if (matchList != null && matchList?.Matches != null)
                                     {
                                         await GetRiotMatchupInformationAndAddIfNotExisting(matchupInformationRepository, matchList, highEloPlayerEntires);
@@ -97,15 +107,15 @@ namespace LccWebAPI.Services
                                 }
                                 else
                                 {
-                                    DateTime lastUpdatedDate = summonerInDatabase.LastUpdated;
+                                    DateTime lastUpdatedDate = summonerInDatabase.LastUpdatedTime;
                                     DateTime lastRevisionDateFromRiot = summoner.RevisionDate;
 
                                     if (lastRevisionDateFromRiot > lastUpdatedDate)
                                     {
-                                        summonerInDatabase.LastUpdated = summoner.RevisionDate;
+                                        summonerInDatabase.LastUpdatedTime = summoner.RevisionDate;
                                         summonerRepository.UpdateSummoner(summonerInDatabase);
 
-                                        var newMatches = await _throttledRequestHelper.SendThrottledRequest<MatchList>(async () => await _riotApi.Match.GetMatchListAsync(RiotSharp.Misc.Region.euw, summoner.AccountId, null, null, null, lastUpdatedDate, DateTime.Now, 0, 25));
+                                        MatchList newMatches = await _throttledRequestHelper.SendThrottledRequest(async () => await _riotApi.Match.GetMatchListAsync(RiotSharp.Misc.Region.euw, summoner.AccountId, null, null, null, lastUpdatedDate, DateTime.Now, 0, 25));
                                         if (newMatches != null && newMatches?.Matches != null)
                                         {
                                             await GetRiotMatchupInformationAndAddIfNotExisting(matchupInformationRepository, newMatches, highEloPlayerEntires);
@@ -142,39 +152,36 @@ namespace LccWebAPI.Services
                 await Task.Run(() => Thread.Sleep(600000));
             }
         }
-
-        private async Task GetRiotMatchupInformationAndAddIfNotExisting(IMatchupInformationRepository matchupInformationRepository, MatchList matchlist, IList<LeaguePosition> highEloPlayerEntires)
+        
+        private async Task GetRiotMatchupInformationAndAddIfNotExisting(IBasicMatchupInformationRepository matchupInformationRepository, MatchList matchlist, IList<LeaguePosition> highEloPlayerEntires)
         {
             foreach (var match in matchlist?.Matches)
             {
-                // If we currently don't have information about this game in our Database
-                if (match.Queue == LeagueQueue.RankedSoloId && matchupInformationRepository.GetMatchupInformationByGameId(match.GameId) == null)
+                if (match.Queue == LeagueQueue.RankedSoloId && matchupInformationRepository.GetMatchupByGameId(match.GameId) == null)
                 {
-                    //Get riots detailed information about this game
-                    // Contains information such as Runes, Masteries, participants 
                     Match riotMatchInformation = await _throttledRequestHelper.SendThrottledRequest<Match>(async () => await _riotApi.Match.GetMatchAsync(RiotSharp.Misc.Region.euw, match.GameId));
-
-                    //If we got it successfully and there's participants 
+                    
                     if (riotMatchInformation != null & riotMatchInformation?.Participants != null)
                     {
-                        var winningTeamId = riotMatchInformation.Teams.Find(x => x.Win == "Win").TeamId;
+                        var winningTeamId = riotMatchInformation.Teams.Find(x => x.Win == MatchOutcome.Win).TeamId;
 
-                        List<LccMatchupInformationPlayer> winningTeam = new List<LccMatchupInformationPlayer>();
-                        List<LccMatchupInformationPlayer> losingTeam = new List<LccMatchupInformationPlayer>();
+                        List<Db_LccBasicMatchInfoPlayer> winningTeam = new List<Db_LccBasicMatchInfoPlayer>();
+                        List<Db_LccBasicMatchInfoPlayer> losingTeam = new List<Db_LccBasicMatchInfoPlayer>();
 
                         foreach (Participant player in riotMatchInformation.Participants)
                         {
                             Player matchPlayer = riotMatchInformation.ParticipantIdentities.FirstOrDefault(x => x.ParticipantId == player.ParticipantId).Player;
 
-                            LccMatchupInformationPlayer lccMatchupInformationPlayer = new LccMatchupInformationPlayer()
-                            {
-                                ChampionId = player.ChampionId,
-                                Lane = player.Timeline.Lane,
-                                AccountId = matchPlayer.AccountId,
-                                SummonerName = matchPlayer.SummonerName
-                            };
+                            Db_LccBasicMatchInfoPlayer lccMatchupInformationPlayer = 
+                                new Db_LccBasicMatchInfoPlayer()
+                                {
+                                    ChampionId = player.ChampionId,
+                                    Lane = player.Timeline.Lane,
+                                    PlayerAccountId = matchPlayer.AccountId,
+                                    SummonerName = matchPlayer.SummonerName
+                                };
 
-                            if(player.TeamId == winningTeamId)
+                            if (player.TeamId == winningTeamId)
                             {
                                 winningTeam.Add(lccMatchupInformationPlayer);
                             }
@@ -183,8 +190,15 @@ namespace LccWebAPI.Services
                                 losingTeam.Add(lccMatchupInformationPlayer);
                             }
                         }
-                        
-                        matchupInformationRepository.InsertMatchupInformation(new LccMatchupInformation(match.GameId,match.Timestamp, winningTeam, losingTeam));
+
+                        matchupInformationRepository.InsertMatchup(
+                            new Db_LccBasicMatchInfo()
+                            {
+                                GameId = match.GameId,
+                                MatchDate = match.Timestamp,
+                                WinningTeamChampions = winningTeam,
+                                LosingTeamChampions = losingTeam
+                            });
 
                         matchesUpdatedTotal++;
                         matchesUpdatedThisSession++;
