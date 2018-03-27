@@ -67,7 +67,8 @@ namespace LccWebAPI.Controllers
                 itemInformationList.Add(new LccItemInformation()
                 {
                     ItemId = dbItem.ItemId,
-                    ItemName = dbItem.ItemName
+                    ItemName = dbItem.ItemName,
+                    ImageFull = dbItem.ImageFull
                 });
             }
 
@@ -75,7 +76,7 @@ namespace LccWebAPI.Controllers
         }
 
         [HttpGet("GetAllSummonerSpellsData")]
-        public async Task<JsonResult> GetAllSummonerSpellData()
+        public JsonResult GetAllSummonerSpellData()
         {
             List<LccSummonerSpellInformation> summonerSpellInformationList = new List<LccSummonerSpellInformation>();
 
@@ -84,9 +85,9 @@ namespace LccWebAPI.Controllers
                 summonerSpellInformationList.Add(new LccSummonerSpellInformation()
                 {
                     SummonerSpellId = dbSummonerSpell.SummonerSpellId,
-                    SummonerSpellName = dbSummonerSpell.SummonerSpellName
+                    SummonerSpellName = dbSummonerSpell.SummonerSpellName,
+                    ImageFull = dbSummonerSpell.ImageFull
                 });
-
             }
 
             return new JsonResult(summonerSpellInformationList);

@@ -115,7 +115,8 @@ namespace LccWebAPI
                     itemRepository.InsertItem(new Db_LccItem()
                     {
                         ItemId = item.Id,
-                        ItemName = item.Name
+                        ItemName = item.Name,
+                        ImageFull = item.Image.Full
                     });
                 }
 
@@ -134,7 +135,8 @@ namespace LccWebAPI
                     summonerSpellRepository.InsertSummonerSpell(new Db_LccSummonerSpell()
                     {
                         SummonerSpellId = summoner.Id,
-                        SummonerSpellName = summoner.Name
+                        SummonerSpellName = summoner.Name,
+                        ImageFull = summoner.Image.Full
                     });
                 }
 
@@ -159,7 +161,6 @@ namespace LccWebAPI
                         ShortDesc = rune.ShortDesc,
                         LongDesc = rune.LongDesc,
                         Icon = rune.Icon
-
                     });
                 }
 

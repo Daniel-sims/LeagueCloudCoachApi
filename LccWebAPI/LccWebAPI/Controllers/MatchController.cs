@@ -240,12 +240,14 @@ namespace LccWebAPI.Controllers
                     SummonerOne = new LccSummonerSpellInformation()
                     {
                         SummonerSpellId = participant.Spell1Id,
-                        SummonerSpellName = summonerSpellStaticData.FirstOrDefault(x => x.SummonerSpellId == participant.Spell1Id)?.SummonerSpellName
+                        SummonerSpellName = summonerSpellStaticData.FirstOrDefault(x => x.SummonerSpellId == participant.Spell1Id)?.SummonerSpellName,
+                        ImageFull = summonerSpellStaticData.FirstOrDefault(x => x.SummonerSpellId == participant.Spell1Id)?.ImageFull
                     },
                     SummonerTwo = new LccSummonerSpellInformation()
                     {
                         SummonerSpellId = participant.Spell2Id,
-                        SummonerSpellName = summonerSpellStaticData.FirstOrDefault(x => x.SummonerSpellId == participant.Spell2Id)?.SummonerSpellName
+                        SummonerSpellName = summonerSpellStaticData.FirstOrDefault(x => x.SummonerSpellId == participant.Spell2Id)?.SummonerSpellName,
+                        ImageFull = summonerSpellStaticData.FirstOrDefault(x => x.SummonerSpellId == participant.Spell2Id)?.ImageFull
                     },
                     Champion = new LccChampionInformation()
                     {

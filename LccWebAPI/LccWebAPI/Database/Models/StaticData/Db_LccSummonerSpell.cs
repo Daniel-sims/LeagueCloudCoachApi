@@ -16,5 +16,7 @@ namespace LccWebAPI.Database.Models.StaticData
         public int SummonerSpellId { get; set; }
 
         public string SummonerSpellName { get; set; }
+
+        public string ImageFull { get; set; }
     }
 }

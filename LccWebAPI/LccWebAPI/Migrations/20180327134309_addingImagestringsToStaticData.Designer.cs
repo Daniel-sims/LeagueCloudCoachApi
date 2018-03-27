@@ -11,9 +11,10 @@ using System;
 namespace LccWebAPI.Migrations
 {
     [DbContext(typeof(LccDatabaseContext))]
-    partial class LccDatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20180327134309_addingImagestringsToStaticData")]
+    partial class addingImagestringsToStaticData
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder

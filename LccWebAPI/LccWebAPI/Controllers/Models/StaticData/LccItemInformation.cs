@@ -10,5 +10,7 @@ namespace LccWebAPI.Controllers.Models.StaticData
         public long ItemId { get; set; }
 
         public string ItemName { get; set; }
+
+        public string ImageFull { get; set; }
     }
 }
