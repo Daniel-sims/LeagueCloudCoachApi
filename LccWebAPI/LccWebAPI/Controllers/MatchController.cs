@@ -6,6 +6,7 @@ using LccWebAPI.Database.Models.StaticData;
 using LccWebAPI.Repository.Interfaces.Match;
 using LccWebAPI.Repository.Interfaces.StaticData;
 using Microsoft.AspNetCore.Mvc;
+using RiotSharp.Endpoints.LeagueEndpoint;
 using RiotSharp.Endpoints.MatchEndpoint;
 using RiotSharp.Interfaces;
 using RiotSharp.Misc;
@@ -81,7 +82,7 @@ namespace LccWebAPI.Controllers
                         break;
                     
                     Match riotMatchInformation = await _riotApi.Match.GetMatchAsync(Region.euw, match.GameId);
-                    matchesToReturnToUser.Add(CreateLccMatchupInformation(riotMatchInformation, usersChampionId));
+                    matchesToReturnToUser.Add(await CreateLccMatchupInformation(riotMatchInformation, usersChampionId));
 
                     matchReturnCount++;
                 }
@@ -90,7 +91,7 @@ namespace LccWebAPI.Controllers
             return new JsonResult(matchesToReturnToUser);
         }
 
-        private LccCalculatedMatchupInformation CreateLccMatchupInformation(Match match, long usersChampionId)
+        private async Task<LccCalculatedMatchupInformation> CreateLccMatchupInformation(Match match, long usersChampionId)
         {
             // General info
             LccCalculatedMatchupInformation matchupInformation = new LccCalculatedMatchupInformation()
@@ -122,12 +123,16 @@ namespace LccWebAPI.Controllers
 
             foreach (Participant friendlyParticipant in friendlyParticipants)
             {
+                ParticipantIdentity friendlyParticipantIdentity = friendlyPartidipantIdentitys.FirstOrDefault(x => x.ParticipantId == friendlyParticipant.ParticipantId);
+                List<LeaguePosition> leaguePosition = await _riotApi.League.GetLeaguePositionsAsync(Region.euw, friendlyParticipantIdentity.Player.SummonerId);
+
                 friendlyTeamInformation.Players.Add
                     (
                         CreatePlayerStats
                         ( 
-                            friendlyParticipant, 
-                            friendlyPartidipantIdentitys.FirstOrDefault(x => x.ParticipantId == friendlyParticipant.ParticipantId)
+                            friendlyParticipant,
+                            friendlyParticipantIdentity,
+                            leaguePosition.FirstOrDefault(x => x.QueueType == LeagueQueue.RankedSolo)
                         )
                     );
             }
@@ -148,18 +153,21 @@ namespace LccWebAPI.Controllers
                 InhibitorKills = enemyTeam.InhibitorKills
             };
 
-            var enemyParticipants = match.Participants.Where(x => x.TeamId != usersTeamId);
-            var enemyPartidipantIdentitys = match.ParticipantIdentities.Where(x => enemyParticipants.Any(u => u.ParticipantId == x.ParticipantId));
-
+            List<Participant> enemyParticipants = match.Participants.Where(x => x.TeamId != usersTeamId).ToList();
+            List<ParticipantIdentity> enemyPartidipantIdentitys = match.ParticipantIdentities.Where(x => enemyParticipants.Any(u => u.ParticipantId == x.ParticipantId)).ToList();
+            
             foreach (Participant enemyParticipant in enemyParticipants)
             {
                 ParticipantIdentity enemyParticipantIdentity = enemyPartidipantIdentitys.FirstOrDefault(x => x.ParticipantId == enemyParticipant.ParticipantId);
+                List<LeaguePosition> leaguePosition = await _riotApi.League.GetLeaguePositionsAsync(Region.euw, enemyParticipantIdentity.Player.SummonerId);
+
                 enemyTeamInformation.Players.Add
                     (
                         CreatePlayerStats
                         (
                             enemyParticipant,
-                            enemyPartidipantIdentitys.FirstOrDefault(x => x.ParticipantId == enemyParticipant.ParticipantId)
+                            enemyParticipantIdentity,
+                            leaguePosition.FirstOrDefault(x => x.QueueType == LeagueQueue.RankedSolo)
                         )
                     );
             }
@@ -168,7 +176,7 @@ namespace LccWebAPI.Controllers
             return matchupInformation;
         }
 
-        private LccPlayerStats CreatePlayerStats(Participant participant, ParticipantIdentity participantIdentity)
+        private LccPlayerStats CreatePlayerStats(Participant participant, ParticipantIdentity participantIdentity, LeaguePosition leaguePosition)
         {
             try
             {
@@ -184,6 +192,11 @@ namespace LccWebAPI.Controllers
                     Deaths = participant.Stats.Deaths,
                     Assists = participant.Stats.Assists,
                     MinionKills = participant.Stats.TotalMinionsKilled,
+                    RankedSoloDivision = leaguePosition?.Rank,
+                    RankedSoloTier = leaguePosition?.Tier,
+                    RankedSoloLeaguePoints = leaguePosition?.LeaguePoints.ToString(),
+                    RankedSoloWins = Convert.ToInt32(leaguePosition?.Wins),
+                    RankedSoloLosses = Convert.ToInt32(leaguePosition?.Losses),
                     ItemOne = new LccItemInformation()
                     {
                         ItemId = participant.Stats.Item0,

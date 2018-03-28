@@ -17,6 +17,16 @@ namespace LccWebAPI.Controllers.Models.Match
         public long Assists { get; set; }
 
         public long MinionKills { get; set; }
+        
+        public string RankedSoloDivision { get; set; }
+        
+        public string RankedSoloTier { get; set; }
+        
+        public string RankedSoloLeaguePoints { get; set; }
+        
+        public long RankedSoloWins { get; set; }
+        
+        public long RankedSoloLosses { get; set; }
 
         public LccItemInformation Trinket { get; set; }
 

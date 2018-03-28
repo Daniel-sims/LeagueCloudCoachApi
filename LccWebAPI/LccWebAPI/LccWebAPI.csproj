@@ -5,7 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Folder Include="Controllers\Models\Summoner\" />
     <Folder Include="wwwroot\" />
   </ItemGroup>
 
