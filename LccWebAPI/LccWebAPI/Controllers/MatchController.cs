@@ -92,7 +92,7 @@ namespace LccWebAPI.Controllers
                         if (cachedMatchInfo == null)
                         {
                             Match riotMatchInformation = await _riotApi.Match.GetMatchAsync(Region.euw, match.GameId);
-                            Db_LccCachedCalculatedMatchupInfo newCachedMatchInfo = CreateDatabaseModelForCalculatedMatchupInfo(riotMatchInformation, usersChampionId);
+                            Db_LccCachedCalculatedMatchupInfo newCachedMatchInfo = await CreateDatabaseModelForCalculatedMatchupInfo(riotMatchInformation, usersChampionId);
 
                             _cachedCalculatedMatchupInformaton.InsertCalculatedMatchupInfo(newCachedMatchInfo);
                             _cachedCalculatedMatchupInformaton.Save();
@@ -100,7 +100,7 @@ namespace LccWebAPI.Controllers
                             cachedMatchInfo = newCachedMatchInfo;
                         }
 
-                        matchesToReturnToUser.Add(await CreateLccCalculatedMatchupInformationFromCache(cachedMatchInfo, usersChampionId));
+                        matchesToReturnToUser.Add(CreateLccCalculatedMatchupInformationFromCache(cachedMatchInfo));
 
                         matchReturnCount++;
                     }
@@ -116,7 +116,7 @@ namespace LccWebAPI.Controllers
 
         // Converts an instnace of Db_LccCachedCalculatedMatchupInfo into LccCalculatedMatchupInformation
         // These are essentially the same models but I don't want to be returning models straight from the db
-        private async Task<LccCalculatedMatchupInformation> CreateLccCalculatedMatchupInformationFromCache(Db_LccCachedCalculatedMatchupInfo match, long usersChampionId)
+        private LccCalculatedMatchupInformation CreateLccCalculatedMatchupInformationFromCache(Db_LccCachedCalculatedMatchupInfo match)
         {
             // General info
             LccCalculatedMatchupInformation matchupInformation = new LccCalculatedMatchupInformation()
@@ -140,16 +140,7 @@ namespace LccWebAPI.Controllers
             
             foreach (Db_LccCachedPlayerStats friendlyPlayer in match.FriendlyTeam.Players)
             {
-                List<LeaguePosition> leaguePosition = await _riotApi.League.GetLeaguePositionsAsync(Region.euw, friendlyPlayer.SummonerId);
-
-                friendlyTeamInformation.Players.Add
-                    (
-                        CreateLccPlayerStatsFromCache
-                        (
-                            friendlyPlayer,
-                            leaguePosition.FirstOrDefault(x => x.QueueType == LeagueQueue.RankedSolo)
-                        )
-                    );
+                friendlyTeamInformation.Players.Add(CreateLccPlayerStatsFromCache(friendlyPlayer));
             }
 
             matchupInformation.FriendlyTeam = friendlyTeamInformation;
@@ -168,22 +159,14 @@ namespace LccWebAPI.Controllers
             
             foreach (Db_LccCachedPlayerStats enemyPlayer in match.EnemyTeam.Players)
             {
-                List<LeaguePosition> leaguePosition = await _riotApi.League.GetLeaguePositionsAsync(Region.euw, enemyPlayer.SummonerId);
-
-                enemyTeamInformation.Players.Add
-                    (
-                        CreateLccPlayerStatsFromCache
-                        (
-                            enemyPlayer,
-                            leaguePosition.FirstOrDefault(x => x.QueueType == LeagueQueue.RankedSolo)
-                        )
-                    );
+                enemyTeamInformation.Players.Add(CreateLccPlayerStatsFromCache(enemyPlayer));
             }
 
             matchupInformation.EnemyTeam = enemyTeamInformation;
+
             return matchupInformation;
         }
-        private LccPlayerStats CreateLccPlayerStatsFromCache(Db_LccCachedPlayerStats playerStats, LeaguePosition leaguePosition)
+        private LccPlayerStats CreateLccPlayerStatsFromCache(Db_LccCachedPlayerStats playerStats)
         {
             try
             {
@@ -194,11 +177,11 @@ namespace LccWebAPI.Controllers
                     Deaths = playerStats.Deaths,
                     Assists = playerStats.Assists,
                     MinionKills = playerStats.MinionKills,
-                    RankedSoloDivision = leaguePosition?.Rank,
-                    RankedSoloTier = leaguePosition?.Tier,
-                    RankedSoloLeaguePoints = leaguePosition?.LeaguePoints.ToString(),
-                    RankedSoloWins = Convert.ToInt32(leaguePosition?.Wins),
-                    RankedSoloLosses = Convert.ToInt32(leaguePosition?.Losses),
+                    RankedSoloDivision = playerStats?.RankedSoloDivision,
+                    RankedSoloTier = playerStats?.RankedSoloTier,
+                    RankedSoloLeaguePoints = playerStats?.RankedSoloLeaguePoints.ToString(),
+                    RankedSoloWins = Convert.ToInt32(playerStats?.RankedSoloWins),
+                    RankedSoloLosses = Convert.ToInt32(playerStats?.RankedSoloLosses),
                     ItemOne = new LccItemInformation()
                     {
                         ItemId = playerStats.ItemOne.ItemId,
@@ -312,23 +295,26 @@ namespace LccWebAPI.Controllers
 
 
         // These two methods created a cached version to later use to lookup information
-        private Db_LccCachedPlayerStats CreateCachedPlayerStatsFromMatchupInfo(ParticipantIdentity participantIdentity, Participant participant)
+        private async Task<Db_LccCachedPlayerStats> CreateCachedPlayerStatsFromMatchupInfo(ParticipantIdentity participantIdentity, Participant participant)
         {
             try
             {
+                List<LeaguePosition> leaguePosition = await _riotApi.League.GetLeaguePositionsAsync(Region.euw, participantIdentity.Player.SummonerId);
+                LeaguePosition rankedSoloLeague = leaguePosition.FirstOrDefault(x => x.QueueType == LeagueQueue.RankedSolo);
+
                 return new Db_LccCachedPlayerStats()
                 {
-                    SummonerId = 0,
-                    SummonerName = "",
-                    Kills = 0,
-                    Deaths = 0,
-                    Assists = 0,
-                    MinionKills = 0,
-                    RankedSoloDivision = "",
-                    RankedSoloTier = "",
-                    RankedSoloLeaguePoints = "",
-                    RankedSoloWins = 0,
-                    RankedSoloLosses = 0,
+                    SummonerId = participantIdentity.Player.SummonerId,
+                    SummonerName = participantIdentity.Player.SummonerName,
+                    Kills = participant.Stats.Kills,
+                    Deaths = participant.Stats.Deaths,
+                    Assists = participant.Stats.Assists,
+                    MinionKills = participant.Stats.NeutralMinionsKilled + participant.Stats.TotalMinionsKilled,
+                    RankedSoloDivision = rankedSoloLeague.Rank,
+                    RankedSoloTier = rankedSoloLeague.Tier,
+                    RankedSoloLeaguePoints = rankedSoloLeague.LeaguePoints.ToString(),
+                    RankedSoloWins = rankedSoloLeague.Wins,
+                    RankedSoloLosses = rankedSoloLeague.Losses,
                     Trinket = new Db_LccItem()
                     {
                         ItemId = 0,
@@ -479,7 +465,7 @@ namespace LccWebAPI.Controllers
 
             return new Db_LccCachedPlayerStats();
         }
-        private Db_LccCachedCalculatedMatchupInfo CreateDatabaseModelForCalculatedMatchupInfo(Match match, long usersChampionId)
+        private async Task<Db_LccCachedCalculatedMatchupInfo> CreateDatabaseModelForCalculatedMatchupInfo(Match match, long usersChampionId)
         {
             IList<Db_LccItem> itemStaticData = _itemStaticDataRepository.GetAllItems().ToList();
             IList<Db_LccRune> runeStaticData = _runeStaticDataReposistory.GetAllRunes().ToList();
@@ -530,14 +516,14 @@ namespace LccWebAPI.Controllers
                 foreach(Participant enemyParticipant in enemyTeamParticipants)
                 {
                     ParticipantIdentity enemyParticipanyIdentity = match.ParticipantIdentities.FirstOrDefault(x => x.ParticipantId == enemyParticipant.ParticipantId);
-                    cachedMatchupInformation.EnemyTeam.Players.Add(CreateCachedPlayerStatsFromMatchupInfo(enemyParticipanyIdentity, enemyParticipant));
+                    cachedMatchupInformation.EnemyTeam.Players.Add(await CreateCachedPlayerStatsFromMatchupInfo(enemyParticipanyIdentity, enemyParticipant));
                 }
                 
                 cachedMatchupInformation.FriendlyTeam.Players = new List<Db_LccCachedPlayerStats>();
                 foreach (Participant friendlyParticipant in friendlyTeamParticipants)
                 {
                     ParticipantIdentity friendlyParticipanyIdentity = match.ParticipantIdentities.FirstOrDefault(x => x.ParticipantId == friendlyParticipant.ParticipantId);
-                    cachedMatchupInformation.EnemyTeam.Players.Add(CreateCachedPlayerStatsFromMatchupInfo(friendlyParticipanyIdentity, friendlyParticipant));
+                    cachedMatchupInformation.FriendlyTeam.Players.Add(await CreateCachedPlayerStatsFromMatchupInfo(friendlyParticipanyIdentity, friendlyParticipant));
                 }
 
                 return cachedMatchupInformation;
