@@ -1,6 +1,8 @@
 ﻿using LccWebAPI.Database.Context;
 using LccWebAPI.Database.Models.StaticData;
 using LccWebAPI.Database.Repository.Interface.Summoner;
+using LccWebAPI.Database.Repository.Interfaces.Match;
+using LccWebAPI.Database.Repository.Match;
 using LccWebAPI.Database.Repository.Summoner;
 using LccWebAPI.Repository.Interfaces.Match;
 using LccWebAPI.Repository.Interfaces.StaticData;
@@ -46,16 +48,18 @@ namespace LccWebAPI
             services.AddSingleton<ILogging, Logging>();
             services.AddSingleton<IThrottledRequestHelper, ThrottledRequestHelper>();
 
-            services.AddSingleton<IRiotApi>(RiotApi.GetDevelopmentInstance("RGAPI-ecff597e-c188-44ac-8247-93005f738ee2"));
-            services.AddSingleton<IStaticDataEndpoints>(StaticDataEndpoints.GetInstance("RGAPI-ecff597e-c188-44ac-8247-93005f738ee2"));
+            services.AddSingleton<IRiotApi>(RiotApi.GetDevelopmentInstance("RGAPI-dc39013c-9259-4538-aecf-41cc41de3370"));
+            services.AddSingleton<IStaticDataEndpoints>(StaticDataEndpoints.GetInstance("RGAPI-dc39013c-9259-4538-aecf-41cc41de3370"));
 
             services.AddTransient<ISummonerRepository, SummonerRepository>();
             services.AddTransient<IBasicMatchupInformationRepository, BasicMatchupInformationRepository>();
+            services.AddTransient<ICachedCalculatedMatchupInformationRepository, CachedCalculatedMatchupInformationRepository>();
             services.AddTransient<IChampionStaticDataRepository, ChampionStaticDataRepository>();
             services.AddTransient<IItemStaticDataRepository, ItemStaticDataRepository>();
             services.AddTransient<ISummonerSpellStaticDataRepository,SummonerSpellStaticDataRepository>();
             services.AddTransient<IRunesStaticDataRepository, RunesStaticDataRepository>();
             
+
             var dbConn = @"Server=(localdb)\mssqllocaldb;Database=LccDatabase;Trusted_Connection=True;ConnectRetryCount=0";
             services.AddDbContext<LccDatabaseContext>(options => options.UseSqlServer(dbConn));
 

@@ -3,6 +3,7 @@ using LccWebAPI.Controllers.Models.Match;
 using LccWebAPI.Controllers.Models.StaticData;
 using LccWebAPI.Database.Models.Match;
 using LccWebAPI.Database.Models.StaticData;
+using LccWebAPI.Database.Repository.Interfaces.Match;
 using LccWebAPI.Repository.Interfaces.Match;
 using LccWebAPI.Repository.Interfaces.StaticData;
 using Microsoft.AspNetCore.Mvc;
@@ -23,7 +24,8 @@ namespace LccWebAPI.Controllers
         private IRiotApi _riotApi;
 
         private IBasicMatchupInformationRepository _matchupInformationRepository;
-        
+        private ICachedCalculatedMatchupInformationRepository _cachedCalculatedMatchupInformaton;
+
         private readonly IItemStaticDataRepository _itemStaticDataRepository;
         private readonly ISummonerSpellStaticDataRepository _summonerSpellStaticDataRepository;
         private readonly IChampionStaticDataRepository _championStaticDataRepository;
@@ -31,6 +33,7 @@ namespace LccWebAPI.Controllers
 
         public MatchController(IRiotApi riotApi,
             IBasicMatchupInformationRepository matchupInformationRepository,
+            ICachedCalculatedMatchupInformationRepository cachedCalculatedMatchupInformaton,
             IItemStaticDataRepository itemStaticDataRepository,
             ISummonerSpellStaticDataRepository summonerSpellStaticDataRepository,
             IChampionStaticDataRepository championStaticDataRepository,
@@ -39,7 +42,8 @@ namespace LccWebAPI.Controllers
             _riotApi = riotApi;
 
             _matchupInformationRepository = matchupInformationRepository;
-            
+            _cachedCalculatedMatchupInformaton = cachedCalculatedMatchupInformaton;
+
             _itemStaticDataRepository = itemStaticDataRepository;
             _summonerSpellStaticDataRepository = summonerSpellStaticDataRepository;
             _championStaticDataRepository = championStaticDataRepository;
@@ -80,93 +84,97 @@ namespace LccWebAPI.Controllers
                 {
                     if (matchReturnCount == maxMatchLimit)
                         break;
-                    
-                    Match riotMatchInformation = await _riotApi.Match.GetMatchAsync(Region.euw, match.GameId);
-                    matchesToReturnToUser.Add(await CreateLccMatchupInformation(riotMatchInformation, usersChampionId));
 
-                    matchReturnCount++;
+                    try
+                    {
+                        Db_LccCachedCalculatedMatchupInfo cachedMatchInfo = _cachedCalculatedMatchupInformaton.GetCalculatedMatchupInfoByGameId(match.GameId);
+
+                        if (cachedMatchInfo == null)
+                        {
+                            Match riotMatchInformation = await _riotApi.Match.GetMatchAsync(Region.euw, match.GameId);
+                            Db_LccCachedCalculatedMatchupInfo newCachedMatchInfo = CreateDatabaseModelForCalculatedMatchupInfo(riotMatchInformation, usersChampionId);
+
+                            _cachedCalculatedMatchupInformaton.InsertCalculatedMatchupInfo(newCachedMatchInfo);
+                            _cachedCalculatedMatchupInformaton.Save();
+
+                            cachedMatchInfo = newCachedMatchInfo;
+                        }
+
+                        matchesToReturnToUser.Add(await CreateLccCalculatedMatchupInformationFromCache(cachedMatchInfo, usersChampionId));
+
+                        matchReturnCount++;
+                    }
+                    catch(Exception e)
+                    {
+                        Console.WriteLine("Exception encountered when creating match :" + e.Message);
+                    }
                 }
             }
             
             return new JsonResult(matchesToReturnToUser);
         }
 
-        private async Task<LccCalculatedMatchupInformation> CreateLccMatchupInformation(Match match, long usersChampionId)
+        // Converts an instnace of Db_LccCachedCalculatedMatchupInfo into LccCalculatedMatchupInformation
+        // These are essentially the same models but I don't want to be returning models straight from the db
+        private async Task<LccCalculatedMatchupInformation> CreateLccCalculatedMatchupInformationFromCache(Db_LccCachedCalculatedMatchupInfo match, long usersChampionId)
         {
             // General info
             LccCalculatedMatchupInformation matchupInformation = new LccCalculatedMatchupInformation()
             {
-                MatchDate = match.GameCreation,
-                MatchPatch = match.GameVersion,
+                MatchDate = match.MatchDate,
+                MatchPatch = match.MatchPatch,
                 GameId = match.GameId
             };
-
-            int usersTeamId = match.Participants.FirstOrDefault(x => x.ChampionId == usersChampionId).TeamId;
-
-            // FRIENDLY TEAM INFORMATION
-            TeamStats friendlyTeam = match.Teams.FirstOrDefault(x => x.TeamId == usersTeamId);
-            matchupInformation.FriendlyTeamWin = friendlyTeam?.Win == MatchOutcome.Win;
             
+            // FRIENDLY TEAM INFORMATION
             LccTeamInformation friendlyTeamInformation = new LccTeamInformation
             {
-                TotalKills = match.Participants.Where(x => x.TeamId == usersTeamId).Sum(x => x.Stats.Kills),
-                TotalDeaths = match.Participants.Where(x => x.TeamId == usersTeamId).Sum(x => x.Stats.Deaths),
-                TotalAssists = match.Participants.Where(x => x.TeamId == usersTeamId).Sum(x => x.Stats.Assists),
-                DragonKills = friendlyTeam.DragonKills,
-                BaronKills = friendlyTeam.BaronKills,
-                RiftHeraldKills = friendlyTeam.RiftHeraldKills,
-                InhibitorKills = friendlyTeam.InhibitorKills
+                TotalKills = match.FriendlyTeam.Players.Sum(x => x.Kills),
+                TotalDeaths = match.FriendlyTeam.Players.Sum(x => x.Deaths),
+                TotalAssists = match.FriendlyTeam.Players.Sum(x => x.Assists),
+                DragonKills = match.FriendlyTeam.DragonKills,
+                BaronKills = match.FriendlyTeam.BaronKills,
+                RiftHeraldKills = match.FriendlyTeam.RiftHeraldKills,
+                InhibitorKills = match.FriendlyTeam.InhibitorKills
             };
-
-            List<Participant> friendlyParticipants = match.Participants.Where(x => x.TeamId == usersTeamId).ToList();
-            List<ParticipantIdentity> friendlyPartidipantIdentitys = match.ParticipantIdentities.Where(x => friendlyParticipants.Any(u => u.ParticipantId == x.ParticipantId)).ToList();
-
-            foreach (Participant friendlyParticipant in friendlyParticipants)
+            
+            foreach (Db_LccCachedPlayerStats friendlyPlayer in match.FriendlyTeam.Players)
             {
-                ParticipantIdentity friendlyParticipantIdentity = friendlyPartidipantIdentitys.FirstOrDefault(x => x.ParticipantId == friendlyParticipant.ParticipantId);
-                List<LeaguePosition> leaguePosition = await _riotApi.League.GetLeaguePositionsAsync(Region.euw, friendlyParticipantIdentity.Player.SummonerId);
+                List<LeaguePosition> leaguePosition = await _riotApi.League.GetLeaguePositionsAsync(Region.euw, friendlyPlayer.SummonerId);
 
                 friendlyTeamInformation.Players.Add
                     (
-                        CreatePlayerStats
-                        ( 
-                            friendlyParticipant,
-                            friendlyParticipantIdentity,
+                        CreateLccPlayerStatsFromCache
+                        (
+                            friendlyPlayer,
                             leaguePosition.FirstOrDefault(x => x.QueueType == LeagueQueue.RankedSolo)
                         )
                     );
             }
 
             matchupInformation.FriendlyTeam = friendlyTeamInformation;
-
+            
             // ENEMY TEAM INFORMATION
-            TeamStats enemyTeam = match.Teams.FirstOrDefault(x => x.TeamId != usersTeamId);
-
             LccTeamInformation enemyTeamInformation = new LccTeamInformation
             {
-                TotalKills = match.Participants.Where(x => x.TeamId != usersTeamId).Sum(x => x.Stats.Kills),
-                TotalDeaths = match.Participants.Where(x => x.TeamId != usersTeamId).Sum(x => x.Stats.Deaths),
-                TotalAssists = match.Participants.Where(x => x.TeamId != usersTeamId).Sum(x => x.Stats.Assists),
-                 DragonKills = enemyTeam.DragonKills,
-                BaronKills = enemyTeam.BaronKills,
-                RiftHeraldKills = enemyTeam.RiftHeraldKills,
-                InhibitorKills = enemyTeam.InhibitorKills
+                TotalKills = match.EnemyTeam.Players.Sum(x => x.Kills),
+                TotalDeaths = match.EnemyTeam.Players.Sum(x => x.Deaths),
+                TotalAssists = match.EnemyTeam.Players.Sum(x => x.Assists),
+                DragonKills = match.EnemyTeam.DragonKills,
+                BaronKills = match.EnemyTeam.BaronKills,
+                RiftHeraldKills = match.EnemyTeam.RiftHeraldKills,
+                InhibitorKills = match.EnemyTeam.InhibitorKills
             };
-
-            List<Participant> enemyParticipants = match.Participants.Where(x => x.TeamId != usersTeamId).ToList();
-            List<ParticipantIdentity> enemyPartidipantIdentitys = match.ParticipantIdentities.Where(x => enemyParticipants.Any(u => u.ParticipantId == x.ParticipantId)).ToList();
             
-            foreach (Participant enemyParticipant in enemyParticipants)
+            foreach (Db_LccCachedPlayerStats enemyPlayer in match.EnemyTeam.Players)
             {
-                ParticipantIdentity enemyParticipantIdentity = enemyPartidipantIdentitys.FirstOrDefault(x => x.ParticipantId == enemyParticipant.ParticipantId);
-                List<LeaguePosition> leaguePosition = await _riotApi.League.GetLeaguePositionsAsync(Region.euw, enemyParticipantIdentity.Player.SummonerId);
+                List<LeaguePosition> leaguePosition = await _riotApi.League.GetLeaguePositionsAsync(Region.euw, enemyPlayer.SummonerId);
 
                 enemyTeamInformation.Players.Add
                     (
-                        CreatePlayerStats
+                        CreateLccPlayerStatsFromCache
                         (
-                            enemyParticipant,
-                            enemyParticipantIdentity,
+                            enemyPlayer,
                             leaguePosition.FirstOrDefault(x => x.QueueType == LeagueQueue.RankedSolo)
                         )
                     );
@@ -175,23 +183,17 @@ namespace LccWebAPI.Controllers
             matchupInformation.EnemyTeam = enemyTeamInformation;
             return matchupInformation;
         }
-
-        private LccPlayerStats CreatePlayerStats(Participant participant, ParticipantIdentity participantIdentity, LeaguePosition leaguePosition)
+        private LccPlayerStats CreateLccPlayerStatsFromCache(Db_LccCachedPlayerStats playerStats, LeaguePosition leaguePosition)
         {
             try
             {
-                IList<Db_LccItem> itemStaticData = _itemStaticDataRepository.GetAllItems().ToList();
-                IList<Db_LccRune> runeStaticData = _runeStaticDataReposistory.GetAllRunes().ToList();
-                IList<Db_LccChampion> championStaticData = _championStaticDataRepository.GetAllChampions().ToList();
-                IList<Db_LccSummonerSpell> summonerSpellStaticData = _summonerSpellStaticDataRepository.GetAllSummonerSpells().ToList();
-
                 return new LccPlayerStats()
                 {
-                    SummonerName = participantIdentity.Player.SummonerName,
-                    Kills = participant.Stats.Kills,
-                    Deaths = participant.Stats.Deaths,
-                    Assists = participant.Stats.Assists,
-                    MinionKills = participant.Stats.TotalMinionsKilled,
+                    SummonerName = playerStats.SummonerName,
+                    Kills = playerStats.Kills,
+                    Deaths = playerStats.Deaths,
+                    Assists = playerStats.Assists,
+                    MinionKills = playerStats.MinionKills,
                     RankedSoloDivision = leaguePosition?.Rank,
                     RankedSoloTier = leaguePosition?.Tier,
                     RankedSoloLeaguePoints = leaguePosition?.LeaguePoints.ToString(),
@@ -199,122 +201,104 @@ namespace LccWebAPI.Controllers
                     RankedSoloLosses = Convert.ToInt32(leaguePosition?.Losses),
                     ItemOne = new LccItemInformation()
                     {
-                        ItemId = participant.Stats.Item0,
-                        ItemName = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item0)?.ItemName,
-                        ImageFull = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item0)?.ImageFull
+                        ItemId = playerStats.ItemOne.ItemId,
+                        ItemName = playerStats.ItemOne?.ItemName,
+                        ImageFull = playerStats.ItemOne?.ImageFull
                     },
                     ItemTwo = new LccItemInformation()
                     {
-                        ItemId = participant.Stats.Item1,
-                        ItemName = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item1)?.ItemName,
-                        ImageFull = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item1)?.ImageFull
+                        ItemId = playerStats.ItemTwo.ItemId,
+                        ItemName = playerStats.ItemTwo?.ItemName,
+                        ImageFull = playerStats.ItemTwo?.ImageFull
                     },
                     ItemThree = new LccItemInformation()
                     {
-                        ItemId = participant.Stats.Item2,
-                        ItemName = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item2)?.ItemName,
-                        ImageFull = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item2)?.ImageFull
+                        ItemId = playerStats.ItemThree.ItemId,
+                        ItemName = playerStats.ItemThree?.ItemName,
+                        ImageFull = playerStats.ItemThree?.ImageFull
                     },
                     ItemFour = new LccItemInformation()
                     {
-                        ItemId = participant.Stats.Item3,
-                        ItemName = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item3)?.ItemName,
-                        ImageFull = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item3)?.ImageFull
+                        ItemId = playerStats.ItemFour.ItemId,
+                        ItemName = playerStats.ItemFour?.ItemName,
+                        ImageFull = playerStats.ItemFour?.ImageFull
                     },
                     ItemFive = new LccItemInformation()
                     {
-                        ItemId = participant.Stats.Item4,
-                        ItemName = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item4)?.ItemName,
-                        ImageFull = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item4)?.ImageFull
+                        ItemId = playerStats.ItemFive.ItemId,
+                        ItemName = playerStats.ItemFive?.ItemName,
+                        ImageFull = playerStats.ItemFive?.ImageFull
                     },
                     ItemSix = new LccItemInformation()
                     {
-                        ItemId = participant.Stats.Item5,
-                        ItemName = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item5)?.ItemName,
-                        ImageFull = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item5)?.ImageFull
+                        ItemId = playerStats.ItemSix.ItemId,
+                        ItemName = playerStats.ItemSix?.ItemName,
+                        ImageFull = playerStats.ItemSix?.ImageFull
                     },
                     Trinket = new LccItemInformation()
                     {
-                        ItemId = participant.Stats.Item6,
-                        ItemName = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item6)?.ItemName,
-                        ImageFull = itemStaticData.FirstOrDefault(x => x.ItemId == participant.Stats.Item6)?.ImageFull
-                    },
-                    FirstItems = new List<LccItemInformation>()
-                    {
-                        new LccItemInformation()
-                        {
-                            ItemId = 0,
-                            ItemName = ""
-                        },
-                        new LccItemInformation()
-                        {
-                            ItemId = 0,
-                            ItemName = ""
-                        },
-                        new LccItemInformation()
-                        {
-                            ItemId = 0,
-                            ItemName = ""
-                        }
+                        ItemId = playerStats.Trinket.ItemId,
+                        ItemName = playerStats.Trinket?.ItemName,
+                        ImageFull = playerStats.Trinket?.ImageFull
                     },
                     SummonerOne = new LccSummonerSpellInformation()
                     {
-                        SummonerSpellId = participant.Spell1Id,
-                        SummonerSpellName = summonerSpellStaticData.FirstOrDefault(x => x.SummonerSpellId == participant.Spell1Id)?.SummonerSpellName,
-                        ImageFull = summonerSpellStaticData.FirstOrDefault(x => x.SummonerSpellId == participant.Spell1Id)?.ImageFull
+                        SummonerSpellId = playerStats.SummonerOne.SummonerSpellId,
+                        SummonerSpellName = playerStats.SummonerOne?.SummonerSpellName,
+                        ImageFull = playerStats.SummonerOne?.ImageFull
                     },
                     SummonerTwo = new LccSummonerSpellInformation()
                     {
-                        SummonerSpellId = participant.Spell2Id,
-                        SummonerSpellName = summonerSpellStaticData.FirstOrDefault(x => x.SummonerSpellId == participant.Spell2Id)?.SummonerSpellName,
-                        ImageFull = summonerSpellStaticData.FirstOrDefault(x => x.SummonerSpellId == participant.Spell2Id)?.ImageFull
+                        SummonerSpellId = playerStats.SummonerTwo.SummonerSpellId,
+                        SummonerSpellName = playerStats.SummonerTwo?.SummonerSpellName,
+                        ImageFull = playerStats.SummonerTwo?.ImageFull
                     },
                     Champion = new LccChampionInformation()
                     {
-                        ChampionId = participant.ChampionId,
-                        ChampionName = championStaticData.FirstOrDefault(x => x.ChampionId == participant.ChampionId)?.ChampionName,
-                        ImageFull = championStaticData.FirstOrDefault(x => x.ChampionId == participant.ChampionId)?.ImageFull
+                        ChampionId = playerStats.Champion.ChampionId,
+                        ChampionName = playerStats.Champion?.ChampionName,
+                        ImageFull = playerStats.Champion?.ImageFull
                     },
-                    ChampionLevel = participant.Stats.ChampLevel,
+                    ChampionLevel = playerStats.ChampionLevel,
                     PrimaryRuneStyle = new LccRuneInformation()
                     {
-                        RuneId = participant.Stats.PerkPrimaryStyle,
-                        RuneName = runeStaticData.FirstOrDefault(x => x.RuneId == participant.Stats.Perk0)?.RunePathName
+                        RuneId = playerStats.PrimaryRuneStyle.RuneId,
+                        RuneName = playerStats.PrimaryRuneStyle?.RuneName
                     },
                     PrimaryRuneSubOne = new LccRuneInformation()
                     {
-                        RuneId = participant.Stats.Perk0,
-                        RuneName = runeStaticData.FirstOrDefault(x => x.RuneId == participant.Stats.Perk0)?.RuneName
+                        RuneId = playerStats.PrimaryRuneSubOne.RuneId,
+                        RuneName = playerStats.PrimaryRuneSubOne?.RuneName
                     },
                     PrimaryRuneSubTwo = new LccRuneInformation()
                     {
-                        RuneId = participant.Stats.Perk1,
-                        RuneName = runeStaticData.FirstOrDefault(x => x.RuneId == participant.Stats.Perk1)?.RuneName
+                        RuneId = playerStats.PrimaryRuneSubTwo.RuneId,
+                        RuneName = playerStats.PrimaryRuneSubTwo?.RuneName
                     },
                     PrimaryRuneSubThree = new LccRuneInformation()
                     {
-                        RuneId = participant.Stats.Perk2,
-                        RuneName = runeStaticData.FirstOrDefault(x => x.RuneId == participant.Stats.Perk2)?.RuneName
+                        RuneId = playerStats.PrimaryRuneSubThree.RuneId,
+                        RuneName = playerStats.PrimaryRuneSubThree?.RuneName
                     },
                     PrimaryRuneSubFour = new LccRuneInformation()
                     {
-                        RuneId = participant.Stats.Perk3,
-                        RuneName = runeStaticData.FirstOrDefault(x => x.RuneId == participant.Stats.Perk3)?.RuneName
+                        RuneId = playerStats.PrimaryRuneSubFour.RuneId,
+                        RuneName = playerStats.PrimaryRuneSubFour?.RuneName
                     },
                     SecondaryRuneStyle = new LccRuneInformation()
                     {
-                        RuneId = participant.Stats.PerkSubStyle,
-                        RuneName = runeStaticData.FirstOrDefault(x => x.RuneId == participant.Stats.Perk4)?.RunePathName
+                        RuneId = playerStats.SecondaryRuneStyle.RuneId,
+                        RuneName = playerStats.SecondaryRuneStyle?.RuneName
                     },
                     SecondaryRuneSubOne = new LccRuneInformation()
                     {
-                        RuneId = participant.Stats.Perk4,
-                        RuneName = runeStaticData.FirstOrDefault(x => x.RuneId == participant.Stats.Perk4)?.RuneName
+                        RuneId = playerStats.SecondaryRuneSubOne.RuneId,
+                        RuneName = playerStats.SecondaryRuneSubOne?.RuneName
                     },
                     SecondaryRuneSubTwo = new LccRuneInformation()
                     {
-                        RuneId = participant.Stats.Perk5,
-                        RuneName = runeStaticData.FirstOrDefault(x => x.RuneId == participant.Stats.Perk5)?.RuneName
+                        RuneId = playerStats.SecondaryRuneSubTwo.RuneId,
+                        RuneName = playerStats.SecondaryRuneSubTwo?.RuneName
                     }
                 };
             }
@@ -324,6 +308,247 @@ namespace LccWebAPI.Controllers
             }
 
             return new LccPlayerStats();
+        }
+
+
+        // These two methods created a cached version to later use to lookup information
+        private Db_LccCachedPlayerStats CreateCachedPlayerStatsFromMatchupInfo(ParticipantIdentity participantIdentity, Participant participant)
+        {
+            try
+            {
+                return new Db_LccCachedPlayerStats()
+                {
+                    SummonerId = 0,
+                    SummonerName = "",
+                    Kills = 0,
+                    Deaths = 0,
+                    Assists = 0,
+                    MinionKills = 0,
+                    RankedSoloDivision = "",
+                    RankedSoloTier = "",
+                    RankedSoloLeaguePoints = "",
+                    RankedSoloWins = 0,
+                    RankedSoloLosses = 0,
+                    Trinket = new Db_LccItem()
+                    {
+                        ItemId = 0,
+                        ItemName = "",
+                        ImageFull = ""
+                    },
+                    ItemOne = new Db_LccItem()
+                    {
+                        ItemId = 0,
+                        ItemName = "",
+                        ImageFull = ""
+                    },
+                    ItemTwo = new Db_LccItem()
+                    {
+                        ItemId = 0,
+                        ItemName = "",
+                        ImageFull = ""
+                    },
+                    ItemThree = new Db_LccItem()
+                    {
+                        ItemId = 0,
+                        ItemName = "",
+                        ImageFull = ""
+                    },
+                    ItemFour = new Db_LccItem()
+                    {
+                        ItemId = 0,
+                        ItemName = "",
+                        ImageFull = ""
+                    },
+                    ItemFive = new Db_LccItem()
+                    {
+                        ItemId = 0,
+                        ItemName = "",
+                        ImageFull = ""
+                    },
+                    ItemSix = new Db_LccItem()
+                    {
+                        ItemId = 0,
+                        ItemName = "",
+                        ImageFull = ""
+                    },
+                    SummonerOne = new Db_LccSummonerSpell()
+                    {
+                        SummonerSpellId = 0,
+                        SummonerSpellName = "",
+                        ImageFull = ""
+                    },
+                    SummonerTwo = new Db_LccSummonerSpell()
+                    {
+                        SummonerSpellId = 0,
+                        SummonerSpellName = "",
+                        ImageFull = ""
+                    },
+                    Champion = new Db_LccChampion()
+                    {
+                        ChampionId = 0,
+                        ChampionName = "",
+                        ImageFull = ""
+                    },
+                    ChampionLevel = 0,
+                    PrimaryRuneStyle = new Db_LccRune()
+                    {
+                        RuneId = 0,
+                        RuneName = "",
+                        RunePathName = "",
+                        Icon = "",
+                        Key = "",
+                        ShortDesc = "",
+                        LongDesc = ""
+                    },
+                    PrimaryRuneSubOne = new Db_LccRune()
+                    {
+                        RuneId = 0,
+                        RuneName = "",
+                        RunePathName = "",
+                        Icon = "",
+                        Key = "",
+                        ShortDesc = "",
+                        LongDesc = ""
+                    },
+                    PrimaryRuneSubTwo = new Db_LccRune()
+                    {
+                        RuneId = 0,
+                        RuneName = "",
+                        RunePathName = "",
+                        Icon = "",
+                        Key = "",
+                        ShortDesc = "",
+                        LongDesc = ""
+                    },
+                    PrimaryRuneSubThree = new Db_LccRune()
+                    {
+                        RuneId = 0,
+                        RuneName = "",
+                        RunePathName = "",
+                        Icon = "",
+                        Key = "",
+                        ShortDesc = "",
+                        LongDesc = ""
+                    },
+                    PrimaryRuneSubFour = new Db_LccRune()
+                    {
+                        RuneId = 0,
+                        RuneName = "",
+                        RunePathName = "",
+                        Icon = "",
+                        Key = "",
+                        ShortDesc = "",
+                        LongDesc = ""
+                    },
+                    SecondaryRuneStyle = new Db_LccRune()
+                    {
+                        RuneId = 0,
+                        RuneName = "",
+                        RunePathName = "",
+                        Icon = "",
+                        Key = "",
+                        ShortDesc = "",
+                        LongDesc = ""
+                    },
+                    SecondaryRuneSubOne = new Db_LccRune()
+                    {
+                        RuneId = 0,
+                        RuneName = "",
+                        RunePathName = "",
+                        Icon = "",
+                        Key = "",
+                        ShortDesc = "",
+                        LongDesc = ""
+                    },
+                    SecondaryRuneSubTwo = new Db_LccRune()
+                    {
+                        RuneId = 0,
+                        RuneName = "",
+                        RunePathName = "",
+                        Icon = "",
+                        Key = "",
+                        ShortDesc = "",
+                        LongDesc = ""
+                    }
+                };
+            }
+            catch(Exception e)
+            {
+                Console.WriteLine("Exception thrown creating cahcedPlayerStatsFromMatchInfo : " + e.Message);
+            }
+
+            return new Db_LccCachedPlayerStats();
+        }
+        private Db_LccCachedCalculatedMatchupInfo CreateDatabaseModelForCalculatedMatchupInfo(Match match, long usersChampionId)
+        {
+            IList<Db_LccItem> itemStaticData = _itemStaticDataRepository.GetAllItems().ToList();
+            IList<Db_LccRune> runeStaticData = _runeStaticDataReposistory.GetAllRunes().ToList();
+            IList<Db_LccChampion> championStaticData = _championStaticDataRepository.GetAllChampions().ToList();
+            IList<Db_LccSummonerSpell> summonerSpellStaticData = _summonerSpellStaticDataRepository.GetAllSummonerSpells().ToList();
+
+            try
+            {
+                Db_LccCachedCalculatedMatchupInfo cachedMatchupInformation = new Db_LccCachedCalculatedMatchupInfo()
+                {
+                    GameId = match.GameId,
+                    MatchDate = match.GameCreation,
+                    MatchPatch = match.GameVersion,
+                    FriendlyTeamWin = false //placeholder value
+                };
+
+                cachedMatchupInformation.EnemyTeam = new Db_LccCachedTeamInformation()
+                {
+                    //placeholder values
+                    TotalKills = 0,
+                    TotalDeaths = 0,
+                    TotalAssists = 0,
+                    DragonKills = 0,
+                    BaronKills = 0,
+                    RiftHeraldKills = 0,
+                    InhibitorKills = 0,
+                };
+
+                cachedMatchupInformation.FriendlyTeam = new Db_LccCachedTeamInformation()
+                {
+                    //placeholder values
+                    TotalKills = 0,
+                    TotalDeaths = 0,
+                    TotalAssists = 0,
+                    DragonKills = 0,
+                    BaronKills = 0,
+                    RiftHeraldKills = 0,
+                    InhibitorKills = 0,
+                };
+
+                //100 or 200
+                int usersTeamId = match.Participants.FirstOrDefault(x => x.ChampionId == usersChampionId).TeamId;
+
+                IList<Participant> friendlyTeamParticipants = match.Participants.Where(x => x.TeamId == usersTeamId).ToList();
+                IList<Participant> enemyTeamParticipants = match.Participants.Where(x => x.TeamId != usersTeamId).ToList();
+
+                cachedMatchupInformation.EnemyTeam.Players = new List<Db_LccCachedPlayerStats>();
+                foreach(Participant enemyParticipant in enemyTeamParticipants)
+                {
+                    ParticipantIdentity enemyParticipanyIdentity = match.ParticipantIdentities.FirstOrDefault(x => x.ParticipantId == enemyParticipant.ParticipantId);
+                    cachedMatchupInformation.EnemyTeam.Players.Add(CreateCachedPlayerStatsFromMatchupInfo(enemyParticipanyIdentity, enemyParticipant));
+                }
+                
+                cachedMatchupInformation.FriendlyTeam.Players = new List<Db_LccCachedPlayerStats>();
+                foreach (Participant friendlyParticipant in friendlyTeamParticipants)
+                {
+                    ParticipantIdentity friendlyParticipanyIdentity = match.ParticipantIdentities.FirstOrDefault(x => x.ParticipantId == friendlyParticipant.ParticipantId);
+                    cachedMatchupInformation.EnemyTeam.Players.Add(CreateCachedPlayerStatsFromMatchupInfo(friendlyParticipanyIdentity, friendlyParticipant));
+                }
+
+                return cachedMatchupInformation;
+            }
+            catch(Exception e)
+            {
+                int i = 0;
+                i++;
+            }
+
+            return new Db_LccCachedCalculatedMatchupInfo();
         }
     }
 }

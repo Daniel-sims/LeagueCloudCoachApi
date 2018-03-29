@@ -1,4 +1,5 @@
-﻿using LccWebAPI.Database.Models;
+﻿using LccWebAPI.Controllers.Models.Match;
+using LccWebAPI.Database.Models;
 using LccWebAPI.Database.Models.Match;
 using LccWebAPI.Database.Models.StaticData;
 using LccWebAPI.Database.Models.Summoner;
@@ -17,6 +18,9 @@ namespace LccWebAPI.Database.Context
         //Basic information stored for quick match lookup
         public DbSet<Db_LccBasicMatchInfo> Matchups { get; set; }
 
+        //Cached matchup information 
+        public DbSet<Db_LccCachedCalculatedMatchupInfo> CalculatedMatchupInformation { get; set; }
+
         //Information about summoners to keep track of matchups we've gotten (for now)
         public DbSet<Db_LccSummoner> Summoners { get; set; }
 
@@ -26,10 +30,6 @@ namespace LccWebAPI.Database.Context
         public DbSet<Db_LccRune> Runes { get; set; }
         public DbSet<Db_LccSummonerSpell> SummonerSpells { get; set; }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<Db_LccBasicMatchInfo>().HasMany(x => x.WinningTeamChampions);
-            modelBuilder.Entity<Db_LccBasicMatchInfo>().HasMany(x => x.LosingTeamChampions);
-        }
+        protected override void OnModelCreating(ModelBuilder modelBuilder) { }
     }
 }
