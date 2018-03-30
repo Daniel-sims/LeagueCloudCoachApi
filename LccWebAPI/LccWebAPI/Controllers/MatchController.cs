@@ -166,6 +166,7 @@ namespace LccWebAPI.Controllers
 
             return matchupInformation;
         }
+
         private LccPlayerStats CreateLccPlayerStatsFromCache(Db_LccCachedPlayerStats playerStats)
         {
             try
@@ -302,6 +303,11 @@ namespace LccWebAPI.Controllers
                 List<LeaguePosition> leaguePosition = await _riotApi.League.GetLeaguePositionsAsync(Region.euw, participantIdentity.Player.SummonerId);
                 LeaguePosition rankedSoloLeague = leaguePosition.FirstOrDefault(x => x.QueueType == LeagueQueue.RankedSolo);
 
+                List<Db_LccItem> items = _itemStaticDataRepository.GetAllItems().ToList();
+                List<Db_LccRune> runes = _runeStaticDataReposistory.GetAllRunes().ToList();
+                List<Db_LccChampion> champions = _championStaticDataRepository.GetAllChampions().ToList();
+                List<Db_LccSummonerSpell> summonerSpells = _summonerSpellStaticDataRepository.GetAllSummonerSpells().ToList();
+
                 return new Db_LccCachedPlayerStats()
                 {
                     SummonerId = participantIdentity.Player.SummonerId,
@@ -310,151 +316,151 @@ namespace LccWebAPI.Controllers
                     Deaths = participant.Stats.Deaths,
                     Assists = participant.Stats.Assists,
                     MinionKills = participant.Stats.NeutralMinionsKilled + participant.Stats.TotalMinionsKilled,
-                    RankedSoloDivision = rankedSoloLeague.Rank,
-                    RankedSoloTier = rankedSoloLeague.Tier,
-                    RankedSoloLeaguePoints = rankedSoloLeague.LeaguePoints.ToString(),
+                    RankedSoloDivision = rankedSoloLeague?.Rank,
+                    RankedSoloTier = rankedSoloLeague?.Tier,
+                    RankedSoloLeaguePoints = rankedSoloLeague?.LeaguePoints.ToString(),
                     RankedSoloWins = rankedSoloLeague.Wins,
                     RankedSoloLosses = rankedSoloLeague.Losses,
                     Trinket = new Db_LccItem()
                     {
-                        ItemId = 0,
-                        ItemName = "",
-                        ImageFull = ""
+                        ItemId = Convert.ToInt32(participant.Stats.Item6),
+                        ItemName = items?.FirstOrDefault(x => x.ItemId == Convert.ToInt32(participant.Stats.Item6))?.ItemName,
+                        ImageFull = items?.FirstOrDefault(x => x.ItemId == Convert.ToInt32(participant.Stats.Item6))?.ImageFull
                     },
                     ItemOne = new Db_LccItem()
                     {
-                        ItemId = 0,
-                        ItemName = "",
-                        ImageFull = ""
+                        ItemId = Convert.ToInt32(participant.Stats.Item0),
+                        ItemName = items.FirstOrDefault(x => x.ItemId == Convert.ToInt32(participant.Stats.Item0))?.ItemName,
+                        ImageFull = items.FirstOrDefault(x => x.ItemId == Convert.ToInt32(participant.Stats.Item0))?.ImageFull
                     },
                     ItemTwo = new Db_LccItem()
                     {
-                        ItemId = 0,
-                        ItemName = "",
-                        ImageFull = ""
+                        ItemId = Convert.ToInt32(participant.Stats.Item1),
+                        ItemName = items.FirstOrDefault(x => x.ItemId == Convert.ToInt32(participant.Stats.Item1))?.ItemName,
+                        ImageFull = items.FirstOrDefault(x => x.ItemId == Convert.ToInt32(participant.Stats.Item1))?.ImageFull
                     },
                     ItemThree = new Db_LccItem()
                     {
-                        ItemId = 0,
-                        ItemName = "",
-                        ImageFull = ""
+                        ItemId = Convert.ToInt32(participant.Stats.Item2),
+                        ItemName = items.FirstOrDefault(x => x.ItemId == Convert.ToInt32(participant.Stats.Item2))?.ItemName,
+                        ImageFull = items.FirstOrDefault(x => x.ItemId == Convert.ToInt32(participant.Stats.Item2))?.ImageFull
                     },
                     ItemFour = new Db_LccItem()
                     {
-                        ItemId = 0,
-                        ItemName = "",
-                        ImageFull = ""
+                        ItemId = Convert.ToInt32(participant.Stats.Item3),
+                        ItemName = items.FirstOrDefault(x => x.ItemId == Convert.ToInt32(participant.Stats.Item3))?.ItemName,
+                        ImageFull = items.FirstOrDefault(x => x.ItemId == Convert.ToInt32(participant.Stats.Item3))?.ImageFull
                     },
                     ItemFive = new Db_LccItem()
                     {
-                        ItemId = 0,
-                        ItemName = "",
-                        ImageFull = ""
+                        ItemId = Convert.ToInt32(participant.Stats.Item4),
+                        ItemName = items.FirstOrDefault(x => x.ItemId == Convert.ToInt32(participant.Stats.Item4))?.ItemName,
+                        ImageFull = items.FirstOrDefault(x => x.ItemId == Convert.ToInt32(participant.Stats.Item4))?.ImageFull
                     },
                     ItemSix = new Db_LccItem()
                     {
-                        ItemId = 0,
-                        ItemName = "",
-                        ImageFull = ""
+                        ItemId = Convert.ToInt32(participant.Stats.Item5),
+                        ItemName = items.FirstOrDefault(x => x.ItemId == Convert.ToInt32(participant.Stats.Item5))?.ItemName,
+                        ImageFull = items.FirstOrDefault(x => x.ItemId == Convert.ToInt32(participant.Stats.Item5))?.ImageFull
                     },
                     SummonerOne = new Db_LccSummonerSpell()
                     {
-                        SummonerSpellId = 0,
-                        SummonerSpellName = "",
-                        ImageFull = ""
+                        SummonerSpellId = Convert.ToInt32(participant.Spell1Id),
+                        SummonerSpellName = summonerSpells.FirstOrDefault(x => Convert.ToInt32(participant.Spell1Id) == x.SummonerSpellId)?.SummonerSpellName,
+                        ImageFull = summonerSpells.FirstOrDefault(x => Convert.ToInt32(participant.Spell1Id) == x.SummonerSpellId)?.ImageFull
                     },
                     SummonerTwo = new Db_LccSummonerSpell()
                     {
-                        SummonerSpellId = 0,
-                        SummonerSpellName = "",
-                        ImageFull = ""
+                        SummonerSpellId = Convert.ToInt32(participant.Spell2Id),
+                        SummonerSpellName = summonerSpells.FirstOrDefault(x => Convert.ToInt32(participant.Spell2Id) == x.SummonerSpellId)?.SummonerSpellName,
+                        ImageFull = summonerSpells.FirstOrDefault(x => Convert.ToInt32(participant.Spell2Id) == x.SummonerSpellId)?.ImageFull
                     },
                     Champion = new Db_LccChampion()
                     {
-                        ChampionId = 0,
-                        ChampionName = "",
-                        ImageFull = ""
+                        ChampionId = participant.ChampionId,
+                        ChampionName = champions.FirstOrDefault(x => x.ChampionId == participant.ChampionId)?.ChampionName,
+                        ImageFull = champions.FirstOrDefault(x => x.ChampionId == participant.ChampionId)?.ImageFull
                     },
-                    ChampionLevel = 0,
+                    ChampionLevel = participant.Stats.ChampLevel,
                     PrimaryRuneStyle = new Db_LccRune()
                     {
-                        RuneId = 0,
-                        RuneName = "",
-                        RunePathName = "",
-                        Icon = "",
-                        Key = "",
-                        ShortDesc = "",
-                        LongDesc = ""
+                        RuneId = Convert.ToInt32(participant.Stats.PerkPrimaryStyle),
+                        RuneName = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.PerkPrimaryStyle))?.RuneName,
+                        RunePathName = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.PerkPrimaryStyle))?.RunePathName,
+                        Icon = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.PerkPrimaryStyle))?.Icon,
+                        Key = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.PerkPrimaryStyle))?.Key,
+                        ShortDesc = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.PerkPrimaryStyle))?.ShortDesc,
+                        LongDesc = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.PerkPrimaryStyle))?.LongDesc
                     },
                     PrimaryRuneSubOne = new Db_LccRune()
                     {
-                        RuneId = 0,
-                        RuneName = "",
-                        RunePathName = "",
-                        Icon = "",
-                        Key = "",
-                        ShortDesc = "",
-                        LongDesc = ""
+                        RuneId = Convert.ToInt32(participant.Stats.Perk0),
+                        RuneName = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.Perk0))?.RuneName,
+                        RunePathName = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.Perk0))?.RunePathName,
+                        Icon = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.Perk0))?.Icon,
+                        Key = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.Perk0))?.Key,
+                        ShortDesc = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.Perk0))?.ShortDesc,
+                        LongDesc = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.Perk0))?.LongDesc
                     },
                     PrimaryRuneSubTwo = new Db_LccRune()
                     {
-                        RuneId = 0,
-                        RuneName = "",
-                        RunePathName = "",
-                        Icon = "",
-                        Key = "",
-                        ShortDesc = "",
-                        LongDesc = ""
+                        RuneId = Convert.ToInt32(participant.Stats.Perk1),
+                        RuneName = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.Perk1))?.RuneName,
+                        RunePathName = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.Perk1))?.RunePathName,
+                        Icon = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.Perk1))?.Icon,
+                        Key = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.Perk1))?.Key,
+                        ShortDesc = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.Perk1))?.ShortDesc,
+                        LongDesc = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.Perk1))?.LongDesc
                     },
                     PrimaryRuneSubThree = new Db_LccRune()
                     {
-                        RuneId = 0,
-                        RuneName = "",
-                        RunePathName = "",
-                        Icon = "",
-                        Key = "",
-                        ShortDesc = "",
-                        LongDesc = ""
+                        RuneId = Convert.ToInt32(participant.Stats.Perk2),
+                        RuneName = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.Perk2))?.RuneName,
+                        RunePathName = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.Perk2))?.RunePathName,
+                        Icon = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.Perk2))?.Icon,
+                        Key = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.Perk2))?.Key,
+                        ShortDesc = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.Perk2))?.ShortDesc,
+                        LongDesc = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.Perk2))?.LongDesc
                     },
                     PrimaryRuneSubFour = new Db_LccRune()
                     {
-                        RuneId = 0,
-                        RuneName = "",
-                        RunePathName = "",
-                        Icon = "",
-                        Key = "",
-                        ShortDesc = "",
-                        LongDesc = ""
+                        RuneId = Convert.ToInt32(participant.Stats.Perk3),
+                        RuneName = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.Perk3))?.RuneName,
+                        RunePathName = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.Perk3))?.RunePathName,
+                        Icon = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.Perk3))?.Icon,
+                        Key = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.Perk3))?.Key,
+                        ShortDesc = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.Perk3))?.ShortDesc,
+                        LongDesc = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.Perk3))?.LongDesc
                     },
                     SecondaryRuneStyle = new Db_LccRune()
                     {
-                        RuneId = 0,
-                        RuneName = "",
-                        RunePathName = "",
-                        Icon = "",
-                        Key = "",
-                        ShortDesc = "",
-                        LongDesc = ""
+                        RuneId = Convert.ToInt32(participant.Stats.PerkSubStyle),
+                        RuneName = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.PerkSubStyle))?.RuneName,
+                        RunePathName = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.PerkSubStyle))?.RunePathName,
+                        Icon = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.PerkSubStyle))?.Icon,
+                        Key = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.PerkSubStyle))?.Key,
+                        ShortDesc = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.PerkSubStyle))?.ShortDesc,
+                        LongDesc = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.PerkSubStyle))?.LongDesc
                     },
                     SecondaryRuneSubOne = new Db_LccRune()
                     {
-                        RuneId = 0,
-                        RuneName = "",
-                        RunePathName = "",
-                        Icon = "",
-                        Key = "",
-                        ShortDesc = "",
-                        LongDesc = ""
+                        RuneId = Convert.ToInt32(participant.Stats.Perk4),
+                        RuneName = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.Perk4))?.RuneName,
+                        RunePathName = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.Perk4))?.RunePathName,
+                        Icon = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.Perk4))?.Icon,
+                        Key = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.Perk4))?.Key,
+                        ShortDesc = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.Perk4))?.ShortDesc,
+                        LongDesc = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.Perk4))?.LongDesc
                     },
                     SecondaryRuneSubTwo = new Db_LccRune()
                     {
-                        RuneId = 0,
-                        RuneName = "",
-                        RunePathName = "",
-                        Icon = "",
-                        Key = "",
-                        ShortDesc = "",
-                        LongDesc = ""
+                        RuneId = Convert.ToInt32(participant.Stats.Perk5),
+                        RuneName = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.Perk5))?.RuneName,
+                        RunePathName = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.Perk5))?.RunePathName,
+                        Icon = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.Perk5))?.Icon,
+                        Key = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.Perk5))?.Key,
+                        ShortDesc = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.Perk5))?.ShortDesc,
+                        LongDesc = runes.FirstOrDefault(x => x.RuneId == Convert.ToInt32(participant.Stats.Perk5))?.LongDesc
                     }
                 };
             }
