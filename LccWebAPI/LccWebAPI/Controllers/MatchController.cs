@@ -123,7 +123,8 @@ namespace LccWebAPI.Controllers
             {
                 MatchDate = match.MatchDate,
                 MatchPatch = match.MatchPatch,
-                GameId = match.GameId
+                GameId = match.GameId,
+                FriendlyTeamWin = match.FriendlyTeamWin
             };
             
             // FRIENDLY TEAM INFORMATION
@@ -473,51 +474,44 @@ namespace LccWebAPI.Controllers
         }
         private async Task<Db_LccCachedCalculatedMatchupInfo> CreateDatabaseModelForCalculatedMatchupInfo(Match match, long usersChampionId)
         {
-            IList<Db_LccItem> itemStaticData = _itemStaticDataRepository.GetAllItems().ToList();
-            IList<Db_LccRune> runeStaticData = _runeStaticDataReposistory.GetAllRunes().ToList();
-            IList<Db_LccChampion> championStaticData = _championStaticDataRepository.GetAllChampions().ToList();
-            IList<Db_LccSummonerSpell> summonerSpellStaticData = _summonerSpellStaticDataRepository.GetAllSummonerSpells().ToList();
 
             try
             {
-                Db_LccCachedCalculatedMatchupInfo cachedMatchupInformation = new Db_LccCachedCalculatedMatchupInfo()
-                {
-                    GameId = match.GameId,
-                    MatchDate = match.GameCreation,
-                    MatchPatch = match.GameVersion,
-                    FriendlyTeamWin = false //placeholder value
-                };
-
-                cachedMatchupInformation.EnemyTeam = new Db_LccCachedTeamInformation()
-                {
-                    //placeholder values
-                    TotalKills = 0,
-                    TotalDeaths = 0,
-                    TotalAssists = 0,
-                    DragonKills = 0,
-                    BaronKills = 0,
-                    RiftHeraldKills = 0,
-                    InhibitorKills = 0,
-                };
-
-                cachedMatchupInformation.FriendlyTeam = new Db_LccCachedTeamInformation()
-                {
-                    //placeholder values
-                    TotalKills = 0,
-                    TotalDeaths = 0,
-                    TotalAssists = 0,
-                    DragonKills = 0,
-                    BaronKills = 0,
-                    RiftHeraldKills = 0,
-                    InhibitorKills = 0,
-                };
-
-                //100 or 200
                 int usersTeamId = match.Participants.FirstOrDefault(x => x.ChampionId == usersChampionId).TeamId;
 
                 IList<Participant> friendlyTeamParticipants = match.Participants.Where(x => x.TeamId == usersTeamId).ToList();
                 IList<Participant> enemyTeamParticipants = match.Participants.Where(x => x.TeamId != usersTeamId).ToList();
 
+                Db_LccCachedCalculatedMatchupInfo cachedMatchupInformation = new Db_LccCachedCalculatedMatchupInfo()
+                {
+                    GameId = match.GameId,
+                    MatchDate = match.GameCreation,
+                    MatchPatch = match.GameVersion,
+                    FriendlyTeamWin = match.Teams.FirstOrDefault(x => x.TeamId == usersTeamId).Win == MatchOutcome.Win
+                };
+
+                cachedMatchupInformation.EnemyTeam = new Db_LccCachedTeamInformation()
+                {
+                    TotalKills = enemyTeamParticipants.Sum(x => x.Stats.Kills),
+                    TotalDeaths = enemyTeamParticipants.Sum(x => x.Stats.Deaths),
+                    TotalAssists = enemyTeamParticipants.Sum(x => x.Stats.Assists),
+                    DragonKills = match.Teams.FirstOrDefault(x => x.TeamId != usersTeamId).DragonKills,
+                    BaronKills = match.Teams.FirstOrDefault(x => x.TeamId != usersTeamId).BaronKills,
+                    RiftHeraldKills = match.Teams.FirstOrDefault(x => x.TeamId != usersTeamId).RiftHeraldKills,
+                    InhibitorKills = match.Teams.FirstOrDefault(x => x.TeamId != usersTeamId).InhibitorKills,
+                };
+
+                cachedMatchupInformation.FriendlyTeam = new Db_LccCachedTeamInformation()
+                {
+                    TotalKills = friendlyTeamParticipants.Sum(x => x.Stats.Kills),
+                    TotalDeaths = friendlyTeamParticipants.Sum(x => x.Stats.Deaths),
+                    TotalAssists = friendlyTeamParticipants.Sum(x => x.Stats.Assists),
+                    DragonKills = match.Teams.FirstOrDefault(x => x.TeamId == usersTeamId).DragonKills,
+                    BaronKills = match.Teams.FirstOrDefault(x => x.TeamId == usersTeamId).BaronKills,
+                    RiftHeraldKills = match.Teams.FirstOrDefault(x => x.TeamId == usersTeamId).RiftHeraldKills,
+                    InhibitorKills = match.Teams.FirstOrDefault(x => x.TeamId == usersTeamId).InhibitorKills,
+                };
+                
                 cachedMatchupInformation.EnemyTeam.Players = new List<Db_LccCachedPlayerStats>();
                 foreach(Participant enemyParticipant in enemyTeamParticipants)
                 {
@@ -536,8 +530,7 @@ namespace LccWebAPI.Controllers
             }
             catch(Exception e)
             {
-                int i = 0;
-                i++;
+                Console.WriteLine("Error when creating dbmodel for cached matchup info.");
             }
 
             return new Db_LccCachedCalculatedMatchupInfo();
