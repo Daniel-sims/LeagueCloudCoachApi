@@ -18,6 +18,8 @@ namespace LccWebAPI.Database.Models.Match
 
         public DateTime MatchDate { get; set; }
 
+        public TimeSpan MatchDuration { get; set; }
+
         public string MatchPatch { get; set; }
 
         public bool FriendlyTeamWin { get; set; }

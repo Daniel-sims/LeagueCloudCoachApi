@@ -99,7 +99,7 @@ namespace LccWebAPI.Services
                                     newSummonersAddedToDatabaseTotal++;
                                     newSummonersAddedThisSession++;
 
-                                    MatchList matchList = await _throttledRequestHelper.SendThrottledRequest(async () => await _riotApi.Match.GetMatchListAsync(Region.euw, summoner.AccountId, null, null, null, null, null, 0, 25));
+                                    MatchList matchList = await _throttledRequestHelper.SendThrottledRequest(async () => await _riotApi.Match.GetMatchListAsync(Region.euw, summoner.AccountId, null, null, null, null, null, 0, 75));
                                     if (matchList != null && matchList?.Matches != null)
                                     {
                                         await GetRiotMatchupInformationAndAddIfNotExisting(matchupInformationRepository, matchList, highEloPlayerEntires);
