@@ -95,107 +95,25 @@ namespace LccWebAPI.Controllers.Utils.Match
                     RankedSoloLeaguePoints = playerStats?.RankedSoloLeaguePoints.ToString(),
                     RankedSoloWins = Convert.ToInt32(playerStats?.RankedSoloWins),
                     RankedSoloLosses = Convert.ToInt32(playerStats?.RankedSoloLosses),
-                    ItemOne = new LccItemInformation()
-                    {
-                        ItemId = playerStats.ItemOne.ItemId,
-                        ItemName = playerStats.ItemOne?.ItemName,
-                        ImageFull = playerStats.ItemOne?.ImageFull
-                    },
-                    ItemTwo = new LccItemInformation()
-                    {
-                        ItemId = playerStats.ItemTwo.ItemId,
-                        ItemName = playerStats.ItemTwo?.ItemName,
-                        ImageFull = playerStats.ItemTwo?.ImageFull
-                    },
-                    ItemThree = new LccItemInformation()
-                    {
-                        ItemId = playerStats.ItemThree.ItemId,
-                        ItemName = playerStats.ItemThree?.ItemName,
-                        ImageFull = playerStats.ItemThree?.ImageFull
-                    },
-                    ItemFour = new LccItemInformation()
-                    {
-                        ItemId = playerStats.ItemFour.ItemId,
-                        ItemName = playerStats.ItemFour?.ItemName,
-                        ImageFull = playerStats.ItemFour?.ImageFull
-                    },
-                    ItemFive = new LccItemInformation()
-                    {
-                        ItemId = playerStats.ItemFive.ItemId,
-                        ItemName = playerStats.ItemFive?.ItemName,
-                        ImageFull = playerStats.ItemFive?.ImageFull
-                    },
-                    ItemSix = new LccItemInformation()
-                    {
-                        ItemId = playerStats.ItemSix.ItemId,
-                        ItemName = playerStats.ItemSix?.ItemName,
-                        ImageFull = playerStats.ItemSix?.ImageFull
-                    },
-                    Trinket = new LccItemInformation()
-                    {
-                        ItemId = playerStats.Trinket.ItemId,
-                        ItemName = playerStats.Trinket?.ItemName,
-                        ImageFull = playerStats.Trinket?.ImageFull
-                    },
-                    SummonerOne = new LccSummonerSpellInformation()
-                    {
-                        SummonerSpellId = playerStats.SummonerOne.SummonerSpellId,
-                        SummonerSpellName = playerStats.SummonerOne?.SummonerSpellName,
-                        ImageFull = playerStats.SummonerOne?.ImageFull
-                    },
-                    SummonerTwo = new LccSummonerSpellInformation()
-                    {
-                        SummonerSpellId = playerStats.SummonerTwo.SummonerSpellId,
-                        SummonerSpellName = playerStats.SummonerTwo?.SummonerSpellName,
-                        ImageFull = playerStats.SummonerTwo?.ImageFull
-                    },
-                    Champion = new LccChampionInformation()
-                    {
-                        ChampionId = playerStats.Champion.ChampionId,
-                        ChampionName = playerStats.Champion?.ChampionName,
-                        ImageFull = playerStats.Champion?.ImageFull
-                    },
+                    ItemOne = CreateLccItemInformationFromCache(playerStats.ItemOne),
+                    ItemTwo = CreateLccItemInformationFromCache(playerStats.ItemTwo),
+                    ItemThree = CreateLccItemInformationFromCache(playerStats.ItemThree),
+                    ItemFour = CreateLccItemInformationFromCache(playerStats.ItemFour),
+                    ItemFive = CreateLccItemInformationFromCache(playerStats.ItemFive),
+                    ItemSix = CreateLccItemInformationFromCache(playerStats.ItemSix),
+                    Trinket = CreateLccItemInformationFromCache(playerStats.Trinket),
+                    SummonerOne = CreateLccSummonerSpellInformationFromCache(playerStats.SummonerOne),
+                    SummonerTwo = CreateLccSummonerSpellInformationFromCache(playerStats.SummonerTwo),
+                    Champion = CreateLccChampionInformationFromCache(playerStats.Champion),
                     ChampionLevel = playerStats.ChampionLevel,
-                    PrimaryRuneStyle = new LccRuneInformation()
-                    {
-                        RuneId = playerStats.PrimaryRuneStyle.RuneId,
-                        RuneName = playerStats.PrimaryRuneStyle?.RuneName
-                    },
-                    PrimaryRuneSubOne = new LccRuneInformation()
-                    {
-                        RuneId = playerStats.PrimaryRuneSubOne.RuneId,
-                        RuneName = playerStats.PrimaryRuneSubOne?.RuneName
-                    },
-                    PrimaryRuneSubTwo = new LccRuneInformation()
-                    {
-                        RuneId = playerStats.PrimaryRuneSubTwo.RuneId,
-                        RuneName = playerStats.PrimaryRuneSubTwo?.RuneName
-                    },
-                    PrimaryRuneSubThree = new LccRuneInformation()
-                    {
-                        RuneId = playerStats.PrimaryRuneSubThree.RuneId,
-                        RuneName = playerStats.PrimaryRuneSubThree?.RuneName
-                    },
-                    PrimaryRuneSubFour = new LccRuneInformation()
-                    {
-                        RuneId = playerStats.PrimaryRuneSubFour.RuneId,
-                        RuneName = playerStats.PrimaryRuneSubFour?.RuneName
-                    },
-                    SecondaryRuneStyle = new LccRuneInformation()
-                    {
-                        RuneId = playerStats.SecondaryRuneStyle.RuneId,
-                        RuneName = playerStats.SecondaryRuneStyle?.RuneName
-                    },
-                    SecondaryRuneSubOne = new LccRuneInformation()
-                    {
-                        RuneId = playerStats.SecondaryRuneSubOne.RuneId,
-                        RuneName = playerStats.SecondaryRuneSubOne?.RuneName
-                    },
-                    SecondaryRuneSubTwo = new LccRuneInformation()
-                    {
-                        RuneId = playerStats.SecondaryRuneSubTwo.RuneId,
-                        RuneName = playerStats.SecondaryRuneSubTwo?.RuneName
-                    }
+                    PrimaryRuneStyle = CreateLccRuneInformationFromCache(playerStats.PrimaryRuneStyle),
+                    PrimaryRuneSubOne = CreateLccRuneInformationFromCache(playerStats.PrimaryRuneSubOne),
+                    PrimaryRuneSubTwo = CreateLccRuneInformationFromCache(playerStats.PrimaryRuneSubTwo),
+                    PrimaryRuneSubThree = CreateLccRuneInformationFromCache(playerStats.PrimaryRuneSubThree),
+                    PrimaryRuneSubFour = CreateLccRuneInformationFromCache(playerStats.PrimaryRuneSubFour),
+                    SecondaryRuneStyle = CreateLccRuneInformationFromCache(playerStats.SecondaryRuneStyle),
+                    SecondaryRuneSubOne = CreateLccRuneInformationFromCache(playerStats.SecondaryRuneSubOne),
+                    SecondaryRuneSubTwo = CreateLccRuneInformationFromCache(playerStats.SecondaryRuneSubTwo)
                 };
             }
             catch (Exception)
@@ -204,6 +122,45 @@ namespace LccWebAPI.Controllers.Utils.Match
             }
 
             return new LccPlayerStats();
+        }
+
+        private LccRuneInformation CreateLccRuneInformationFromCache(Db_LccRune rune)
+        {
+            return new LccRuneInformation()
+            {
+                RuneId = rune.RuneId,
+                RuneName = rune?.RuneName
+            };
+        }
+
+        private LccChampionInformation CreateLccChampionInformationFromCache(Db_LccChampion champion)
+        {
+            return new LccChampionInformation()
+            {
+                ChampionId = champion.ChampionId,
+                ChampionName = champion?.ChampionName,
+                ImageFull = champion?.ImageFull
+            };
+        }
+
+        private LccSummonerSpellInformation CreateLccSummonerSpellInformationFromCache(Db_LccSummonerSpell summonerSpell)
+        {
+            return new LccSummonerSpellInformation()
+            {
+                SummonerSpellId = summonerSpell.SummonerSpellId,
+                SummonerSpellName = summonerSpell.SummonerSpellName,
+                ImageFull = summonerSpell.ImageFull
+            };
+        }
+
+        private LccItemInformation CreateLccItemInformationFromCache(Db_LccItem item)
+        {
+            return new LccItemInformation()
+            {
+                ItemId = item.ItemId,
+                ItemName = item?.ItemName,
+                ImageFull = item?.ImageFull
+            };
         }
         #endregion
 
