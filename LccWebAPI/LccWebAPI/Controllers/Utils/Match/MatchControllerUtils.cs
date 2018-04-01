@@ -166,7 +166,7 @@ namespace LccWebAPI.Controllers.Utils.Match
 
         #region Riot match information -> CachedInformation
         //Method triggered when a match is requested that we don't currently have in the cache
-        public async Task<Db_LccCachedCalculatedMatchupInfo> CreateDatabaseModelForCalculatedMatchupInfo(RiotSharp.Endpoints.MatchEndpoint.Match match, long usersChampionId)
+        public async Task<Db_LccCachedCalculatedMatchupInfo> CreateDatabaseModelForCalculatedMatchupInfo(RiotSharp.Endpoints.MatchEndpoint.Match match, Timeline timeline, long usersChampionId)
         {
             try
             {
@@ -199,6 +199,8 @@ namespace LccWebAPI.Controllers.Utils.Match
                         match.Participants.Where(x => x.TeamId != usersTeamId).ToList(),
                         match.Participants.FirstOrDefault(x => x.ChampionId != usersChampionId).TeamId
                     );
+
+                cachedMatchupInformation.Timeline = CreateMatchTimelineFromRiotTimeline(timeline);
                 
                 return cachedMatchupInformation;
             }
@@ -286,6 +288,38 @@ namespace LccWebAPI.Controllers.Utils.Match
             }
 
             return new Db_LccCachedPlayerStats();
+        }
+
+        private Db_LccMatchTimeline CreateMatchTimelineFromRiotTimeline(Timeline timeline)
+        {
+            return new Db_LccMatchTimeline()
+            {
+                FrameInterval = timeline.FrameInterval,
+                Frames = CreateDbMatchTimelineFramesFromRiotTimelineFrames(timeline.Frames)
+            };
+        }
+
+        private IList<Db_LccMatchTimelineFrame> CreateDbMatchTimelineFramesFromRiotTimelineFrames(List<Frame> frames)
+        {
+            List<Db_LccMatchTimelineFrame> matchTimelineFrames = new List<Db_LccMatchTimelineFrame>();
+
+            foreach(Frame frame in frames)
+            {
+                matchTimelineFrames.Add(new Db_LccMatchTimelineFrame()
+                {
+                    Timestamp = frame.Timestamp,
+                    Events = CreateDbMatchTimelineEventsFromRiotTimelineEvents(frame.Events)
+                });
+
+            }
+
+            return matchTimelineFrames;
+        }
+
+        private IList<Db_MatchTimelineEvent> CreateDbMatchTimelineEventsFromRiotTimelineEvents(IList<Event> events)
+        {
+            IList<Db_MatchTimelineEvent> matchtimelineEvents = new List<Db_MatchTimelineEvent>();
+            return matchtimelineEvents;
         }
 
         private Db_LccRune CreateCachedRuneInformation(int runeId)

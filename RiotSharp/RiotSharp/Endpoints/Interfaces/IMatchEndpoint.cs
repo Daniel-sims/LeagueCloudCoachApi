@@ -57,5 +57,7 @@ namespace RiotSharp.Endpoints.Interfaces
         /// <param name="summonerId">ID of the summoner for which to retrieve recent matches.</param>
         /// <returns>A list of the 10 most recent matches.</returns>
         Task<List<MatchReference>> GetRecentMatchesAsync(Region region, long summonerId);
+
+        Task<Timeline> GetMatchTimelineAsync(Region region, long matchId);
     }
 }

@@ -20,5 +20,7 @@ namespace LccWebAPI.Controllers.Models.Match
         public LccTeamInformation FriendlyTeam { get; set; }
 
         public LccTeamInformation EnemyTeam { get; set; }
+
+        public LccMatchTimeline Timeline { get; set; }
     }
 }

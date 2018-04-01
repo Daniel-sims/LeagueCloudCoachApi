@@ -84,7 +84,9 @@ namespace LccWebAPI.Controllers
                         if (cachedMatchInfo == null)
                         {
                             Match riotMatchInformation = await _riotApi.Match.GetMatchAsync(Region.euw, match.GameId);
-                            Db_LccCachedCalculatedMatchupInfo newCachedMatchInfo = await _matchControllerUtils.CreateDatabaseModelForCalculatedMatchupInfo(riotMatchInformation, usersChampionId);
+                            Timeline timeline = await _riotApi.Match.GetMatchTimelineAsync(Region.euw, match.GameId);
+
+                            Db_LccCachedCalculatedMatchupInfo newCachedMatchInfo = await _matchControllerUtils.CreateDatabaseModelForCalculatedMatchupInfo(riotMatchInformation, timeline, usersChampionId);
 
                             _cachedCalculatedMatchupInformaton.InsertCalculatedMatchupInfo(newCachedMatchInfo);
                             _cachedCalculatedMatchupInformaton.Save();
