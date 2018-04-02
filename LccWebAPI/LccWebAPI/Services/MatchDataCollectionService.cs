@@ -73,7 +73,7 @@ namespace LccWebAPI.Services
                             League challengerPlayers = await _throttledRequestHelper.SendThrottledRequest(async () => await _riotApi.League.GetChallengerLeagueAsync(Region.euw, LeagueQueue.RankedSolo));
                             League mastersPlayers = await _throttledRequestHelper.SendThrottledRequest(async () => await _riotApi.League.GetMasterLeagueAsync(Region.euw, LeagueQueue.RankedSolo));
 
-                            IList<LeaguePosition> highEloPlayerEntires = challengerPlayers.Entries.Concat(mastersPlayers.Entries).ToList();
+                            IEnumerable<LeaguePosition> highEloPlayerEntires = challengerPlayers.Entries.Concat(mastersPlayers.Entries);
 
                             int totalPlayers = highEloPlayerEntires.Count();
                             int currentCount = 0;
@@ -153,7 +153,7 @@ namespace LccWebAPI.Services
             }
         }
         
-        private async Task GetRiotMatchupInformationAndAddIfNotExisting(IBasicMatchupInformationRepository matchupInformationRepository, MatchList matchlist, IList<LeaguePosition> highEloPlayerEntires)
+        private async Task GetRiotMatchupInformationAndAddIfNotExisting(IBasicMatchupInformationRepository matchupInformationRepository, MatchList matchlist, IEnumerable<LeaguePosition> highEloPlayerEntires)
         {
             foreach (var match in matchlist?.Matches)
             {

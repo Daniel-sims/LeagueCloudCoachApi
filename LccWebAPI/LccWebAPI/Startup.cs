@@ -90,7 +90,7 @@ namespace LccWebAPI
             var runeRepository = serviceProvider.GetService<IRunesStaticDataRepository>();
 
             //Champions
-            IList<Db_LccChampion> championsInDatabase = championRepository.GetAllChampions().ToList();
+            IEnumerable<Db_LccChampion> championsInDatabase = championRepository.GetAllChampions();
 
             if (championsInDatabase.Count() == 0)
             {
@@ -110,7 +110,7 @@ namespace LccWebAPI
             }
 
             //Items
-            IList<Db_LccItem> itemsInDatabase = itemRepository.GetAllItems().ToList();
+            IEnumerable<Db_LccItem> itemsInDatabase = itemRepository.GetAllItems();
 
             if (itemsInDatabase.Count() == 0)
             {
@@ -128,9 +128,9 @@ namespace LccWebAPI
 
                 itemRepository.Save();
             }
-            
+
             //SummonerSpells
-            IList<Db_LccSummonerSpell> lccSummonerSpellInformation = summonerSpellRepository.GetAllSummonerSpells().ToList();
+            IEnumerable<Db_LccSummonerSpell> lccSummonerSpellInformation = summonerSpellRepository.GetAllSummonerSpells();
 
             if (lccSummonerSpellInformation.Count() == 0)
             {
@@ -150,7 +150,7 @@ namespace LccWebAPI
             }
 
             //Runes
-            IList<Db_LccRune> lccRuneInformation = runeRepository.GetAllRunes().ToList();
+            IEnumerable<Db_LccRune> lccRuneInformation = runeRepository.GetAllRunes();
 
             if (lccRuneInformation.Count() == 0)
             {

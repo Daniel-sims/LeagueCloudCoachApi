@@ -54,7 +54,7 @@ namespace LccWebAPI.Controllers
         {
             IEnumerable<Db_LccBasicMatchInfo> allMatchesInDatabase = _matchupInformationRepository.GetAllMatchups();
             IList<long> friendlyTeamChampionIds = new List<long>(friendlyTeamChampions) { usersChampionId };
-            IList<long> enemyTeamChampionIds = enemyTeamChampions.ToList();
+            IList<long> enemyTeamChampionIds = enemyTeamChampions;
 
             IEnumerable<Db_LccBasicMatchInfo> allMatchesContainingUsersChampion = allMatchesInDatabase.Where
                 (x => x.LosingTeamChampions.Any(p => p.ChampionId == usersChampionId || x.WinningTeamChampions.Any(u => u.ChampionId == usersChampionId)));
@@ -71,7 +71,7 @@ namespace LccWebAPI.Controllers
                 && friendlyTeamChampionIds.All(f => q.WinningTeamChampions.Any(l => l.ChampionId == f && l.SummonerName == summonerName)))
                 //Check to see if the winning team Ids are the losing team, and the enemy team are the winning team
                 || (enemyTeamChampionIds.All(e => q.WinningTeamChampions.Any(l => l.ChampionId == e && l.SummonerName == summonerName))
-                && friendlyTeamChampionIds.All(f => q.LosingTeamChampions.Any(l => l.ChampionId == f && l.SummonerName == summonerName)))).ToList();
+                && friendlyTeamChampionIds.All(f => q.LosingTeamChampions.Any(l => l.ChampionId == f && l.SummonerName == summonerName))));
             }
             else
             {
@@ -81,7 +81,7 @@ namespace LccWebAPI.Controllers
                && friendlyTeamChampionIds.All(f => q.WinningTeamChampions.Any(l => l.ChampionId == f)))
                //Check to see if the winning team Ids are the losing team, and the enemy team are the winning team
                || (enemyTeamChampionIds.All(e => q.WinningTeamChampions.Any(l => l.ChampionId == e))
-               && friendlyTeamChampionIds.All(f => q.LosingTeamChampions.Any(l => l.ChampionId == f)))).ToList();
+               && friendlyTeamChampionIds.All(f => q.LosingTeamChampions.Any(l => l.ChampionId == f))));
             }
             Console.WriteLine(DateTime.Now + ": Found - " + allMatchesWithRequestedTeams.Count() + " matches");
 

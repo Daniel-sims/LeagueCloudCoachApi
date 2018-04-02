@@ -23,7 +23,7 @@ namespace LccWebAPI.Repository.StaticData
 
         public IEnumerable<Db_LccItem> GetAllItems()
         {
-            return _lccDatabaseContext.Items.ToList();
+            return _lccDatabaseContext.Items;
         }
 
         public Db_LccItem GetItemById(int itemId)

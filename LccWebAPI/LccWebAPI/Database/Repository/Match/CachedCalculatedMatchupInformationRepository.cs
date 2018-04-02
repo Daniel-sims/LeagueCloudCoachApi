@@ -67,8 +67,7 @@ namespace LccWebAPI.Database.Repository.Match
                 .Include(x => x.FriendlyTeam.Players).ThenInclude(x => x.SummonerTwo)
                 .Include(x => x.FriendlyTeam.Players).ThenInclude(x => x.Timeline)
                 .Include(x => x.FriendlyTeam.Players).ThenInclude(x => x.Timeline.Frames)
-                .Include(x => x.FriendlyTeam.Players).ThenInclude(x => x.Timeline.Frames).ThenInclude(x => x.Events)
-                .ToList();
+                .Include(x => x.FriendlyTeam.Players).ThenInclude(x => x.Timeline.Frames).ThenInclude(x => x.Events);
         }
 
         public Db_LccCachedCalculatedMatchupInfo GetCalculatedMatchupInfoByGameId(long gameId)

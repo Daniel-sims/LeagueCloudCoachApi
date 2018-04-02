@@ -23,7 +23,7 @@ namespace LccWebAPI.Repository.StaticData
 
         public IEnumerable<Db_LccSummonerSpell> GetAllSummonerSpells()
         {
-            return _lccDatabaseContext.SummonerSpells.ToList();
+            return _lccDatabaseContext.SummonerSpells;
         }
 
         public Db_LccSummonerSpell GetSummonerSpellById(int summonerSpellId)

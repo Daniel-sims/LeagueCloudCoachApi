@@ -23,7 +23,7 @@ namespace LccWebAPI.Repository.StaticData
 
         public IEnumerable<Db_LccChampion> GetAllChampions()
         {
-            return _lccDatabaseContext.Champions.ToList();
+            return _lccDatabaseContext.Champions;
         }
 
         public Db_LccChampion GetChampionById(int championId)

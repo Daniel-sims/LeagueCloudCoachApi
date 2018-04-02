@@ -23,7 +23,7 @@ namespace LccWebAPI.Repository.StaticData
 
         public IEnumerable<Db_LccRune> GetAllRunes()
         {
-            return _lccDatabaseContext.Runes.ToList();
+            return _lccDatabaseContext.Runes;
         }
 
         public Db_LccRune GetRuneById(int runeId)

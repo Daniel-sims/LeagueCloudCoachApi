@@ -23,7 +23,7 @@ namespace LccWebAPI.Database.Repository.Summoner
 
         public IEnumerable<Db_LccSummoner> GetAllSummoner()
         {
-            return _lccDatabaseContext.Summoners.ToList();
+            return _lccDatabaseContext.Summoners;
         }
 
         public Db_LccSummoner GetSummonerByAccountId(long accountId)

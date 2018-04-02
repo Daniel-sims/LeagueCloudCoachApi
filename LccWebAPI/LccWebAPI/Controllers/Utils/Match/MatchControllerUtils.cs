@@ -63,13 +63,13 @@ namespace LccWebAPI.Controllers.Utils.Match
             LccMatchTimeline timeline = new LccMatchTimeline
             {
                 FrameInterval = dbTimeline.FrameInterval,
-                Frames = ConvertDbTimelineFramesToLccTimelineFrames(dbTimeline.Frames.ToList())
+                Frames = ConvertDbTimelineFramesToLccTimelineFrames(dbTimeline.Frames)
             };
             
             return timeline;
         }
 
-        private IList<LccMatchTimelineFrame> ConvertDbTimelineFramesToLccTimelineFrames(IList<Db_LccMatchTimelineFrame> dbFrames)
+        private IList<LccMatchTimelineFrame> ConvertDbTimelineFramesToLccTimelineFrames(IEnumerable<Db_LccMatchTimelineFrame> dbFrames)
         {
             IList<LccMatchTimelineFrame> frames = new List<LccMatchTimelineFrame>();
             
@@ -85,7 +85,7 @@ namespace LccWebAPI.Controllers.Utils.Match
             return frames;
         }
 
-        private IList<LccMatchTimelineEvent> ConvertDbTimelineEventsToLccTimelineEvents(IList<Db_MatchTimelineEvent> dbEvents)
+        private IList<LccMatchTimelineEvent> ConvertDbTimelineEventsToLccTimelineEvents(IEnumerable<Db_MatchTimelineEvent> dbEvents)
         {
             IList<LccMatchTimelineEvent> events = new List<LccMatchTimelineEvent>();
 
@@ -117,8 +117,7 @@ namespace LccWebAPI.Controllers.Utils.Match
 
             return events;
         }
-
-
+        
         private LccTeamInformation CreateLccTeamInformationFromCache(Db_LccCachedTeamInformation cachedTeamInformation)
         {
             LccTeamInformation lccTeamInformation = new LccTeamInformation()
@@ -230,13 +229,13 @@ namespace LccWebAPI.Controllers.Utils.Match
             LccMatchTimeline matchTimeline = new LccMatchTimeline
             {
                 FrameInterval = dbTimeline.FrameInterval,
-                Frames = ConvertDbMatchTimelineFramesToLccMatchTimelineFrames(dbTimeline.Frames.ToList())
+                Frames = ConvertDbMatchTimelineFramesToLccMatchTimelineFrames(dbTimeline.Frames)
             };
 
             return matchTimeline;
         }
 
-        private IList<LccMatchTimelineFrame> ConvertDbMatchTimelineFramesToLccMatchTimelineFrames(IList<Db_LccMatchTimelineFrame> dbFrames)
+        private IList<LccMatchTimelineFrame> ConvertDbMatchTimelineFramesToLccMatchTimelineFrames(IEnumerable<Db_LccMatchTimelineFrame> dbFrames)
         {
             IList<LccMatchTimelineFrame> frames = new List<LccMatchTimelineFrame>();
 
@@ -245,14 +244,14 @@ namespace LccWebAPI.Controllers.Utils.Match
                 frames.Add(new LccMatchTimelineFrame()
                 {
                     Timestamp = frame.Timestamp,
-                    Events = CreateLccMatchTimelineEventsFromDbMatchTimelineEvents(frame.Events.ToList())
+                    Events = CreateLccMatchTimelineEventsFromDbMatchTimelineEvents(frame.Events)
                 });
             }
 
             return frames;
         }
 
-        private IList<LccMatchTimelineEvent> CreateLccMatchTimelineEventsFromDbMatchTimelineEvents(IList<Db_MatchTimelineEvent> dbEvents)
+        private IList<LccMatchTimelineEvent> CreateLccMatchTimelineEventsFromDbMatchTimelineEvents(IEnumerable<Db_MatchTimelineEvent> dbEvents)
         {
             IList<LccMatchTimelineEvent> events = new List<LccMatchTimelineEvent>();
 
@@ -295,8 +294,8 @@ namespace LccWebAPI.Controllers.Utils.Match
             {
                 int usersTeamId = match.Participants.FirstOrDefault(x => x.ChampionId == usersChampionId).TeamId;
 
-                IList<Participant> friendlyTeamParticipants = match.Participants.Where(x => x.TeamId == usersTeamId).ToList();
-                IList<Participant> enemyTeamParticipants = match.Participants.Where(x => x.TeamId != usersTeamId).ToList();
+                IEnumerable<Participant> friendlyTeamParticipants = match.Participants.Where(x => x.TeamId == usersTeamId);
+                IEnumerable<Participant> enemyTeamParticipants = match.Participants.Where(x => x.TeamId != usersTeamId);
 
                 Db_LccCachedCalculatedMatchupInfo cachedMatchupInformation = new Db_LccCachedCalculatedMatchupInfo()
                 {
@@ -311,7 +310,7 @@ namespace LccWebAPI.Controllers.Utils.Match
                     CreateCachedTeamInformationFromRiotMatch
                     (
                         match, 
-                        match.Participants.Where(x => x.TeamId == usersTeamId).ToList(),
+                        match.Participants.Where(x => x.TeamId == usersTeamId),
                         timeline,
                         match.Participants.FirstOrDefault(x => x.ChampionId == usersChampionId).TeamId
                     );
@@ -320,7 +319,7 @@ namespace LccWebAPI.Controllers.Utils.Match
                     CreateCachedTeamInformationFromRiotMatch
                     (
                         match,
-                        match.Participants.Where(x => x.TeamId != usersTeamId).ToList(),
+                        match.Participants.Where(x => x.TeamId != usersTeamId),
                         timeline,
                         match.Participants.FirstOrDefault(x => x.ChampionId != usersChampionId).TeamId
                     );
@@ -335,7 +334,7 @@ namespace LccWebAPI.Controllers.Utils.Match
             return new Db_LccCachedCalculatedMatchupInfo();
         }
         
-        private async Task<Db_LccCachedTeamInformation> CreateCachedTeamInformationFromRiotMatch(RiotSharp.Endpoints.MatchEndpoint.Match match, IList<Participant> teamParticipants, Timeline timeline, int teamId)
+        private async Task<Db_LccCachedTeamInformation> CreateCachedTeamInformationFromRiotMatch(RiotSharp.Endpoints.MatchEndpoint.Match match, IEnumerable<Participant> teamParticipants, Timeline timeline, int teamId)
         {
             Db_LccCachedTeamInformation teamInformation = new Db_LccCachedTeamInformation
             {
@@ -441,7 +440,7 @@ namespace LccWebAPI.Controllers.Utils.Match
             return matchTimelineFrames;
         }
 
-        private IList<Db_MatchTimelineEvent> CreateDbMatchTimelineEventsFromRiotTimelineEvents(IList<Event> events, int participantId)
+        private IList<Db_MatchTimelineEvent> CreateDbMatchTimelineEventsFromRiotTimelineEvents(IEnumerable<Event> events, int participantId)
         {
             IList<Db_MatchTimelineEvent> matchtimelineEvents = new List<Db_MatchTimelineEvent>();
 
@@ -476,7 +475,7 @@ namespace LccWebAPI.Controllers.Utils.Match
 
         private Db_LccRune CreateCachedRuneInformation(int runeId)
         {
-            List<Db_LccRune> runes = _runeStaticDataReposistory.GetAllRunes().ToList();
+            IEnumerable<Db_LccRune> runes = _runeStaticDataReposistory.GetAllRunes();
 
             return new Db_LccRune()
             {
@@ -492,7 +491,7 @@ namespace LccWebAPI.Controllers.Utils.Match
 
         private Db_LccSummonerSpell CreateCachedSummonerSpellInformation(int spellId)
         {
-            List<Db_LccSummonerSpell> summonerSpells = _summonerSpellStaticDataRepository.GetAllSummonerSpells().ToList();
+            IEnumerable<Db_LccSummonerSpell> summonerSpells = _summonerSpellStaticDataRepository.GetAllSummonerSpells();
 
             return new Db_LccSummonerSpell()
             {
@@ -504,7 +503,7 @@ namespace LccWebAPI.Controllers.Utils.Match
 
         private Db_LccChampion CreateCachedChampionInformation(int championId)
         {
-            List<Db_LccChampion> champions = _championStaticDataRepository.GetAllChampions().ToList();
+            IEnumerable<Db_LccChampion> champions = _championStaticDataRepository.GetAllChampions();
 
             return new Db_LccChampion()
             {
@@ -516,7 +515,7 @@ namespace LccWebAPI.Controllers.Utils.Match
 
         private Db_LccItem CreateCachedItemInformation(int itemId)
         {
-            List<Db_LccItem> items = _itemStaticDataRepository.GetAllItems().ToList();
+            IEnumerable<Db_LccItem> items = _itemStaticDataRepository.GetAllItems();
 
             return new Db_LccItem()
             {
