@@ -67,5 +67,7 @@ namespace LccWebAPI.Controllers.Models.Match
         public LccRuneInformation SecondaryRuneSubOne { get; set; }
 
         public LccRuneInformation SecondaryRuneSubTwo { get; set; }
+
+        public LccMatchTimeline Timeline { get; set; }
     }
 }

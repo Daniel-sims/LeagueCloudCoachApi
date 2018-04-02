@@ -49,7 +49,7 @@ namespace LccWebAPI.Controllers.Utils.Match
                 MatchPatch = match.MatchPatch,
                 MatchDuration = match.MatchDuration,
                 GameId = match.GameId,
-                FriendlyTeamWin = match.FriendlyTeamWin
+                FriendlyTeamWin = match.FriendlyTeamWin,
             };
             
             matchupInformation.FriendlyTeam = CreateLccTeamInformationFromCache(match.FriendlyTeam);
@@ -57,7 +57,68 @@ namespace LccWebAPI.Controllers.Utils.Match
 
             return matchupInformation;
         }
-        
+
+        private LccMatchTimeline ConvertCachedTimelineToLccMatchTimeline(Db_LccMatchTimeline dbTimeline)
+        {
+            LccMatchTimeline timeline = new LccMatchTimeline
+            {
+                FrameInterval = dbTimeline.FrameInterval,
+                Frames = ConvertDbTimelineFramesToLccTimelineFrames(dbTimeline.Frames.ToList())
+            };
+            
+            return timeline;
+        }
+
+        private IList<LccMatchTimelineFrame> ConvertDbTimelineFramesToLccTimelineFrames(IList<Db_LccMatchTimelineFrame> dbFrames)
+        {
+            IList<LccMatchTimelineFrame> frames = new List<LccMatchTimelineFrame>();
+            
+            foreach(Db_LccMatchTimelineFrame frame in dbFrames)
+            {
+                frames.Add(new LccMatchTimelineFrame()
+                {
+                    Events = ConvertDbTimelineEventsToLccTimelineEvents(frame.Events),
+                    Timestamp = frame.Timestamp
+                });
+            }
+
+            return frames;
+        }
+
+        private IList<LccMatchTimelineEvent> ConvertDbTimelineEventsToLccTimelineEvents(IList<Db_MatchTimelineEvent> dbEvents)
+        {
+            IList<LccMatchTimelineEvent> events = new List<LccMatchTimelineEvent>();
+
+            foreach(var ev in dbEvents)
+            {
+                events.Add(
+                    new LccMatchTimelineEvent()
+                    {
+                        Type = ev.Type,
+                        Timestamp = ev.Timestamp,
+                        ParticipantId = ev.ParticipantId,
+                        ItemId = ev.ItemId,
+                        SkillSlot = ev.SkillSlot,
+                        LevelUpType = ev.LevelUpType,
+                        WardType = ev.WardType,
+                        CreatorId = ev.CreatorId,
+                        KillerId = ev.KillerId,
+                        VictimId = ev.VictimId,
+                        AfterId = ev.AfterId,
+                        BeforeId = ev.BeforeId,
+                        TeamId = ev.TeamId,
+                        BuildingType = ev.BuildingType,
+                        LaneType = ev.LaneType,
+                        TowerType = ev.TowerType,
+                        MonsterType = ev.MonsterType,
+                        MonsterSubType = ev.MonsterSubType
+                    });
+            }
+
+            return events;
+        }
+
+
         private LccTeamInformation CreateLccTeamInformationFromCache(Db_LccCachedTeamInformation cachedTeamInformation)
         {
             LccTeamInformation lccTeamInformation = new LccTeamInformation()
@@ -113,7 +174,8 @@ namespace LccWebAPI.Controllers.Utils.Match
                     PrimaryRuneSubFour = CreateLccRuneInformationFromCache(playerStats.PrimaryRuneSubFour),
                     SecondaryRuneStyle = CreateLccRuneInformationFromCache(playerStats.SecondaryRuneStyle),
                     SecondaryRuneSubOne = CreateLccRuneInformationFromCache(playerStats.SecondaryRuneSubOne),
-                    SecondaryRuneSubTwo = CreateLccRuneInformationFromCache(playerStats.SecondaryRuneSubTwo)
+                    SecondaryRuneSubTwo = CreateLccRuneInformationFromCache(playerStats.SecondaryRuneSubTwo),
+                    Timeline = CreateLccMatchTimelineFromCache(playerStats.Timeline)
                 };
             }
             catch (Exception)
@@ -162,6 +224,68 @@ namespace LccWebAPI.Controllers.Utils.Match
                 ImageFull = item?.ImageFull
             };
         }
+
+        private LccMatchTimeline CreateLccMatchTimelineFromCache(Db_LccMatchTimeline dbTimeline)
+        {
+            LccMatchTimeline matchTimeline = new LccMatchTimeline
+            {
+                FrameInterval = dbTimeline.FrameInterval,
+                Frames = ConvertDbMatchTimelineFramesToLccMatchTimelineFrames(dbTimeline.Frames.ToList())
+            };
+
+            return matchTimeline;
+        }
+
+        private IList<LccMatchTimelineFrame> ConvertDbMatchTimelineFramesToLccMatchTimelineFrames(IList<Db_LccMatchTimelineFrame> dbFrames)
+        {
+            IList<LccMatchTimelineFrame> frames = new List<LccMatchTimelineFrame>();
+
+            foreach(Db_LccMatchTimelineFrame frame in dbFrames)
+            {
+                frames.Add(new LccMatchTimelineFrame()
+                {
+                    Timestamp = frame.Timestamp,
+                    Events = CreateLccMatchTimelineEventsFromDbMatchTimelineEvents(frame.Events.ToList())
+
+                });
+            }
+
+            return frames;
+        }
+
+        private IList<LccMatchTimelineEvent> CreateLccMatchTimelineEventsFromDbMatchTimelineEvents(IList<Db_MatchTimelineEvent> dbEvents)
+        {
+            IList<LccMatchTimelineEvent> events = new List<LccMatchTimelineEvent>();
+
+            foreach(Db_MatchTimelineEvent ev in dbEvents)
+            {
+                events.Add(new LccMatchTimelineEvent()
+                {
+                    Type = ev.Type,
+                    Timestamp = ev.Timestamp,
+                    ParticipantId = ev.ParticipantId,
+                    ItemId = ev.ItemId,
+                    SkillSlot = ev.SkillSlot,
+                    LevelUpType = ev.LevelUpType,
+                    WardType = ev.WardType,
+                    CreatorId = ev.CreatorId,
+                    KillerId = ev.KillerId,
+                    VictimId = ev.VictimId,
+                    AfterId = ev.AfterId,
+                    BeforeId = ev.BeforeId,
+                    TeamId = ev.TeamId,
+                    BuildingType = ev.BuildingType,
+                    LaneType = ev.LaneType,
+                    TowerType = ev.TowerType,
+                    MonsterType = ev.MonsterType,
+                    MonsterSubType = ev.MonsterSubType
+                });
+            }
+            
+            return events;
+        }
+
+
         #endregion
 
         #region Riot match information -> CachedInformation
@@ -189,6 +313,7 @@ namespace LccWebAPI.Controllers.Utils.Match
                     (
                         match, 
                         match.Participants.Where(x => x.TeamId == usersTeamId).ToList(),
+                        timeline,
                         match.Participants.FirstOrDefault(x => x.ChampionId == usersChampionId).TeamId
                     );
 
@@ -197,10 +322,9 @@ namespace LccWebAPI.Controllers.Utils.Match
                     (
                         match,
                         match.Participants.Where(x => x.TeamId != usersTeamId).ToList(),
+                        timeline,
                         match.Participants.FirstOrDefault(x => x.ChampionId != usersChampionId).TeamId
                     );
-
-                cachedMatchupInformation.Timeline = CreateMatchTimelineFromRiotTimeline(timeline);
                 
                 return cachedMatchupInformation;
             }
@@ -212,7 +336,7 @@ namespace LccWebAPI.Controllers.Utils.Match
             return new Db_LccCachedCalculatedMatchupInfo();
         }
         
-        private async Task<Db_LccCachedTeamInformation> CreateCachedTeamInformationFromRiotMatch(RiotSharp.Endpoints.MatchEndpoint.Match match, IList<Participant> teamParticipants, int teamId)
+        private async Task<Db_LccCachedTeamInformation> CreateCachedTeamInformationFromRiotMatch(RiotSharp.Endpoints.MatchEndpoint.Match match, IList<Participant> teamParticipants, Timeline timeline, int teamId)
         {
             Db_LccCachedTeamInformation teamInformation = new Db_LccCachedTeamInformation
             {
@@ -233,7 +357,8 @@ namespace LccWebAPI.Controllers.Utils.Match
                     CreateCachedPlayerStatsFromMatchupInfo
                     (
                         participantIdentity, 
-                        participant
+                        participant,
+                        timeline
                     )
                 );
             }
@@ -241,7 +366,7 @@ namespace LccWebAPI.Controllers.Utils.Match
             return teamInformation;
         }
 
-        private async Task<Db_LccCachedPlayerStats> CreateCachedPlayerStatsFromMatchupInfo(ParticipantIdentity participantIdentity, Participant participant)
+        private async Task<Db_LccCachedPlayerStats> CreateCachedPlayerStatsFromMatchupInfo(ParticipantIdentity participantIdentity, Participant participant, Timeline timeline)
         {
             try
             {
@@ -279,7 +404,8 @@ namespace LccWebAPI.Controllers.Utils.Match
                     PrimaryRuneSubFour = CreateCachedRuneInformation(Convert.ToInt32(participant.Stats.Perk3)),
                     SecondaryRuneStyle = CreateCachedRuneInformation(Convert.ToInt32(participant.Stats.PerkSubStyle)),
                     SecondaryRuneSubOne = CreateCachedRuneInformation(Convert.ToInt32(participant.Stats.Perk4)),
-                    SecondaryRuneSubTwo = CreateCachedRuneInformation(Convert.ToInt32(participant.Stats.Perk5))
+                    SecondaryRuneSubTwo = CreateCachedRuneInformation(Convert.ToInt32(participant.Stats.Perk5)),
+                    Timeline = CreateMatchTimelineForParticipantFromRiotTimeline(timeline, participant.ParticipantId)
                 };
             }
             catch (Exception e)
@@ -290,16 +416,16 @@ namespace LccWebAPI.Controllers.Utils.Match
             return new Db_LccCachedPlayerStats();
         }
 
-        private Db_LccMatchTimeline CreateMatchTimelineFromRiotTimeline(Timeline timeline)
+        private Db_LccMatchTimeline CreateMatchTimelineForParticipantFromRiotTimeline(Timeline timeline, int participantId)
         {
             return new Db_LccMatchTimeline()
             {
                 FrameInterval = timeline.FrameInterval,
-                Frames = CreateDbMatchTimelineFramesFromRiotTimelineFrames(timeline.Frames)
+                Frames = CreateDbMatchTimelineFramesFromRiotTimelineFrames(timeline.Frames, participantId)
             };
         }
 
-        private IList<Db_LccMatchTimelineFrame> CreateDbMatchTimelineFramesFromRiotTimelineFrames(List<Frame> frames)
+        private IList<Db_LccMatchTimelineFrame> CreateDbMatchTimelineFramesFromRiotTimelineFrames(List<Frame> frames, int participantId)
         {
             List<Db_LccMatchTimelineFrame> matchTimelineFrames = new List<Db_LccMatchTimelineFrame>();
 
@@ -308,7 +434,7 @@ namespace LccWebAPI.Controllers.Utils.Match
                 matchTimelineFrames.Add(new Db_LccMatchTimelineFrame()
                 {
                     Timestamp = frame.Timestamp,
-                    Events = CreateDbMatchTimelineEventsFromRiotTimelineEvents(frame.Events)
+                    Events = CreateDbMatchTimelineEventsFromRiotTimelineEvents(frame.Events, participantId)
                 });
 
             }
@@ -316,9 +442,36 @@ namespace LccWebAPI.Controllers.Utils.Match
             return matchTimelineFrames;
         }
 
-        private IList<Db_MatchTimelineEvent> CreateDbMatchTimelineEventsFromRiotTimelineEvents(IList<Event> events)
+        private IList<Db_MatchTimelineEvent> CreateDbMatchTimelineEventsFromRiotTimelineEvents(IList<Event> events, int participantId)
         {
             IList<Db_MatchTimelineEvent> matchtimelineEvents = new List<Db_MatchTimelineEvent>();
+
+            foreach(Event ev in events.Where(x => x.ParticipantId == participantId))
+            {
+                matchtimelineEvents.Add(
+                    new Db_MatchTimelineEvent()
+                    {
+                        Type = ev.Type,
+                        Timestamp = ev.Timestamp,
+                        ParticipantId = ev.ParticipantId,
+                        ItemId = ev.ItemId,
+                        SkillSlot = ev.SkillSlot,
+                        LevelUpType = ev.LevelUpType,
+                        WardType = ev.WardType,
+                        CreatorId = ev.CreatorId,
+                        KillerId = ev.KillerId,
+                        VictimId = ev.VictimId,
+                        AfterId = ev.AfterId,
+                        BeforeId = ev.BeforeId,
+                        TeamId = ev.TeamId,
+                        BuildingType = ev.BuildingType,
+                        LaneType = ev.LaneType,
+                        TowerType = ev.TowerType,
+                        MonsterType = ev.MonsterType,
+                        MonsterSubType = ev.MonsterSubType
+                    });
+            }
+
             return matchtimelineEvents;
         }
 

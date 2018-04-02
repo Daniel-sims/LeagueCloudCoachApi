@@ -75,5 +75,7 @@ namespace LccWebAPI.Database.Models.Match
         public virtual Db_LccRune SecondaryRuneSubOne { get; set; }
 
         public virtual Db_LccRune SecondaryRuneSubTwo { get; set; }
+
+        public virtual Db_LccMatchTimeline Timeline { get; set; }
     }
 }

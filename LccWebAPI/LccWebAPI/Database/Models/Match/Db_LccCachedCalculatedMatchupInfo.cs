@@ -27,7 +27,5 @@ namespace LccWebAPI.Database.Models.Match
         public virtual Db_LccCachedTeamInformation FriendlyTeam { get; set; }
 
         public virtual Db_LccCachedTeamInformation EnemyTeam { get; set; }
-
-        public virtual Db_LccMatchTimeline Timeline { get; set; }
     }
 }

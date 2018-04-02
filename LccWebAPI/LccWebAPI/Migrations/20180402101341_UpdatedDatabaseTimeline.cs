@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace LccWebAPI.Migrations
 {
-    public partial class RemovedOnModelCreating : Migration
+    public partial class UpdatedDatabaseTimeline : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -41,6 +41,19 @@ namespace LccWebAPI.Migrations
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Db_LccCachedTeamInformation", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Db_LccMatchTimeline",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    FrameInterval = table.Column<TimeSpan>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Db_LccMatchTimeline", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -132,6 +145,7 @@ namespace LccWebAPI.Migrations
                     FriendlyTeamWin = table.Column<bool>(nullable: false),
                     GameId = table.Column<long>(nullable: false),
                     MatchDate = table.Column<DateTime>(nullable: false),
+                    MatchDuration = table.Column<TimeSpan>(nullable: false),
                     MatchPatch = table.Column<string>(nullable: true)
                 },
                 constraints: table =>
@@ -147,6 +161,26 @@ namespace LccWebAPI.Migrations
                         name: "FK_CalculatedMatchupInformation_Db_LccCachedTeamInformation_FriendlyTeamId",
                         column: x => x.FriendlyTeamId,
                         principalTable: "Db_LccCachedTeamInformation",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Db_LccMatchTimelineFrame",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Db_LccMatchTimelineId = table.Column<int>(nullable: true),
+                    Timestamp = table.Column<TimeSpan>(nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Db_LccMatchTimelineFrame", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Db_LccMatchTimelineFrame_Db_LccMatchTimeline_Db_LccMatchTimelineId",
+                        column: x => x.Db_LccMatchTimelineId,
+                        principalTable: "Db_LccMatchTimeline",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -217,6 +251,7 @@ namespace LccWebAPI.Migrations
                     SummonerName = table.Column<string>(nullable: true),
                     SummonerOneId = table.Column<int>(nullable: true),
                     SummonerTwoId = table.Column<int>(nullable: true),
+                    TimelineId = table.Column<int>(nullable: true),
                     TrinketId = table.Column<int>(nullable: true)
                 },
                 constraints: table =>
@@ -331,9 +366,52 @@ namespace LccWebAPI.Migrations
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
+                        name: "FK_Db_LccCachedPlayerStats_Db_LccMatchTimeline_TimelineId",
+                        column: x => x.TimelineId,
+                        principalTable: "Db_LccMatchTimeline",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
                         name: "FK_Db_LccCachedPlayerStats_Items_TrinketId",
                         column: x => x.TrinketId,
                         principalTable: "Items",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Db_MatchTimelineEvent",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    AfterId = table.Column<long>(nullable: true),
+                    BeforeId = table.Column<long>(nullable: true),
+                    BuildingType = table.Column<string>(nullable: true),
+                    CreatorId = table.Column<long>(nullable: true),
+                    Db_LccMatchTimelineFrameId = table.Column<int>(nullable: true),
+                    ItemId = table.Column<long>(nullable: true),
+                    KillerId = table.Column<long>(nullable: true),
+                    LaneType = table.Column<string>(nullable: true),
+                    LevelUpType = table.Column<string>(nullable: true),
+                    MonsterSubType = table.Column<string>(nullable: true),
+                    MonsterType = table.Column<string>(nullable: true),
+                    ParticipantId = table.Column<long>(nullable: true),
+                    SkillSlot = table.Column<long>(nullable: true),
+                    TeamId = table.Column<long>(nullable: true),
+                    Timestamp = table.Column<long>(nullable: false),
+                    TowerType = table.Column<string>(nullable: true),
+                    Type = table.Column<string>(nullable: true),
+                    VictimId = table.Column<long>(nullable: true),
+                    WardType = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Db_MatchTimelineEvent", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Db_MatchTimelineEvent_Db_LccMatchTimelineFrame_Db_LccMatchTimelineFrameId",
+                        column: x => x.Db_LccMatchTimelineFrameId,
+                        principalTable: "Db_LccMatchTimelineFrame",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -449,9 +527,24 @@ namespace LccWebAPI.Migrations
                 column: "SummonerTwoId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Db_LccCachedPlayerStats_TimelineId",
+                table: "Db_LccCachedPlayerStats",
+                column: "TimelineId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Db_LccCachedPlayerStats_TrinketId",
                 table: "Db_LccCachedPlayerStats",
                 column: "TrinketId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Db_LccMatchTimelineFrame_Db_LccMatchTimelineId",
+                table: "Db_LccMatchTimelineFrame",
+                column: "Db_LccMatchTimelineId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Db_MatchTimelineEvent_Db_LccMatchTimelineFrameId",
+                table: "Db_MatchTimelineEvent",
+                column: "Db_LccMatchTimelineFrameId");
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
@@ -464,6 +557,9 @@ namespace LccWebAPI.Migrations
 
             migrationBuilder.DropTable(
                 name: "Db_LccCachedPlayerStats");
+
+            migrationBuilder.DropTable(
+                name: "Db_MatchTimelineEvent");
 
             migrationBuilder.DropTable(
                 name: "Summoners");
@@ -485,6 +581,12 @@ namespace LccWebAPI.Migrations
 
             migrationBuilder.DropTable(
                 name: "SummonerSpells");
+
+            migrationBuilder.DropTable(
+                name: "Db_LccMatchTimelineFrame");
+
+            migrationBuilder.DropTable(
+                name: "Db_LccMatchTimeline");
         }
     }
 }

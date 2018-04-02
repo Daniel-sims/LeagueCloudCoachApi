@@ -153,6 +153,8 @@ namespace LccWebAPI.Migrations
 
                     b.Property<int?>("SummonerTwoId");
 
+                    b.Property<int?>("TimelineId");
+
                     b.Property<int?>("TrinketId");
 
                     b.HasKey("Id");
@@ -193,6 +195,8 @@ namespace LccWebAPI.Migrations
 
                     b.HasIndex("SummonerTwoId");
 
+                    b.HasIndex("TimelineId");
+
                     b.HasIndex("TrinketId");
 
                     b.ToTable("Db_LccCachedPlayerStats");
@@ -220,6 +224,84 @@ namespace LccWebAPI.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Db_LccCachedTeamInformation");
+                });
+
+            modelBuilder.Entity("LccWebAPI.Database.Models.Match.Db_LccMatchTimeline", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<TimeSpan>("FrameInterval");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Db_LccMatchTimeline");
+                });
+
+            modelBuilder.Entity("LccWebAPI.Database.Models.Match.Db_LccMatchTimelineFrame", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int?>("Db_LccMatchTimelineId");
+
+                    b.Property<TimeSpan>("Timestamp");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Db_LccMatchTimelineId");
+
+                    b.ToTable("Db_LccMatchTimelineFrame");
+                });
+
+            modelBuilder.Entity("LccWebAPI.Database.Models.Match.Db_MatchTimelineEvent", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<long?>("AfterId");
+
+                    b.Property<long?>("BeforeId");
+
+                    b.Property<string>("BuildingType");
+
+                    b.Property<long?>("CreatorId");
+
+                    b.Property<int?>("Db_LccMatchTimelineFrameId");
+
+                    b.Property<long?>("ItemId");
+
+                    b.Property<long?>("KillerId");
+
+                    b.Property<string>("LaneType");
+
+                    b.Property<string>("LevelUpType");
+
+                    b.Property<string>("MonsterSubType");
+
+                    b.Property<string>("MonsterType");
+
+                    b.Property<long?>("ParticipantId");
+
+                    b.Property<long?>("SkillSlot");
+
+                    b.Property<long?>("TeamId");
+
+                    b.Property<long>("Timestamp");
+
+                    b.Property<string>("TowerType");
+
+                    b.Property<string>("Type");
+
+                    b.Property<long?>("VictimId");
+
+                    b.Property<string>("WardType");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Db_LccMatchTimelineFrameId");
+
+                    b.ToTable("Db_MatchTimelineEvent");
                 });
 
             modelBuilder.Entity("LccWebAPI.Database.Models.StaticData.Db_LccChampion", b =>
@@ -406,9 +488,27 @@ namespace LccWebAPI.Migrations
                         .WithMany()
                         .HasForeignKey("SummonerTwoId");
 
+                    b.HasOne("LccWebAPI.Database.Models.Match.Db_LccMatchTimeline", "Timeline")
+                        .WithMany()
+                        .HasForeignKey("TimelineId");
+
                     b.HasOne("LccWebAPI.Database.Models.StaticData.Db_LccItem", "Trinket")
                         .WithMany()
                         .HasForeignKey("TrinketId");
+                });
+
+            modelBuilder.Entity("LccWebAPI.Database.Models.Match.Db_LccMatchTimelineFrame", b =>
+                {
+                    b.HasOne("LccWebAPI.Database.Models.Match.Db_LccMatchTimeline")
+                        .WithMany("Frames")
+                        .HasForeignKey("Db_LccMatchTimelineId");
+                });
+
+            modelBuilder.Entity("LccWebAPI.Database.Models.Match.Db_MatchTimelineEvent", b =>
+                {
+                    b.HasOne("LccWebAPI.Database.Models.Match.Db_LccMatchTimelineFrame")
+                        .WithMany("Events")
+                        .HasForeignKey("Db_LccMatchTimelineFrameId");
                 });
 #pragma warning restore 612, 618
         }
