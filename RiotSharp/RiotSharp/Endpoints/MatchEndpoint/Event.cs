@@ -15,7 +15,7 @@ namespace RiotSharp.Endpoints.MatchEndpoint
         internal Event() { }
 
         [JsonProperty("type")]
-        public string Type { get; set; }
+        public EventType Type { get; set; }
 
         [JsonProperty("timestamp")]
         public long Timestamp { get; set; }

@@ -10,7 +10,7 @@ namespace LccWebAPI.Controllers.Models.Match
     {
         public LccMatchTimelineEvent() { }
 
-        public string Type { get; set; }
+        public EventType Type { get; set; }
 
         public long Timestamp { get; set; }
 

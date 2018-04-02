@@ -15,7 +15,7 @@ namespace LccWebAPI.Database.Models.Match
         [Key]
         public int Id { get; set; }
         
-        public string Type { get; set; }
+        public EventType Type { get; set; }
         
         public long Timestamp { get; set; }
         
