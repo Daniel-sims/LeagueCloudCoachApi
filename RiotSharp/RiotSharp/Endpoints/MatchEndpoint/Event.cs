@@ -18,7 +18,8 @@ namespace RiotSharp.Endpoints.MatchEndpoint
         public EventType Type { get; set; }
 
         [JsonProperty("timestamp")]
-        public long Timestamp { get; set; }
+        [JsonConverter(typeof(TimeSpanConverterFromMilliseconds))]
+        public TimeSpan Timestamp { get; set; }
 
         [JsonProperty("participantId")]
         public long? ParticipantId { get; set; }

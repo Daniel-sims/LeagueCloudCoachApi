@@ -288,7 +288,7 @@ namespace LccWebAPI.Migrations
 
                     b.Property<long?>("TeamId");
 
-                    b.Property<long>("Timestamp");
+                    b.Property<TimeSpan>("Timestamp");
 
                     b.Property<string>("TowerType");
 

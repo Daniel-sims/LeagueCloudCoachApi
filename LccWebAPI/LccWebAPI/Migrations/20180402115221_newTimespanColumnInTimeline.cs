@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace LccWebAPI.Migrations
 {
-    public partial class UpdatedDatabaseTimeline : Migration
+    public partial class newTimespanColumnInTimeline : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
@@ -399,9 +399,9 @@ namespace LccWebAPI.Migrations
                     ParticipantId = table.Column<long>(nullable: true),
                     SkillSlot = table.Column<long>(nullable: true),
                     TeamId = table.Column<long>(nullable: true),
-                    Timestamp = table.Column<long>(nullable: false),
+                    Timestamp = table.Column<TimeSpan>(nullable: false),
                     TowerType = table.Column<string>(nullable: true),
-                    Type = table.Column<string>(nullable: true),
+                    Type = table.Column<int>(nullable: false),
                     VictimId = table.Column<long>(nullable: true),
                     WardType = table.Column<string>(nullable: true)
                 },

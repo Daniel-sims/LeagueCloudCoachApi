@@ -59,7 +59,9 @@ namespace RiotSharp.Endpoints.MatchEndpoint
         public async Task<Timeline> GetMatchTimelineAsync(Region region, long matchId)
         {
             var json = await _requester.CreateGetRequestAsync(TimelinesRootUrl + string.Format(TimelineByMatchIdUrl, matchId), region).ConfigureAwait(false);
+
             var match = JsonConvert.DeserializeObject<Timeline>(json);
+
             return match;
         }
         
@@ -71,6 +73,7 @@ namespace RiotSharp.Endpoints.MatchEndpoint
 
             var json = await _requester.CreateGetRequestAsync(MatchListRootUrl + string.Format(MatchListByAccountIdUrl, accountId),
                 region, addedArguments).ConfigureAwait(false);
+
             return JsonConvert.DeserializeObject<MatchList>(json);
         }
 
@@ -79,6 +82,7 @@ namespace RiotSharp.Endpoints.MatchEndpoint
             var json = await _requester.CreateGetRequestAsync(
                 MatchListRootUrl + string.Format(MatchListByAccountIdRecentUrl, summonerId),
                 region).ConfigureAwait(false);
+
             return JsonConvert.DeserializeObject<MatchList>(json).Matches;
         }
 

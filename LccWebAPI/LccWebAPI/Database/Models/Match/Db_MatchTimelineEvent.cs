@@ -17,7 +17,7 @@ namespace LccWebAPI.Database.Models.Match
         
         public EventType Type { get; set; }
         
-        public long Timestamp { get; set; }
+        public TimeSpan Timestamp { get; set; }
         
         public long? ParticipantId { get; set; }
         

@@ -12,8 +12,8 @@ using System;
 namespace LccWebAPI.Migrations
 {
     [DbContext(typeof(LccDatabaseContext))]
-    [Migration("20180402102637_UpdateEventTypeToBeEnum")]
-    partial class UpdateEventTypeToBeEnum
+    [Migration("20180402115221_newTimespanColumnInTimeline")]
+    partial class newTimespanColumnInTimeline
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -289,7 +289,7 @@ namespace LccWebAPI.Migrations
 
                     b.Property<long?>("TeamId");
 
-                    b.Property<long>("Timestamp");
+                    b.Property<TimeSpan>("Timestamp");
 
                     b.Property<string>("TowerType");
 
