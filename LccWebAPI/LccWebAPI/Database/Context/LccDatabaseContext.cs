@@ -13,7 +13,9 @@ namespace LccWebAPI.Database.Context
 {
     public class LccDatabaseContext : DbContext
     {
-        public LccDatabaseContext(DbContextOptions<LccDatabaseContext> options) : base(options) { }
+        public LccDatabaseContext(DbContextOptions<LccDatabaseContext> options) : base(options)
+        {
+        }
         
         //Basic information stored for quick match lookup
         public DbSet<Db_LccBasicMatchInfo> Matchups { get; set; }

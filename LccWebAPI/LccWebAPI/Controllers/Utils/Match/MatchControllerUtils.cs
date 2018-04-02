@@ -178,7 +178,7 @@ namespace LccWebAPI.Controllers.Utils.Match
                     Timeline = CreateLccMatchTimelineFromCache(playerStats.Timeline)
                 };
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 Console.WriteLine("Exception hit creating the player stats!");
             }
@@ -246,7 +246,6 @@ namespace LccWebAPI.Controllers.Utils.Match
                 {
                     Timestamp = frame.Timestamp,
                     Events = CreateLccMatchTimelineEventsFromDbMatchTimelineEvents(frame.Events.ToList())
-
                 });
             }
 

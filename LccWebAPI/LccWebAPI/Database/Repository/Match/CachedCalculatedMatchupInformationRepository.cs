@@ -26,7 +26,6 @@ namespace LccWebAPI.Database.Repository.Match
         public IEnumerable<Db_LccCachedCalculatedMatchupInfo> GetAllCalculatedMatchups()
         {
             return _lccDatabaseContext.CalculatedMatchupInformation
-                .Include(x => x.EnemyTeam)
                 .Include(x => x.FriendlyTeam)
                 .Include(x => x.EnemyTeam.Players).ThenInclude(y => y.Trinket)
                 .Include(x => x.EnemyTeam.Players).ThenInclude(x => x.ItemOne)
@@ -47,7 +46,7 @@ namespace LccWebAPI.Database.Repository.Match
                 .Include(x => x.EnemyTeam.Players).ThenInclude(x => x.SummonerOne)
                 .Include(x => x.EnemyTeam.Players).ThenInclude(x => x.SummonerTwo)
                 .Include(x => x.EnemyTeam.Players).ThenInclude(x => x.Timeline)
-                .Include(x => x.EnemyTeam.Players).ThenInclude(x => x.Timeline.Frames)
+                .Include(x => x.EnemyTeam.Players).ThenInclude(x => x.Timeline.Frames).ThenInclude(x => x.Events)
                 .Include(x => x.FriendlyTeam.Players).ThenInclude(y => y.Trinket)
                 .Include(x => x.FriendlyTeam.Players).ThenInclude(x => x.ItemOne)
                 .Include(x => x.FriendlyTeam.Players).ThenInclude(x => x.ItemTwo)
@@ -68,6 +67,7 @@ namespace LccWebAPI.Database.Repository.Match
                 .Include(x => x.FriendlyTeam.Players).ThenInclude(x => x.SummonerTwo)
                 .Include(x => x.FriendlyTeam.Players).ThenInclude(x => x.Timeline)
                 .Include(x => x.FriendlyTeam.Players).ThenInclude(x => x.Timeline.Frames)
+                .Include(x => x.FriendlyTeam.Players).ThenInclude(x => x.Timeline.Frames).ThenInclude(x => x.Events)
                 .ToList();
         }
 
