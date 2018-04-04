@@ -52,11 +52,11 @@ namespace LccWebAPI.Services
             Console.WriteLine("#############################");
         }
 
-        private Models.Db.Match CreateMatch()
+        private Models.Db.Match CreateMatch(long testMatchId)
         {
             return new Models.Db.Match
             {
-                GameId = 51122,
+                GameId = testMatchId,
                 Teams = new List<Models.Db.MatchTeam>
                 {
                     new Models.Db.MatchTeam()
@@ -615,10 +615,17 @@ namespace LccWebAPI.Services
                 {
                     using (var dbContext = scope.ServiceProvider.GetRequiredService<DatabaseContext>())
                     {
-                        dbContext.Matches.Add(CreateMatch());
+                        long testMatchId = 5512222;
+
+                        dbContext.Matches.Add(CreateMatch(testMatchId));
                         dbContext.SaveChanges();
 
-                        var s = dbContext.Matches.Include(x => x.Teams).ThenInclude(y => y.Players).FirstOrDefault(x => x.GameId == 51122);
+                        var match = dbContext.Matches
+                            .Include(x => x.Teams).ThenInclude(y => y.Players).ThenInclude(x => x.Runes)
+                            .Include(x => x.Teams).ThenInclude(y => y.Players).ThenInclude(x => x.Items)
+                            .Include(x => x.Teams).ThenInclude(y => y.Players).ThenInclude(x => x.SummonerSpells)
+                            .FirstOrDefault(x => x.GameId == 51122);
+                        await Task.Run(() => Thread.Sleep(100000));
                     }
                 }
 
