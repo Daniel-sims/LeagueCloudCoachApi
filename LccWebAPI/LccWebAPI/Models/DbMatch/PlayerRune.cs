@@ -10,8 +10,9 @@ namespace LccWebAPI.Models.Db
         // Primary Key
         public int Id { get; set; }
 
-        // Data
+        // Game specific data
         public long RuneId { get; set; }
+        public int RuneSlot { get; set; }
 
         // Foreign Key
         public int MatchPlayerId { get; set; }

@@ -5,15 +5,15 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage;
-using Microsoft.EntityFrameworkCore.Storage.Internal;
 using System;
 
 namespace LccWebAPI.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class LccDatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20180404202917_Migration2")]
+    partial class Migration2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -27,14 +27,6 @@ namespace LccWebAPI.Migrations
 
                     b.Property<long>("GameId");
 
-                    b.Property<DateTime>("MatchDate");
-
-                    b.Property<TimeSpan>("MatchDuration");
-
-                    b.Property<string>("MatchPatch");
-
-                    b.Property<int>("WinningTeamId");
-
                     b.HasKey("Id");
 
                     b.ToTable("Matches");
@@ -45,23 +37,9 @@ namespace LccWebAPI.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<int>("Assists");
-
-                    b.Property<int>("ChampionId");
-
-                    b.Property<int>("Deaths");
-
-                    b.Property<int>("Kills");
-
                     b.Property<long>("MatchTeamId");
 
                     b.Property<int?>("MatchTeamId1");
-
-                    b.Property<int>("ParticipantId");
-
-                    b.Property<long>("PlayerId");
-
-                    b.Property<int>("TeamId");
 
                     b.HasKey("Id");
 
@@ -75,17 +53,7 @@ namespace LccWebAPI.Migrations
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<int>("BaronKills");
-
-                    b.Property<int>("DragonKills");
-
-                    b.Property<int>("InhibitorKills");
-
                     b.Property<int>("MatchId");
-
-                    b.Property<int>("RiftHeraldKills");
-
-                    b.Property<int>("TeamId");
 
                     b.HasKey("Id");
 
@@ -100,8 +68,6 @@ namespace LccWebAPI.Migrations
                         .ValueGeneratedOnAdd();
 
                     b.Property<long>("ItemId");
-
-                    b.Property<int>("ItemSlot");
 
                     b.Property<int>("MatchPlayerId");
 
@@ -121,8 +87,6 @@ namespace LccWebAPI.Migrations
 
                     b.Property<long>("RuneId");
 
-                    b.Property<int>("RuneSlot");
-
                     b.HasKey("Id");
 
                     b.HasIndex("MatchPlayerId");
@@ -138,8 +102,6 @@ namespace LccWebAPI.Migrations
                     b.Property<int>("MatchPlayerId");
 
                     b.Property<long>("SummonerSpellId");
-
-                    b.Property<int>("SummonerSpellSlot");
 
                     b.HasKey("Id");
 

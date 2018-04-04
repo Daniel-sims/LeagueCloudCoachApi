@@ -1,7 +1,14 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using LccWebAPI.Database.Context;
+using LccWebAPI.Services;
+using LccWebAPI.Utils;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using RiotSharp;
+using RiotSharp.Interfaces;
 using System;
 using System.Threading.Tasks;
 
@@ -19,25 +26,18 @@ namespace LccWebAPI
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            //services.AddSingleton<IHostedService, MatchDataCollectionService>();
-            //services.AddSingleton<ILogging, Logging>();
-            //services.AddSingleton<IThrottledRequestHelper, ThrottledRequestHelper>();
+            services.AddSingleton<IHostedService, MatchDataCollectionService>();
+            services.AddSingleton<ILogging, Logging>();
+            services.AddSingleton<IThrottledRequestHelper, ThrottledRequestHelper>();
 
-            //services.AddSingleton<IRiotApi>(RiotApi.GetDevelopmentInstance("RGAPI-e495fb49-5211-440e-913d-9cd233ca6a45"));
+            services.AddSingleton<IRiotApi>(RiotApi.GetDevelopmentInstance("RGAPI-e495fb49-5211-440e-913d-9cd233ca6a45"));
             //services.AddSingleton<IStaticDataEndpoints>(StaticDataEndpoints.GetInstance("RGAPI-e495fb49-5211-440e-913d-9cd233ca6a45"));
 
-            //services.AddTransient<ISummonerRepository, SummonerRepository>();
-            //services.AddTransient<IBasicMatchupInformationRepository, BasicMatchupInformationRepository>();
-            //services.AddTransient<ICachedCalculatedMatchupInformationRepository, CachedCalculatedMatchupInformationRepository>();
-            //services.AddTransient<IChampionStaticDataRepository, ChampionStaticDataRepository>();
-            //services.AddTransient<IItemStaticDataRepository, ItemStaticDataRepository>();
-            //services.AddTransient<ISummonerSpellStaticDataRepository,SummonerSpellStaticDataRepository>();
-            //services.AddTransient<IRunesStaticDataRepository, RunesStaticDataRepository>();
             //services.AddTransient<IMatchControllerUtils, MatchControllerUtils>();
 
 
-            //var dbConn = @"Server=(localdb)\mssqllocaldb;Database=LccDatabase;Trusted_Connection=True;ConnectRetryCount=0";
-            //services.AddDbContext<LccDatabaseContext>(options => options.UseSqlServer(dbConn));
+            var dbConn = @"Server=(localdb)\mssqllocaldb;Database=LccDatabase;Trusted_Connection=True;ConnectRetryCount=0";
+            services.AddDbContext<DatabaseContext>(options => options.UseSqlServer(dbConn));
 
             services.AddMvc();
         }

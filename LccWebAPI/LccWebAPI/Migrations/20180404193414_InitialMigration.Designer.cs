@@ -9,7 +9,7 @@ using System;
 
 namespace LccWebAPI.Migrations
 {
-    [DbContext(typeof(LccDatabaseContext))]
+    [DbContext(typeof(DatabaseContext))]
     [Migration("20180404193414_InitialMigration")]
     partial class InitialMigration
     {

@@ -11,7 +11,19 @@ namespace LccWebAPI.Models.Db
         // Primary Key
         public int Id { get; set; }
         
-        // Data 
+        // General player data
+        public long PlayerId { get; set; }
+
+        // Game specific data
+        public int TeamId { get; set; }
+        public int ParticipantId { get; set; }
+
+        public int Kills { get; set; }
+        public int Deaths { get; set; }
+        public int Assists { get; set; }
+
+        public int ChampionId { get; set; }
+        
         public virtual ICollection<PlayerItem> Items { get; set; }
         public virtual ICollection<PlayerRune> Runes { get; set; }
         public virtual ICollection<PlayerSummonerSpell> SummonerSpells { get; set; }

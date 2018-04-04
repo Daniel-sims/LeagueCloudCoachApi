@@ -10,8 +10,13 @@ namespace LccWebAPI.Models.Db
         // Primary Key
         public int Id { get; set; }
 
-        // Data 
+        // Match specific data 
         public virtual ICollection<MatchPlayer> Players { get; set; }
+        public int TeamId { get; set; }
+        public int BaronKills { get; set; }
+        public int DragonKills { get; set; }
+        public int RiftHeraldKills { get; set; }
+        public int InhibitorKills { get; set; }
 
         // Foreign Key
         public int MatchId { get; set; }

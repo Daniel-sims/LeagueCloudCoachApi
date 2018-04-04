@@ -11,6 +11,13 @@ namespace LccWebAPI.Models.Db
         // Primary Key
         public int Id { get; set; }
 
+        // Game specific data
+        public long GameId { get; set; }
+        public DateTime MatchDate { get; set; }
+        public TimeSpan MatchDuration { get; set; }
+        public string MatchPatch { get; set; }
+        public int WinningTeamId { get; set; }
+
         // Data 
         public virtual ICollection<MatchTeam> Teams { get; set; }
     }
