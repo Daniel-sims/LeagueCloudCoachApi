@@ -4,12 +4,14 @@ using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace LccWebAPI.Models.DbMatch
+namespace LccWebAPI.Models.Db
 {
     public class Match
     {
-        //Primary Key
+        // Primary Key
         public int Id { get; set; }
-        
+
+        // Data 
+        public virtual ICollection<MatchTeam> Teams { get; set; }
     }
 }
