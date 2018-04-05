@@ -13,9 +13,9 @@ namespace LccWebAPI.Models.DbMatch
 
         // Game specific data
         public long GameId { get; set; }
-        public DateTime MatchDate { get; set; }
-        public TimeSpan MatchDuration { get; set; }
-        public string MatchPatch { get; set; }
+        public DateTime GameDate { get; set; }
+        public TimeSpan GameDuration { get; set; }
+        public string GamePatch { get; set; }
         public int WinningTeamId { get; set; }
 
         // Data 

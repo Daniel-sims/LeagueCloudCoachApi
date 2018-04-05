@@ -18,15 +18,78 @@ namespace LccWebAPI.Models.DbMatch
         public int TeamId { get; set; }
         public int ParticipantId { get; set; }
 
-        public int Kills { get; set; }
-        public int Deaths { get; set; }
-        public int Assists { get; set; }
+        public long Kills { get; set; }
+        public long Deaths { get; set; }
+        public long Assists { get; set; }
+        public long TotalMinionsKilled { get; set; }
 
         public int ChampionId { get; set; }
-        
+        public int ChampionLevel { get; set; }
+
         public virtual ICollection<PlayerItem> Items { get; set; }
         public virtual ICollection<PlayerRune> Runes { get; set; }
         public virtual ICollection<PlayerSummonerSpell> SummonerSpells { get; set; }
+        
+        public long GoldEarned { get; set; }
+
+        public long VisionScore { get; set; }
+        public long WardsPlaced { get; set; }
+        public long VisionWardsBoughtInGame { get; set; }
+        public long SightWardsBoughtInGame { get; set; }
+
+        public long TotalDamageTaken { get; set; }
+        public long TotalDamageDealt { get; set; }
+        public long TotalDamageDealtToChampions { get; set; }
+
+        public long TrueDamageTaken { get; set; }
+        public long TrueDamageDealt { get; set; }
+        public long TrueDamageDealtToChampions { get; set; }
+
+        public long MagicalDamageTaken { get; set; }
+        public long MagicDamageDealt { get; set; }
+        public long MagicDamageDealtToChampions { get; set; }
+
+        public long PhysicalDamageTaken { get; set; }
+        public long PhysicalDamageDealt { get; set; }
+        public long PhysicalDamageDealtToChampions { get; set; }
+
+        public bool FirstTowerAssist { get; set; }
+        public bool FirstTowerKill { get; set; }
+        public long TurretKills { get; set; }
+        public long DamageDealtToTurrets { get; set; }
+
+        public long DamageDealtToObjectives { get; set; }
+
+        public bool FirstInhibitorAssist { get; set; }
+        public bool FirstInhibitorKill { get; set; }
+        public long InhibitorKills { get; set; }
+
+        public bool FirstBloodAssist { get; set; }
+        public bool FirstBloodKill { get; set; }
+
+        public long LargestMultiKill { get; set; }
+        public long LargestKillingSpree { get; set; }
+        public long PentaKills { get; set; }
+        public long QuadraKills { get; set; }
+        public long KillingSprees { get; set; }
+        public long DoubleKills { get; set; }
+        
+        public long NeutralMinionsKilled { get; set; }
+        public long NeutralMinionsKilledEnemyJungle { get; set; }
+        public long NeutralMinionsKilledTeamJungle { get; set; }
+
+        //Random info that could be useful
+        public long TimeCCingOthers { get; set; }
+        public long TotalTimeCrowdControlDealt { get; set; }
+
+        public long TotalHeal { get; set; }
+        public long TotalUnitsHealed { get; set; }
+
+        public long ObjectivePlayerScore { get; set; }
+
+        public long LargestCriticalStrike { get; set; }
+
+        public long TotalScoreRank { get; set; }
         
         // Foreign Key
         public long MatchTeamId { get; set; }

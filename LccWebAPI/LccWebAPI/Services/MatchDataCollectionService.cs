@@ -30,6 +30,191 @@ namespace LccWebAPI.Services
             _throttledRequestHelper = throttledRequestHelper;
             _serviceProvider = serviceProvider;
         }
+       
+        protected override async Task ExecuteAsync(CancellationToken cancellationToken)
+        {
+            while (!cancellationToken.IsCancellationRequested)
+            {
+                _logging.LogEvent("MatchDataCollectionService started.");
+
+                using (var scope = _serviceProvider.CreateScope())
+                {
+                    try
+                    {
+                        RiotSharp.Endpoints.LeagueEndpoint.League challengerPlayers = await _throttledRequestHelper.SendThrottledRequest(async () => await _riotApi.League.GetChallengerLeagueAsync(Region.euw, LeagueQueue.RankedSolo));
+                        RiotSharp.Endpoints.LeagueEndpoint.League mastersPlayers = await _throttledRequestHelper.SendThrottledRequest(async () => await _riotApi.League.GetMasterLeagueAsync(Region.euw, LeagueQueue.RankedSolo));
+
+                        IEnumerable<RiotSharp.Endpoints.LeagueEndpoint.LeaguePosition> highEloPlayerEntires = challengerPlayers.Entries.Concat(mastersPlayers.Entries);
+                            
+                        int totalPlayersFound = highEloPlayerEntires.Count();
+                        int currentPlayerCount = 0;
+
+                        _logging.LogEvent("Found " + totalPlayersFound + " summoners.");
+
+                        foreach (RiotSharp.Endpoints.LeagueEndpoint.LeaguePosition highEloPlayer in highEloPlayerEntires)
+                        {
+                            using (var dbContext = scope.ServiceProvider.GetRequiredService<DatabaseContext>())
+                            {
+                                _logging.LogEvent(++currentPlayerCount + "/" + totalPlayersFound + ": " + highEloPlayer.PlayerOrTeamName);
+
+                                RiotSharp.Endpoints.SummonerEndpoint.Summoner summoner = await _throttledRequestHelper.SendThrottledRequest(async () => await _riotApi.Summoner.GetSummonerBySummonerIdAsync(Region.euw, Convert.ToInt64(highEloPlayer.PlayerOrTeamId)));
+
+                                Models.DbSummoner.Summoner dbSummoner = await dbContext.Summoners.FirstOrDefaultAsync(x => x.AccountId == summoner.AccountId);
+
+                                if (dbSummoner == null)
+                                {
+                                    Models.DbSummoner.Summoner newDbSummoner = new Models.DbSummoner.Summoner
+                                    {
+                                        SummonerId = summoner.Id,
+                                        AccountId = summoner.AccountId,
+                                        ProfileIconId = summoner.ProfileIconId,
+                                        Level = summoner.Level,
+                                        RevisionDate = summoner.RevisionDate,
+                                        SummonerName = summoner.Name,
+                                        LastUpdatedDate = new DateTime()
+                                    };
+
+                                    dbContext.Summoners.Add(newDbSummoner);
+                                    await dbContext.SaveChangesAsync();
+
+                                    dbSummoner = newDbSummoner;
+                                }
+
+                                // If the summoner has had updates post the date what we have on our records
+                                // RevisionDate can be anything from a level up to new games played
+                                if (summoner.RevisionDate > dbSummoner.LastUpdatedDate)
+                                {
+                                    /*
+                                        * TODO: Update Summoner information
+                                        *  I.E Level, name...etc
+                                        */
+
+                                    RiotSharp.Endpoints.MatchEndpoint.MatchList matchList = await _throttledRequestHelper.SendThrottledRequest(
+                                        async () =>
+                                        await _riotApi.Match.GetMatchListAsync(
+                                            Region.euw, summoner.AccountId,
+                                            null,
+                                            null,
+                                            null,
+                                            dbSummoner.LastUpdatedDate, //From date
+                                            DateTime.Now,               //To date
+                                            0,                          //starting index
+                                            75));                       //ending index
+
+                                    if (matchList != null && matchList?.Matches != null)
+                                    {
+                                        foreach (RiotSharp.Endpoints.MatchEndpoint.MatchReference match in matchList?.Matches)
+                                        {
+                                            Models.DbMatch.Match newDbMatch = ConvertRiotMatchReferenceToDbMatch(match);
+                                            if(newDbMatch != null)
+                                            {
+                                                dbContext.Matches.Add(newDbMatch);
+                                                await dbContext.SaveChangesAsync();
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    catch (RiotSharp.RiotSharpException ex)
+                    {
+                        _logging.LogEvent(" RiotSharpException: " + ex.Message);
+                    }
+                    catch(Exception ex)
+                    {
+                        _logging.LogEvent(" Exception: " + ex.Message);
+                    } 
+                }
+            }
+        }
+
+        private async Task<Models.DbMatch.Match> ConvertRiotMatchReferenceToDbMatch(RiotSharp.Endpoints.MatchEndpoint.MatchReference riotMatchReference)
+        {
+            try
+            {
+                Models.DbMatch.Match newDbMatch = new Models.DbMatch.Match();
+
+                RiotSharp.Endpoints.MatchEndpoint.Match riotMatch = await _riotApi.Match.GetMatchAsync(Region.euw, riotMatchReference.GameId);
+
+                if (riotMatch != null)
+                {
+                    newDbMatch.GameId = riotMatch.GameId;
+                    newDbMatch.GameDuration = riotMatch.GameDuration;
+                    newDbMatch.GameDate = riotMatch.GameCreation;
+                    newDbMatch.GamePatch = riotMatch.GameVersion;
+                    newDbMatch.WinningTeamId = riotMatch.Participants.FirstOrDefault(x => x.Stats.Win).TeamId;
+
+                    IEnumerable<RiotSharp.Endpoints.MatchEndpoint.Participant> winningTeamParticipants = riotMatch.Participants.Where(x => x.TeamId == newDbMatch.WinningTeamId);
+                    RiotSharp.Endpoints.MatchEndpoint.TeamStats winningTeamstats = riotMatch.Teams.FirstOrDefault(x => x.TeamId == newDbMatch.WinningTeamId);
+
+                    IEnumerable<RiotSharp.Endpoints.MatchEndpoint.Participant> losingTeamParticipants = riotMatch.Participants.Where(x => x.TeamId != newDbMatch.WinningTeamId);
+                    RiotSharp.Endpoints.MatchEndpoint.TeamStats losingTeamStats = riotMatch.Teams.FirstOrDefault(x => x.TeamId != newDbMatch.WinningTeamId);
+                    
+                    return newDbMatch;
+                }
+            }
+            catch(Exception e)
+            {
+                _logging.LogEvent(" Exception hit when converting Riot Match Reference to DbMatch. Reason: " + e.Message);
+            }
+            
+            return null;
+        }
+
+        private async Task<Models.DbMatch.MatchTeam> ConvertRiotParticipantsToDbTeam(IEnumerable<RiotSharp.Endpoints.MatchEndpoint.Participant> participants, RiotSharp.Endpoints.MatchEndpoint.TeamStats teamStats)
+        {
+            Models.DbMatch.MatchTeam team = new Models.DbMatch.MatchTeam
+            {
+                BaronKills = teamStats.BaronKills,
+                DragonKills = teamStats.DragonKills,
+                InhibitorKills = teamStats.InhibitorKills,
+                RiftHeraldKills = teamStats.RiftHeraldKills
+            };
+
+            foreach (RiotSharp.Endpoints.MatchEndpoint.Participant participant in participants)
+            {
+                try
+                {
+                    team.Players.Add
+                    (
+                        new Models.DbMatch.MatchPlayer()
+                        {
+                            TeamId = participant.TeamId,
+                            ParticipantId = participant.ParticipantId,
+                            Kills = participant.Stats.Kills,
+                            Deaths = participant.Stats.Deaths,
+                            Assists = participant.Stats.Assists,
+                            ChampionId = participant.ChampionId,
+                            SummonerSpells = new List<Models.DbMatch.PlayerSummonerSpell>()
+                            {
+                                new Models.DbMatch.PlayerSummonerSpell()
+                                {
+                                    SummonerSpellId = participant.Spell1Id,
+                                    SummonerSpellSlot = 0
+                                },
+                                new Models.DbMatch.PlayerSummonerSpell()
+                                {
+                                    SummonerSpellId = participant.Spell2Id,
+                                    SummonerSpellSlot = 1
+                                }
+                            },
+
+
+                        }
+                    );
+                }
+                catch(Exception e)
+                {
+                    _logging.LogEvent(" Exception encountered when converting Riot Participants to DbTeam. Reason: " + e.Message);
+                }
+            }
+
+            return team;
+        }
+
+        private ICollection<Models.DbMatch.PlayerSummonerSpell> ConvertSu
+
         private Models.DbMatch.Match CreateMatch(long testMatchId)
         {
             return new Models.DbMatch.Match
@@ -576,257 +761,12 @@ namespace LccWebAPI.Services
                                         SummonerSpellSlot = 2
                                     }
                                 }
-                            },
+                            }
                         }
                     }
                 }
             };
         }
-        
-        protected override async Task ExecuteAsync(CancellationToken cancellationToken)
-        {
-            while (!cancellationToken.IsCancellationRequested)
-            {
-                _logging.LogEvent("MatchDataCollectionService started.");
 
-                using (var scope = _serviceProvider.CreateScope())
-                {
-                    using (var dbContext = scope.ServiceProvider.GetRequiredService<DatabaseContext>())
-                    {
-                        try
-                        {
-                            RiotSharp.Endpoints.LeagueEndpoint.League challengerPlayers = await _throttledRequestHelper.SendThrottledRequest(async () => await _riotApi.League.GetChallengerLeagueAsync(Region.euw, LeagueQueue.RankedSolo));
-                            RiotSharp.Endpoints.LeagueEndpoint.League mastersPlayers = await _throttledRequestHelper.SendThrottledRequest(async () => await _riotApi.League.GetMasterLeagueAsync(Region.euw, LeagueQueue.RankedSolo));
-
-                            IEnumerable<RiotSharp.Endpoints.LeagueEndpoint.LeaguePosition> highEloPlayerEntires = challengerPlayers.Entries.Concat(mastersPlayers.Entries);
-                            
-                            int totalPlayersFound = highEloPlayerEntires.Count();
-                            int currentPlayerCount = 0;
-
-                            _logging.LogEvent("Found " + totalPlayersFound + " summoners.");
-
-                            foreach (RiotSharp.Endpoints.LeagueEndpoint.LeaguePosition highEloPlayer in highEloPlayerEntires)
-                            {
-                                _logging.LogEvent(++currentPlayerCount + "/" + totalPlayersFound + ": " + highEloPlayer.PlayerOrTeamName);
-                                
-                                RiotSharp.Endpoints.SummonerEndpoint.Summoner summoner = await _throttledRequestHelper.SendThrottledRequest(async () => await _riotApi.Summoner.GetSummonerBySummonerIdAsync(Region.euw, Convert.ToInt64(highEloPlayer.PlayerOrTeamId)));
-
-                                Models.DbSummoner.Summoner dbSummoner = await dbContext.Summoners.FirstOrDefaultAsync(x => x.AccountId == summoner.AccountId);
-                                
-                                if(dbSummoner == null)
-                                {
-                                    Models.DbSummoner.Summoner newDbSummoner = new Models.DbSummoner.Summoner
-                                    {
-                                        SummonerId = summoner.Id,
-                                        AccountId = summoner.AccountId,
-                                        ProfileIconId = summoner.ProfileIconId,
-                                        Level = summoner.Level,
-                                        RevisionDate = summoner.RevisionDate,
-                                        SummonerName = summoner.Name,
-                                        LastUpdatedDate = new DateTime()
-                                    };
-
-                                    dbContext.Summoners.Add(newDbSummoner);
-                                    await dbContext.SaveChangesAsync();
-
-                                    dbSummoner = newDbSummoner;
-                                }
-
-                                // If the summoner has had updates post the date what we have on our records
-                                // RevisionDate can be anything from a level up to new games played
-                                if(summoner.RevisionDate > dbSummoner.LastUpdatedDate)
-                                {
-                                    /*
-                                     * TODO: Update Summoner information
-                                     *  I.E Level, name...etc
-                                     */
-
-                                    RiotSharp.Endpoints.MatchEndpoint.MatchList matchList = await _throttledRequestHelper.SendThrottledRequest(
-                                        async () => 
-                                        await _riotApi.Match.GetMatchListAsync(
-                                            Region.euw, summoner.AccountId, 
-                                            null, 
-                                            null, 
-                                            null, 
-                                            dbSummoner.LastUpdatedDate, //From date
-                                            DateTime.Now,               //To date
-                                            0,                          //starting index
-                                            75));                       //ending index
-
-                                    if (matchList != null && matchList?.Matches != null)
-                                    {
-
-                                    }
-
-                                }
-                            }
-                        }
-                        catch (RiotSharp.RiotSharpException ex)
-                        {
-                            _logging.LogEvent(" RiotSharpException: " + ex.Message);
-                        }
-                        catch(Exception ex)
-                        {
-                            _logging.LogEvent(" Exception: " + ex.Message);
-                        }
-                        
-                    }
-                }
-
-            //    _logging.LogEvent("MatchDataCollectionService started.");
-
-                    //using (var scope = _serviceScopeFactory.CreateScope())
-                  //  {
-                //        using (var basicMatchupInformationRepository = scope.ServiceProvider.GetRequiredService<IBasicMatchupInformationRepository>())
-                //        using (var summonerRepository = scope.ServiceProvider.GetRequiredService<ISummonerRepository>())
-                //        {
-                //            try
-                //            {
-                //                //_logging.LogEvent("Current matches count - " + matchupInformationRepository.GetAllMatchups().Count());
-
-                //                League challengerPlayers = await _throttledRequestHelper.SendThrottledRequest(async () => await _riotApi.League.GetChallengerLeagueAsync(Region.euw, LeagueQueue.RankedSolo));
-                //                League mastersPlayers = await _throttledRequestHelper.SendThrottledRequest(async () => await _riotApi.League.GetMasterLeagueAsync(Region.euw, LeagueQueue.RankedSolo));
-
-                //                IEnumerable<LeaguePosition> highEloPlayerEntires = challengerPlayers.Entries.Concat(mastersPlayers.Entries);
-
-                //                int totalPlayers = highEloPlayerEntires.Count();
-                //                int currentCount = 0;
-
-                //                foreach (var highEloPlayer in highEloPlayerEntires)
-                //                {
-                //                    _logging.LogEvent(++currentCount + "/" + totalPlayers + " - " + highEloPlayer.PlayerOrTeamName);
-
-                //                    Summoner summoner = await _throttledRequestHelper.SendThrottledRequest(async () => await _riotApi.Summoner.GetSummonerBySummonerIdAsync(RiotSharp.Misc.Region.euw, Convert.ToInt64(highEloPlayer.PlayerOrTeamId)));
-
-                //                    Db_LccSummoner summonerInDatabase = summonerRepository.GetSummonerByAccountId(summoner.AccountId);
-                //                    if (summoner != null && summonerInDatabase == null)
-                //                    {
-                //                        summonerRepository.InsertSummoner(
-                //                            new Db_LccSummoner()
-                //                            {
-                //                                AccountId = summoner.AccountId,
-                //                                SummonerName = summoner.Name,
-                //                                LastUpdatedTime = DateTime.Now
-
-                //                            });
-
-                //                        newSummonersAddedToDatabaseTotal++;
-                //                        newSummonersAddedThisSession++;
-
-                //                        MatchList matchList = await _throttledRequestHelper.SendThrottledRequest(async () => await _riotApi.Match.GetMatchListAsync(Region.euw, summoner.AccountId, null, null, null, null, null, 0, 75));
-                //                        if (matchList != null && matchList?.Matches != null)
-                //                        {
-                //                            await GetRiotMatchupInformationAndAddIfNotExisting(basicMatchupInformationRepository, matchList, highEloPlayerEntires);
-                //                        }
-                //                    }
-                //                    else
-                //                    {
-                //                        DateTime lastUpdatedDate = summonerInDatabase.LastUpdatedTime;
-                //                        DateTime lastRevisionDateFromRiot = summoner.RevisionDate;
-
-                //                        if (lastRevisionDateFromRiot > lastUpdatedDate)
-                //                        {
-                //                            summonerInDatabase.LastUpdatedTime = summoner.RevisionDate;
-                //                            summonerRepository.UpdateSummoner(summonerInDatabase);
-
-                //                            MatchList newMatches = await _throttledRequestHelper.SendThrottledRequest(async () => await _riotApi.Match.GetMatchListAsync(RiotSharp.Misc.Region.euw, summoner.AccountId, null, null, null, lastUpdatedDate, DateTime.Now, 0, 25));
-                //                            if (newMatches != null && newMatches?.Matches != null)
-                //                            {
-                //                                await GetRiotMatchupInformationAndAddIfNotExisting(basicMatchupInformationRepository, newMatches, highEloPlayerEntires);
-                //                            }
-                //                        }
-                //                    }
-
-                //                    summonerRepository.Save();
-                //                }
-                //            }
-                //            catch (RiotSharpException e)
-                //            {
-                //                _logging.LogEvent("RiotSharpException encountered - " + e.Message + ".");
-                //                if (e.HttpStatusCode == (HttpStatusCode)429)
-                //                {
-                //                    _logging.LogEvent("RateLimitExceeded exception - Sleeping for 50 seconds.");
-                //                    await Task.Run(() => Thread.Sleep(50 * 1000));
-                //                }
-                //            }
-                //            catch (Exception e)
-                //            {
-                //                _logging.LogEvent("Exception encountered - " + e.Message + ".");
-                //            }
-                //        }
-                //    }
-
-                //    PrintSummary();
-
-                //    matchesUpdatedThisSession = 0;
-                //    newSummonersAddedThisSession = 0;
-
-                //    _logging.LogEvent("MatchDataCollectionService finished, will wait 10 minutes and start again.");
-                //    await Task.Run(() => Thread.Sleep(600000));
-            }
-        }
-        
-        //private async Task GetRiotMatchupInformationAndAddIfNotExisting(IBasicMatchupInformationRepository matchupInformationRepository, MatchList matchlist, IEnumerable<LeaguePosition> highEloPlayerEntires)
-        //{
-            //foreach (var match in matchlist?.Matches)
-            //{
-            //    var m = matchupInformationRepository.GetMatchupByGameId(match.GameId);
-            //    if(m != null)
-            //    {
-            //        int i = 0;
-            //        i++;
-            //    }
-
-            //    if (match.Queue == LeagueQueue.RankedSoloId && m == null)
-            //    {
-            //        Match riotMatchInformation = await _throttledRequestHelper.SendThrottledRequest<Match>(async () => await _riotApi.Match.GetMatchAsync(RiotSharp.Misc.Region.euw, match.GameId));
-                    
-            //        if (riotMatchInformation != null & riotMatchInformation?.Participants != null)
-            //        {
-            //            var winningTeamId = riotMatchInformation.Teams.Find(x => x.Win == MatchOutcome.Win).TeamId;
-
-            //            List<Db_LccBasicMatchInfoPlayer> winningTeam = new List<Db_LccBasicMatchInfoPlayer>();
-            //            List<Db_LccBasicMatchInfoPlayer> losingTeam = new List<Db_LccBasicMatchInfoPlayer>();
-
-            //            foreach (Participant player in riotMatchInformation.Participants)
-            //            {
-            //                Player matchPlayer = riotMatchInformation.ParticipantIdentities.FirstOrDefault(x => x.ParticipantId == player.ParticipantId).Player;
-
-            //                Db_LccBasicMatchInfoPlayer lccMatchupInformationPlayer = 
-            //                    new Db_LccBasicMatchInfoPlayer()
-            //                    {
-            //                        ChampionId = player.ChampionId,
-            //                        Lane = player.Timeline.Lane,
-            //                        PlayerAccountId = matchPlayer.AccountId,
-            //                        SummonerName = matchPlayer.SummonerName
-            //                    };
-
-            //                if (player.TeamId == winningTeamId)
-            //                {
-            //                    winningTeam.Add(lccMatchupInformationPlayer);
-            //                }
-            //                else
-            //                {
-            //                    losingTeam.Add(lccMatchupInformationPlayer);
-            //                }
-            //            }
-
-            //            matchupInformationRepository.InsertMatchup(
-            //                new Db_LccBasicMatchInfo()
-            //                {
-            //                    GameId = match.GameId,
-            //                    MatchDate = match.Timestamp,
-            //                    WinningTeamChampions = winningTeam,
-            //                    LosingTeamChampions = losingTeam
-            //                });
-
-            //            matchesUpdatedTotal++;
-            //            matchesUpdatedThisSession++;
-
-            //            _logging.LogEvent("Added new matchup No:" + matchesUpdatedTotal);
-            //        }
-            //    }
-            //}
-       // }
     }
 }
