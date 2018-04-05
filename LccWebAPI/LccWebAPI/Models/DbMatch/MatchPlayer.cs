@@ -24,7 +24,7 @@ namespace LccWebAPI.Models.DbMatch
         public long TotalMinionsKilled { get; set; }
 
         public int ChampionId { get; set; }
-        public int ChampionLevel { get; set; }
+        public long ChampionLevel { get; set; }
 
         public virtual ICollection<PlayerItem> Items { get; set; } = new List<PlayerItem>();
         public virtual long TrinketId { get; set; }
@@ -32,13 +32,17 @@ namespace LccWebAPI.Models.DbMatch
         public virtual ICollection<PlayerRune> Runes { get; set; } = new List<PlayerRune>();
         public virtual ICollection<PlayerSummonerSpell> SummonerSpells { get; set; } = new List<PlayerSummonerSpell>();
         
+        //Gold
         public long GoldEarned { get; set; }
+        public long GoldSpent { get; set; }
 
+        //Vision
         public long VisionScore { get; set; }
         public long WardsPlaced { get; set; }
         public long VisionWardsBoughtInGame { get; set; }
         public long SightWardsBoughtInGame { get; set; }
 
+        //Damage dealt/taken
         public long TotalDamageTaken { get; set; }
         public long TotalDamageDealt { get; set; }
         public long TotalDamageDealtToChampions { get; set; }
@@ -54,18 +58,23 @@ namespace LccWebAPI.Models.DbMatch
         public long PhysicalDamageTaken { get; set; }
         public long PhysicalDamageDealt { get; set; }
         public long PhysicalDamageDealtToChampions { get; set; }
+        
+        public long LargestCriticalStrike { get; set; }
 
+        // Objectives
         public bool FirstTowerAssist { get; set; }
         public bool FirstTowerKill { get; set; }
         public long TurretKills { get; set; }
         public long DamageDealtToTurrets { get; set; }
-
-        public long DamageDealtToObjectives { get; set; }
-
+        
         public bool FirstInhibitorAssist { get; set; }
         public bool FirstInhibitorKill { get; set; }
         public long InhibitorKills { get; set; }
 
+        public long DamageDealtToObjectives { get; set; }
+        public long ObjectivePlayerScore { get; set; }
+
+        //Kills
         public bool FirstBloodAssist { get; set; }
         public bool FirstBloodKill { get; set; }
 
@@ -76,21 +85,18 @@ namespace LccWebAPI.Models.DbMatch
         public long KillingSprees { get; set; }
         public long DoubleKills { get; set; }
         
+        //Farming
         public long NeutralMinionsKilled { get; set; }
         public long NeutralMinionsKilledEnemyJungle { get; set; }
         public long NeutralMinionsKilledTeamJungle { get; set; }
 
-        //Random info that could be useful
+        //Nusc
         public long TimeCCingOthers { get; set; }
         public long TotalTimeCrowdControlDealt { get; set; }
 
         public long TotalHeal { get; set; }
         public long TotalUnitsHealed { get; set; }
-
-        public long ObjectivePlayerScore { get; set; }
-
-        public long LargestCriticalStrike { get; set; }
-
+        
         public long TotalScoreRank { get; set; }
         
         // Foreign Key

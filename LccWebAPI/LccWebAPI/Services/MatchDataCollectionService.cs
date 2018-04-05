@@ -40,23 +40,23 @@ namespace LccWebAPI.Services
 
                 using (var scope = _serviceProvider.CreateScope())
                 {
-                    try
+                    using (var dbContext = scope.ServiceProvider.GetRequiredService<DatabaseContext>())
                     {
-                        RiotSharp.Endpoints.LeagueEndpoint.League challengerPlayers = await _throttledRequestHelper.SendThrottledRequest(async () => await _riotApi.League.GetChallengerLeagueAsync(Region.euw, LeagueQueue.RankedSolo));
-                        RiotSharp.Endpoints.LeagueEndpoint.League mastersPlayers = await _throttledRequestHelper.SendThrottledRequest(async () => await _riotApi.League.GetMasterLeagueAsync(Region.euw, LeagueQueue.RankedSolo));
-
-                        IEnumerable<RiotSharp.Endpoints.LeagueEndpoint.LeaguePosition> highEloPlayerEntires = challengerPlayers.Entries.Concat(mastersPlayers.Entries);
-                            
-                        int totalPlayersFound = highEloPlayerEntires.Count();
-                        int currentPlayerCount = 0;
-
-                        _logging.LogEvent("Found " + totalPlayersFound + " summoners.");
-
-                        foreach (RiotSharp.Endpoints.LeagueEndpoint.LeaguePosition highEloPlayer in highEloPlayerEntires)
+                        try
                         {
-                            try
+                            RiotSharp.Endpoints.LeagueEndpoint.League challengerPlayers = await _throttledRequestHelper.SendThrottledRequest(async () => await _riotApi.League.GetChallengerLeagueAsync(Region.euw, LeagueQueue.RankedSolo));
+                            RiotSharp.Endpoints.LeagueEndpoint.League mastersPlayers = await _throttledRequestHelper.SendThrottledRequest(async () => await _riotApi.League.GetMasterLeagueAsync(Region.euw, LeagueQueue.RankedSolo));
+
+                            IEnumerable<RiotSharp.Endpoints.LeagueEndpoint.LeaguePosition> highEloPlayerEntires = challengerPlayers.Entries.Concat(mastersPlayers.Entries);
+
+                            int totalPlayersFound = highEloPlayerEntires.Count();
+                            int currentPlayerCount = 0;
+
+                            _logging.LogEvent("Found " + totalPlayersFound + " summoners.");
+
+                            foreach (RiotSharp.Endpoints.LeagueEndpoint.LeaguePosition highEloPlayer in highEloPlayerEntires)
                             {
-                                using (var dbContext = scope.ServiceProvider.GetRequiredService<DatabaseContext>())
+                                try
                                 {
                                     _logging.LogEvent(++currentPlayerCount + "/" + totalPlayersFound + ": " + highEloPlayer.PlayerOrTeamName);
 
@@ -79,8 +79,14 @@ namespace LccWebAPI.Services
 
                                         dbContext.Summoners.Add(newDbSummoner);
                                         await dbContext.SaveChangesAsync();
-
+                                        
                                         dbSummoner = newDbSummoner;
+
+                                        _logging.LogEvent(dbSummoner.SummonerName + " added to our database.");
+                                    }
+                                    else
+                                    {
+                                        _logging.LogEvent(dbSummoner.SummonerName + " already exists in our database.");
                                     }
 
                                     // If the summoner has had updates post the date what we have on our records
@@ -88,9 +94,9 @@ namespace LccWebAPI.Services
                                     if (summoner.RevisionDate > dbSummoner.LastUpdatedDate)
                                     {
                                         /*
-                                            * TODO: Update Summoner information
-                                            *  I.E Level, name...etc
-                                            */
+                                        * TODO: Update Summoner information
+                                        *  I.E Level, name...etc
+                                        */
 
                                         DateTime? collectionFromDate;
                                         DateTime? collectionToDate;
@@ -113,44 +119,57 @@ namespace LccWebAPI.Services
                                                 null,
                                                 null,
                                                 null,
-                                                collectionFromDate,
+                                                collectionFromDate,         //No filter if null on these dates
                                                 collectionToDate,
                                                 0,                          //starting index
-                                                75));                       //ending index
+                                                25));                       //ending index
 
                                         if (matchList != null && matchList?.Matches != null)
                                         {
+                                            _logging.LogEvent(" Found " + matchList?.Matches.Count() + " matches for the summoner " + dbSummoner.SummonerName);
+
                                             foreach (RiotSharp.Endpoints.MatchEndpoint.MatchReference match in matchList?.Matches)
                                             {
-                                                Models.DbMatch.Match newDbMatch = await ConvertRiotMatchReferenceToDbMatch(match);
-                                                if (newDbMatch != null)
+                                                if(!dbContext.Matches.Any(x => x.GameId == match.GameId))
                                                 {
-                                                    dbContext.Matches.Add(newDbMatch);
-                                                    await dbContext.SaveChangesAsync();
+                                                    Models.DbMatch.Match newDbMatch = await ConvertRiotMatchReferenceToDbMatch(match);
+                                                    if (newDbMatch != null)
+                                                    {
+                                                        dbContext.Matches.Add(newDbMatch);
+                                                        await dbContext.SaveChangesAsync();
+
+                                                        _logging.LogEvent(" Added new match " + newDbMatch.GameId);
+                                                    }
+                                                }
+                                                else
+                                                {
+                                                    _logging.LogEvent(" The game " + match.GameId + " already exists in our database.");
                                                 }
                                             }
                                         }
                                     }
                                 }
+                                //This catch block avoids one unhandled exception causing the service to restart
+                                catch (RiotSharp.RiotSharpException ex)
+                                {
+                                    _logging.LogEvent(" RiotSharpException: " + ex.Message);
                                 }
-                            catch (RiotSharp.RiotSharpException ex)
-                            {
-                                _logging.LogEvent(" RiotSharpException: " + ex.Message);
-                            }
-                            catch (Exception ex)
-                            {
-                                _logging.LogEvent(" Exception: " + ex.Message);
+                                catch (Exception ex)
+                                {
+                                    _logging.LogEvent(" Exception: " + ex.Message);
+                                }
                             }
                         }
+                        //This catch block is to stop the app crashing if something goes really tits up somewhere I haven't thought of
+                        catch (RiotSharp.RiotSharpException ex)
+                        {
+                            _logging.LogEvent(" RiotSharpException: " + ex.Message);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logging.LogEvent(" Exception: " + ex.Message);
+                        }
                     }
-                    catch (RiotSharp.RiotSharpException ex)
-                    {
-                        _logging.LogEvent(" RiotSharpException: " + ex.Message);
-                    }
-                    catch(Exception ex)
-                    {
-                        _logging.LogEvent(" Exception: " + ex.Message);
-                    } 
                 }
             }
         }
@@ -161,7 +180,7 @@ namespace LccWebAPI.Services
             {
                 Models.DbMatch.Match newDbMatch = new Models.DbMatch.Match();
 
-                RiotSharp.Endpoints.MatchEndpoint.Match riotMatch = await _riotApi.Match.GetMatchAsync(Region.euw, riotMatchReference.GameId);
+                RiotSharp.Endpoints.MatchEndpoint.Match riotMatch = await _throttledRequestHelper.SendThrottledRequest( async () => await _riotApi.Match.GetMatchAsync(Region.euw, riotMatchReference.GameId));
 
                 if (riotMatch != null)
                 {
@@ -216,10 +235,78 @@ namespace LccWebAPI.Services
                             Deaths = participant.Stats.Deaths,
                             Assists = participant.Stats.Assists,
                             ChampionId = participant.ChampionId,
-                            SummonerSpells = GetSummonerSpellsForParticipant(participant),
+                            ChampionLevel = participant.Stats.ChampLevel,
                             Items = GetItemsForParticipant(participant),
                             TrinketId = participant.Stats.Item6,
-                            Runes = GetRunesForParticipant(participant)
+                            Runes = GetRunesForParticipant(participant),
+                            SummonerSpells = GetSummonerSpellsForParticipant(participant),
+
+                            //Gold
+                            GoldEarned = participant.Stats.GoldEarned,
+                            GoldSpent = participant.Stats.GoldSpent,
+
+                            //Vision
+                            VisionScore = participant.Stats.VisionScore,
+                            WardsPlaced = participant.Stats.WardsPlaced,
+                            VisionWardsBoughtInGame = participant.Stats.VisionWardsBoughtInGame,
+                            SightWardsBoughtInGame = participant.Stats.SightWardsBoughtInGame,
+
+                            //Damage dealt/taken
+                            TotalDamageTaken = participant.Stats.TotalDamageTaken,
+                            TotalDamageDealt = participant.Stats.TotalDamageDealt,
+                            TotalDamageDealtToChampions = participant.Stats.TotalDamageDealtToChampions,
+
+                            TrueDamageTaken = participant.Stats.TrueDamageTaken,
+                            TrueDamageDealt = participant.Stats.TrueDamageDealt,
+                            TrueDamageDealtToChampions = participant.Stats.TrueDamageDealtToChampions,
+
+                            MagicalDamageTaken = participant.Stats.MagicalDamageTaken,
+                            MagicDamageDealt = participant.Stats.MagicDamageDealt,
+                            MagicDamageDealtToChampions = participant.Stats.MagicDamageDealtToChampions,
+
+                            PhysicalDamageTaken = participant.Stats.PhysicalDamageTaken,
+                            PhysicalDamageDealt = participant.Stats.PhysicalDamageDealt,
+                            PhysicalDamageDealtToChampions = participant.Stats.PhysicalDamageDealtToChampions,
+
+                            LargestCriticalStrike = participant.Stats.LargestCriticalStrike,
+
+                            //objectives
+                            FirstTowerAssist = participant.Stats.FirstTowerAssist,
+                            FirstTowerKill = participant.Stats.FirstTowerKill,
+                            TurretKills = participant.Stats.TurretKills,
+                            DamageDealtToTurrets = participant.Stats.DamageDealtToTurrets,
+                            
+                            FirstInhibitorAssist = participant.Stats.FirstInhibitorAssist,
+                            FirstInhibitorKill = participant.Stats.FirstInhibitorKill,
+                            InhibitorKills = participant.Stats.InhibitorKills,
+                            
+                            DamageDealtToObjectives = participant.Stats.DamageDealtToObjectives,
+                            ObjectivePlayerScore = participant.Stats.ObjectivePlayerScore,
+
+                            //Kills
+                            FirstBloodAssist = participant.Stats.FirstBloodAssist,
+                            FirstBloodKill = participant.Stats.FirstBloodKill,
+
+                            LargestMultiKill = participant.Stats.LargestMultiKill,
+                            LargestKillingSpree = participant.Stats.LargestKillingSpree,
+                            PentaKills = participant.Stats.PentaKills,
+                            QuadraKills = participant.Stats.QuadraKills,
+                            KillingSprees = participant.Stats.KillingSprees,
+                            DoubleKills = participant.Stats.DoubleKills,
+
+                            //Farming
+                            NeutralMinionsKilled = participant.Stats.NeutralMinionsKilled,
+                            NeutralMinionsKilledEnemyJungle = participant.Stats.NeutralMinionsKilledEnemyJungle,
+                            NeutralMinionsKilledTeamJungle = participant.Stats.NeutralMinionsKilledTeamJungle,
+
+                            //Misc info
+                            TimeCCingOthers = participant.Stats.TimeCCingOthers,
+                            TotalTimeCrowdControlDealt = participant.Stats.TotalTimeCrowdControlDealt,
+
+                            TotalHeal = participant.Stats.TotalHeal,
+                            TotalUnitsHealed = participant.Stats.TotalUnitsHealed,
+                            
+                            TotalScoreRank = participant.Stats.TotalScoreRank
                         }
                     );
                 }
@@ -238,32 +325,32 @@ namespace LccWebAPI.Services
 
             try
             {
-                if (participant.Stats.Item0 != 0)
+                if (participant?.Stats?.Item0 != 0)
                 {
                     items.Add(new Models.DbMatch.PlayerItem() { ItemId = participant.Stats.Item0, ItemSlot = 0});
                 }
 
-                if (participant.Stats.Item1 != 0)
+                if (participant?.Stats.Item1 != 0)
                 {
                     items.Add(new Models.DbMatch.PlayerItem() { ItemId = participant.Stats.Item1, ItemSlot = 1 });
                 }
 
-                if (participant.Stats.Item2 != 0)
+                if (participant?.Stats?.Item2 != 0)
                 {
                     items.Add(new Models.DbMatch.PlayerItem() { ItemId = participant.Stats.Item2, ItemSlot = 2 });
                 }
 
-                if (participant.Stats.Item3 != 0)
+                if (participant?.Stats?.Item3 != 0)
                 {
                     items.Add(new Models.DbMatch.PlayerItem() { ItemId = participant.Stats.Item3, ItemSlot = 3 });
                 }
 
-                if (participant.Stats.Item4 != 0)
+                if (participant?.Stats?.Item4 != 0)
                 {
                     items.Add(new Models.DbMatch.PlayerItem() { ItemId = participant.Stats.Item4, ItemSlot = 4 });
                 }
 
-                if (participant.Stats.Item5 != 0)
+                if (participant?.Stats?.Item5 != 0)
                 {
                     items.Add(new Models.DbMatch.PlayerItem() { ItemId = participant.Stats.Item5, ItemSlot = 5 });
                 }
@@ -280,6 +367,61 @@ namespace LccWebAPI.Services
         {
             ICollection<Models.DbMatch.PlayerRune> runes = new List<Models.DbMatch.PlayerRune>();
 
+            try
+            {
+                //Primary Style
+                if(participant?.Stats?.PerkPrimaryStyle != 0)
+                {
+                    runes.Add(new Models.DbMatch.PlayerRune() { RuneId = participant.Stats.PerkPrimaryStyle, RuneSlot = 0 });
+                }
+
+                //Primary sub style row one
+                if (participant?.Stats?.Perk0 != 0)
+                {
+                    runes.Add(new Models.DbMatch.PlayerRune() { RuneId = participant.Stats.Perk0, RuneSlot = 1 });
+                }
+
+                //Primary sub style row two
+                if (participant?.Stats?.Perk1 != 0)
+                {
+                    runes.Add(new Models.DbMatch.PlayerRune() { RuneId = participant.Stats.Perk1, RuneSlot = 2 });
+                }
+
+                //Primary sub style row three
+                if (participant?.Stats?.Perk2 != 0)
+                {
+                    runes.Add(new Models.DbMatch.PlayerRune() { RuneId = participant.Stats.Perk2, RuneSlot = 3 });
+                }
+
+                //Primary sub style row four
+                if (participant?.Stats?.Perk3 != 0)
+                {
+                    runes.Add(new Models.DbMatch.PlayerRune() { RuneId = participant.Stats.Perk3, RuneSlot = 4 });
+                }
+
+                //secondary Style
+                if (participant?.Stats?.PerkSubStyle != 0)
+                {
+                    runes.Add(new Models.DbMatch.PlayerRune() { RuneId = participant.Stats.PerkSubStyle, RuneSlot = 5 });
+                }
+
+                //secondary sub style row one
+                if (participant?.Stats?.Perk4 != 0)
+                {
+                    runes.Add(new Models.DbMatch.PlayerRune() { RuneId = participant.Stats.Perk4, RuneSlot = 6 });
+                }
+
+                //secondary sub style row two
+                if (participant?.Stats?.Perk5 != 0)
+                {
+                    runes.Add(new Models.DbMatch.PlayerRune() { RuneId = participant.Stats.Perk5, RuneSlot = 7 });
+                }
+            }
+            catch (Exception ex)
+            {
+                _logging.LogEvent(" Exception hit when getting runes for participant : " + ex.Message);
+            }
+
             return runes;
         }
 
@@ -287,562 +429,24 @@ namespace LccWebAPI.Services
         {
             ICollection<Models.DbMatch.PlayerSummonerSpell> summonerSpells = new List<Models.DbMatch.PlayerSummonerSpell>();
 
+            try
+            {
+                if(participant?.Spell1Id != 0)
+                {
+                    summonerSpells.Add(new Models.DbMatch.PlayerSummonerSpell() { SummonerSpellId = participant.Spell1Id, SummonerSpellSlot = 0 });
+                }
+
+                if (participant?.Spell2Id != 0)
+                {
+                    summonerSpells.Add(new Models.DbMatch.PlayerSummonerSpell() { SummonerSpellId = participant.Spell2Id, SummonerSpellSlot = 0 });
+                }
+            }
+            catch(Exception ex)
+            {
+                _logging.LogEvent(" Exception hit when getting summoner spells for participant : " + ex.Message);
+            }
+
             return summonerSpells;
         }
-
-
-        private Models.DbMatch.Match CreateMatch(long testMatchId)
-        {
-            return new Models.DbMatch.Match
-            {
-                GameId = testMatchId,
-                Teams = new List<Models.DbMatch.MatchTeam>
-                {
-                    new Models.DbMatch.MatchTeam()
-                    {
-                        Players = new List<Models.DbMatch.MatchPlayer>()
-                        {
-                            new Models.DbMatch.MatchPlayer()
-                            {
-                                TeamId = 100,
-                                ParticipantId = 1,
-                                Kills = 3,
-                                Deaths = 0,
-                                Assists = 2,
-                                ChampionId = 44,
-                                Items = new List<Models.DbMatch.PlayerItem>()
-                                {
-                                    new Models.DbMatch.PlayerItem()
-                                    {
-                                        ItemId = 412,
-                                        ItemSlot = 1
-                                    },
-                                    new Models.DbMatch.PlayerItem()
-                                    {
-                                        ItemId = 651,
-                                        ItemSlot = 2
-                                    },
-                                    new Models.DbMatch.PlayerItem()
-                                    {
-                                        ItemId = 22,
-                                        ItemSlot = 3
-                                    }
-                                },
-                                Runes = new List<Models.DbMatch.PlayerRune>()
-                                {
-                                    new Models.DbMatch.PlayerRune()
-                                    {
-                                        RuneId = 662,
-                                        RuneSlot = 1
-                                    },
-                                     new Models.DbMatch.PlayerRune()
-                                    {
-                                        RuneId = 41,
-                                        RuneSlot = 2
-                                    }
-                                },
-                                SummonerSpells = new List<Models.DbMatch.PlayerSummonerSpell>()
-                                {
-                                    new Models.DbMatch.PlayerSummonerSpell()
-                                    {
-                                        SummonerSpellId = 22,
-                                        SummonerSpellSlot = 1
-                                    },
-                                    new Models.DbMatch.PlayerSummonerSpell()
-                                    {
-                                        SummonerSpellId = 14,
-                                        SummonerSpellSlot = 2
-                                    }
-                                }
-                            },
-                            new Models.DbMatch.MatchPlayer()
-                            {
-                                TeamId = 100,
-                                ParticipantId = 2,
-                                Kills = 3,
-                                Deaths = 0,
-                                Assists = 2,
-                                ChampionId = 44,
-                                Items = new List<Models.DbMatch.PlayerItem>()
-                                {
-                                    new Models.DbMatch.PlayerItem()
-                                    {
-                                        ItemId = 412,
-                                        ItemSlot = 1
-                                    },
-                                    new Models.DbMatch.PlayerItem()
-                                    {
-                                        ItemId = 651,
-                                        ItemSlot = 2
-                                    },
-                                    new Models.DbMatch.PlayerItem()
-                                    {
-                                        ItemId = 22,
-                                        ItemSlot = 3
-                                    }
-                                },
-                                Runes = new List<Models.DbMatch.PlayerRune>()
-                                {
-                                    new Models.DbMatch.PlayerRune()
-                                    {
-                                        RuneId = 662,
-                                        RuneSlot = 1
-                                    },
-                                     new Models.DbMatch.PlayerRune()
-                                    {
-                                        RuneId = 41,
-                                        RuneSlot = 2
-                                    }
-                                },
-                                SummonerSpells = new List<Models.DbMatch.PlayerSummonerSpell>()
-                                {
-                                    new Models.DbMatch.PlayerSummonerSpell()
-                                    {
-                                        SummonerSpellId = 22,
-                                        SummonerSpellSlot = 1
-                                    },
-                                    new Models.DbMatch.PlayerSummonerSpell()
-                                    {
-                                        SummonerSpellId = 14,
-                                        SummonerSpellSlot = 2
-                                    }
-                                }
-                            },
-                            new Models.DbMatch.MatchPlayer()
-                            {
-                                TeamId = 100,
-                                ParticipantId = 3,
-                                Kills = 3,
-                                Deaths = 0,
-                                Assists = 2,
-                                ChampionId = 44,
-                                Items = new List<Models.DbMatch.PlayerItem>()
-                                {
-                                    new Models.DbMatch.PlayerItem()
-                                    {
-                                        ItemId = 412,
-                                        ItemSlot = 1
-                                    },
-                                    new Models.DbMatch.PlayerItem()
-                                    {
-                                        ItemId = 651,
-                                        ItemSlot = 2
-                                    },
-                                    new Models.DbMatch.PlayerItem()
-                                    {
-                                        ItemId = 22,
-                                        ItemSlot = 3
-                                    }
-                                },
-                                Runes = new List<Models.DbMatch.PlayerRune>()
-                                {
-                                    new Models.DbMatch.PlayerRune()
-                                    {
-                                        RuneId = 662,
-                                        RuneSlot = 1
-                                    },
-                                     new Models.DbMatch.PlayerRune()
-                                    {
-                                        RuneId = 41,
-                                        RuneSlot = 2
-                                    }
-                                },
-                                SummonerSpells = new List<Models.DbMatch.PlayerSummonerSpell>()
-                                {
-                                    new Models.DbMatch.PlayerSummonerSpell()
-                                    {
-                                        SummonerSpellId = 22,
-                                        SummonerSpellSlot = 1
-                                    },
-                                    new Models.DbMatch.PlayerSummonerSpell()
-                                    {
-                                        SummonerSpellId = 14,
-                                        SummonerSpellSlot = 2
-                                    }
-                                }
-                            },
-                            new Models.DbMatch.MatchPlayer()
-                            {
-                                TeamId = 100,
-                                ParticipantId = 4,
-                                Kills = 3,
-                                Deaths = 0,
-                                Assists = 2,
-                                ChampionId = 44,
-                                Items = new List<Models.DbMatch.PlayerItem>()
-                                {
-                                    new Models.DbMatch.PlayerItem()
-                                    {
-                                        ItemId = 412,
-                                        ItemSlot = 1
-                                    },
-                                    new Models.DbMatch.PlayerItem()
-                                    {
-                                        ItemId = 651,
-                                        ItemSlot = 2
-                                    },
-                                    new Models.DbMatch.PlayerItem()
-                                    {
-                                        ItemId = 22,
-                                        ItemSlot = 3
-                                    }
-                                },
-                                Runes = new List<Models.DbMatch.PlayerRune>()
-                                {
-                                    new Models.DbMatch.PlayerRune()
-                                    {
-                                        RuneId = 662,
-                                        RuneSlot = 1
-                                    },
-                                     new Models.DbMatch.PlayerRune()
-                                    {
-                                        RuneId = 41,
-                                        RuneSlot = 2
-                                    }
-                                },
-                                SummonerSpells = new List<Models.DbMatch.PlayerSummonerSpell>()
-                                {
-                                    new Models.DbMatch.PlayerSummonerSpell()
-                                    {
-                                        SummonerSpellId = 22,
-                                        SummonerSpellSlot = 1
-                                    },
-                                    new Models.DbMatch.PlayerSummonerSpell()
-                                    {
-                                        SummonerSpellId = 14,
-                                        SummonerSpellSlot = 2
-                                    }
-                                }
-                            },
-                            new Models.DbMatch.MatchPlayer()
-                            {
-                                TeamId = 100,
-                                ParticipantId = 5,
-                                Kills = 3,
-                                Deaths = 0,
-                                Assists = 2,
-                                ChampionId = 44,
-                                Items = new List<Models.DbMatch.PlayerItem>()
-                                {
-                                    new Models.DbMatch.PlayerItem()
-                                    {
-                                        ItemId = 412,
-                                        ItemSlot = 1
-                                    },
-                                    new Models.DbMatch.PlayerItem()
-                                    {
-                                        ItemId = 651,
-                                        ItemSlot = 2
-                                    },
-                                    new Models.DbMatch.PlayerItem()
-                                    {
-                                        ItemId = 22,
-                                        ItemSlot = 3
-                                    }
-                                },
-                                Runes = new List<Models.DbMatch.PlayerRune>()
-                                {
-                                    new Models.DbMatch.PlayerRune()
-                                    {
-                                        RuneId = 662,
-                                        RuneSlot = 1
-                                    },
-                                     new Models.DbMatch.PlayerRune()
-                                    {
-                                        RuneId = 41,
-                                        RuneSlot = 2
-                                    }
-                                },
-                                SummonerSpells = new List<Models.DbMatch.PlayerSummonerSpell>()
-                                {
-                                    new Models.DbMatch.PlayerSummonerSpell()
-                                    {
-                                        SummonerSpellId = 22,
-                                        SummonerSpellSlot = 1
-                                    },
-                                    new Models.DbMatch.PlayerSummonerSpell()
-                                    {
-                                        SummonerSpellId = 14,
-                                        SummonerSpellSlot = 2
-                                    }
-                                }
-                            },
-                        }
-                    },
-                    new Models.DbMatch.MatchTeam()
-                    {
-                        Players = new List<Models.DbMatch.MatchPlayer>()
-                        {
-                            new Models.DbMatch.MatchPlayer()
-                            {
-                                TeamId = 200,
-                                ParticipantId = 6,
-                                Kills = 3,
-                                Deaths = 0,
-                                Assists = 2,
-                                ChampionId = 44,
-                                Items = new List<Models.DbMatch.PlayerItem>()
-                                {
-                                    new Models.DbMatch.PlayerItem()
-                                    {
-                                        ItemId = 412,
-                                        ItemSlot = 1
-                                    },
-                                    new Models.DbMatch.PlayerItem()
-                                    {
-                                        ItemId = 651,
-                                        ItemSlot = 2
-                                    },
-                                    new Models.DbMatch.PlayerItem()
-                                    {
-                                        ItemId = 22,
-                                        ItemSlot = 3
-                                    }
-                                },
-                                Runes = new List<Models.DbMatch.PlayerRune>()
-                                {
-                                    new Models.DbMatch.PlayerRune()
-                                    {
-                                        RuneId = 662,
-                                        RuneSlot = 1
-                                    },
-                                     new Models.DbMatch.PlayerRune()
-                                    {
-                                        RuneId = 41,
-                                        RuneSlot = 2
-                                    }
-                                },
-                                SummonerSpells = new List<Models.DbMatch.PlayerSummonerSpell>()
-                                {
-                                    new Models.DbMatch.PlayerSummonerSpell()
-                                    {
-                                        SummonerSpellId = 22,
-                                        SummonerSpellSlot = 1
-                                    },
-                                    new Models.DbMatch.PlayerSummonerSpell()
-                                    {
-                                        SummonerSpellId = 14,
-                                        SummonerSpellSlot = 2
-                                    }
-                                }
-                            },
-                            new Models.DbMatch.MatchPlayer()
-                            {
-                                TeamId = 200,
-                                ParticipantId = 7,
-                                Kills = 3,
-                                Deaths = 0,
-                                Assists = 2,
-                                ChampionId = 44,
-                                Items = new List<Models.DbMatch.PlayerItem>()
-                                {
-                                    new Models.DbMatch.PlayerItem()
-                                    {
-                                        ItemId = 412,
-                                        ItemSlot = 1
-                                    },
-                                    new Models.DbMatch.PlayerItem()
-                                    {
-                                        ItemId = 651,
-                                        ItemSlot = 2
-                                    },
-                                    new Models.DbMatch.PlayerItem()
-                                    {
-                                        ItemId = 22,
-                                        ItemSlot = 3
-                                    }
-                                },
-                                Runes = new List<Models.DbMatch.PlayerRune>()
-                                {
-                                    new Models.DbMatch.PlayerRune()
-                                    {
-                                        RuneId = 662,
-                                        RuneSlot = 1
-                                    },
-                                     new Models.DbMatch.PlayerRune()
-                                    {
-                                        RuneId = 41,
-                                        RuneSlot = 2
-                                    }
-                                },
-                                SummonerSpells = new List<Models.DbMatch.PlayerSummonerSpell>()
-                                {
-                                    new Models.DbMatch.PlayerSummonerSpell()
-                                    {
-                                        SummonerSpellId = 22,
-                                        SummonerSpellSlot = 1
-                                    },
-                                    new Models.DbMatch.PlayerSummonerSpell()
-                                    {
-                                        SummonerSpellId = 14,
-                                        SummonerSpellSlot = 2
-                                    }
-                                }
-                            },
-                            new Models.DbMatch.MatchPlayer()
-                            {
-                                TeamId = 200,
-                                ParticipantId = 8,
-                                Kills = 3,
-                                Deaths = 0,
-                                Assists = 2,
-                                ChampionId = 44,
-                                Items = new List<Models.DbMatch.PlayerItem>()
-                                {
-                                    new Models.DbMatch.PlayerItem()
-                                    {
-                                        ItemId = 412,
-                                        ItemSlot = 1
-                                    },
-                                    new Models.DbMatch.PlayerItem()
-                                    {
-                                        ItemId = 651,
-                                        ItemSlot = 2
-                                    },
-                                    new Models.DbMatch.PlayerItem()
-                                    {
-                                        ItemId = 22,
-                                        ItemSlot = 3
-                                    }
-                                },
-                                Runes = new List<Models.DbMatch.PlayerRune>()
-                                {
-                                    new Models.DbMatch.PlayerRune()
-                                    {
-                                        RuneId = 662,
-                                        RuneSlot = 1
-                                    },
-                                     new Models.DbMatch.PlayerRune()
-                                    {
-                                        RuneId = 41,
-                                        RuneSlot = 2
-                                    }
-                                },
-                                SummonerSpells = new List<Models.DbMatch.PlayerSummonerSpell>()
-                                {
-                                    new Models.DbMatch.PlayerSummonerSpell()
-                                    {
-                                        SummonerSpellId = 22,
-                                        SummonerSpellSlot = 1
-                                    },
-                                    new Models.DbMatch.PlayerSummonerSpell()
-                                    {
-                                        SummonerSpellId = 14,
-                                        SummonerSpellSlot = 2
-                                    }
-                                }
-                            },
-                            new Models.DbMatch.MatchPlayer()
-                            {
-                                TeamId = 200,
-                                ParticipantId = 9,
-                                Kills = 3,
-                                Deaths = 0,
-                                Assists = 2,
-                                ChampionId = 44,
-                                Items = new List<Models.DbMatch.PlayerItem>()
-                                {
-                                    new Models.DbMatch.PlayerItem()
-                                    {
-                                        ItemId = 412,
-                                        ItemSlot = 1
-                                    },
-                                    new Models.DbMatch.PlayerItem()
-                                    {
-                                        ItemId = 651,
-                                        ItemSlot = 2
-                                    },
-                                    new Models.DbMatch.PlayerItem()
-                                    {
-                                        ItemId = 22,
-                                        ItemSlot = 3
-                                    }
-                                },
-                                Runes = new List<Models.DbMatch.PlayerRune>()
-                                {
-                                    new Models.DbMatch.PlayerRune()
-                                    {
-                                        RuneId = 662,
-                                        RuneSlot = 1
-                                    },
-                                     new Models.DbMatch.PlayerRune()
-                                    {
-                                        RuneId = 41,
-                                        RuneSlot = 2
-                                    }
-                                },
-                                SummonerSpells = new List<Models.DbMatch.PlayerSummonerSpell>()
-                                {
-                                    new Models.DbMatch.PlayerSummonerSpell()
-                                    {
-                                        SummonerSpellId = 22,
-                                        SummonerSpellSlot = 1
-                                    },
-                                    new Models.DbMatch.PlayerSummonerSpell()
-                                    {
-                                        SummonerSpellId = 14,
-                                        SummonerSpellSlot = 2
-                                    }
-                                }
-                            },
-                            new Models.DbMatch.MatchPlayer()
-                            {
-                                TeamId = 200,
-                                ParticipantId = 10,
-                                Kills = 3,
-                                Deaths = 0,
-                                Assists = 2,
-                                ChampionId = 44,
-                                Items = new List<Models.DbMatch.PlayerItem>()
-                                {
-                                    new Models.DbMatch.PlayerItem()
-                                    {
-                                        ItemId = 412,
-                                        ItemSlot = 1
-                                    },
-                                    new Models.DbMatch.PlayerItem()
-                                    {
-                                        ItemId = 651,
-                                        ItemSlot = 2
-                                    },
-                                    new Models.DbMatch.PlayerItem()
-                                    {
-                                        ItemId = 22,
-                                        ItemSlot = 3
-                                    }
-                                },
-                                Runes = new List<Models.DbMatch.PlayerRune>()
-                                {
-                                    new Models.DbMatch.PlayerRune()
-                                    {
-                                        RuneId = 662,
-                                        RuneSlot = 1
-                                    },
-                                     new Models.DbMatch.PlayerRune()
-                                    {
-                                        RuneId = 41,
-                                        RuneSlot = 2
-                                    }
-                                },
-                                SummonerSpells = new List<Models.DbMatch.PlayerSummonerSpell>()
-                                {
-                                    new Models.DbMatch.PlayerSummonerSpell()
-                                    {
-                                        SummonerSpellId = 22,
-                                        SummonerSpellSlot = 1
-                                    },
-                                    new Models.DbMatch.PlayerSummonerSpell()
-                                    {
-                                        SummonerSpellId = 14,
-                                        SummonerSpellSlot = 2
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            };
-        }
-
     }
 }

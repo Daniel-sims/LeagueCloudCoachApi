@@ -11,9 +11,10 @@ using System;
 namespace LccWebAPI.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20180405174928_addedTrinketId")]
+    partial class addedTrinketId
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -49,7 +50,7 @@ namespace LccWebAPI.Migrations
 
                     b.Property<int>("ChampionId");
 
-                    b.Property<long>("ChampionLevel");
+                    b.Property<int>("ChampionLevel");
 
                     b.Property<long>("DamageDealtToObjectives");
 
@@ -72,8 +73,6 @@ namespace LccWebAPI.Migrations
                     b.Property<bool>("FirstTowerKill");
 
                     b.Property<long>("GoldEarned");
-
-                    b.Property<long>("GoldSpent");
 
                     b.Property<long>("InhibitorKills");
 
