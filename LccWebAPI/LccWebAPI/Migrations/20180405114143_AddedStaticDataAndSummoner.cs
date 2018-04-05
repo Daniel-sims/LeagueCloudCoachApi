@@ -5,20 +5,103 @@ using System.Collections.Generic;
 
 namespace LccWebAPI.Migrations
 {
-    public partial class InitialMigration : Migration
+    public partial class AddedStaticDataAndSummoner : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
+            migrationBuilder.CreateTable(
+                name: "Champions",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    ChampionId = table.Column<int>(nullable: false),
+                    ChampionName = table.Column<string>(nullable: true),
+                    ImageFull = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Champions", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Items",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    ImageFull = table.Column<string>(nullable: true),
+                    ItemId = table.Column<int>(nullable: false),
+                    ItemName = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Items", x => x.Id);
+                });
+
             migrationBuilder.CreateTable(
                 name: "Matches",
                 columns: table => new
                 {
                     Id = table.Column<int>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    GameId = table.Column<long>(nullable: false),
+                    MatchDate = table.Column<DateTime>(nullable: false),
+                    MatchDuration = table.Column<TimeSpan>(nullable: false),
+                    MatchPatch = table.Column<string>(nullable: true),
+                    WinningTeamId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Matches", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Runes",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    ImageFull = table.Column<string>(nullable: true),
+                    RuneId = table.Column<int>(nullable: false),
+                    RuneName = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Runes", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "Summoners",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    AccountId = table.Column<long>(nullable: false),
+                    Level = table.Column<long>(nullable: false),
+                    ProfileIconId = table.Column<int>(nullable: false),
+                    RevisionDate = table.Column<DateTime>(nullable: false),
+                    SummonerId = table.Column<long>(nullable: false),
+                    SummonerName = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Summoners", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
+                name: "SummonerSpells",
+                columns: table => new
+                {
+                    Id = table.Column<int>(nullable: false)
+                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    ImageFull = table.Column<string>(nullable: true),
+                    SummonerSpellId = table.Column<int>(nullable: false),
+                    SummonerSpellName = table.Column<string>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_SummonerSpells", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -27,7 +110,12 @@ namespace LccWebAPI.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
-                    MatchId = table.Column<int>(nullable: false)
+                    BaronKills = table.Column<int>(nullable: false),
+                    DragonKills = table.Column<int>(nullable: false),
+                    InhibitorKills = table.Column<int>(nullable: false),
+                    MatchId = table.Column<int>(nullable: false),
+                    RiftHeraldKills = table.Column<int>(nullable: false),
+                    TeamId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -46,8 +134,15 @@ namespace LccWebAPI.Migrations
                 {
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                    Assists = table.Column<int>(nullable: false),
+                    ChampionId = table.Column<int>(nullable: false),
+                    Deaths = table.Column<int>(nullable: false),
+                    Kills = table.Column<int>(nullable: false),
                     MatchTeamId = table.Column<long>(nullable: false),
-                    MatchTeamId1 = table.Column<int>(nullable: true)
+                    MatchTeamId1 = table.Column<int>(nullable: true),
+                    ParticipantId = table.Column<int>(nullable: false),
+                    PlayerId = table.Column<long>(nullable: false),
+                    TeamId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -67,6 +162,7 @@ namespace LccWebAPI.Migrations
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     ItemId = table.Column<long>(nullable: false),
+                    ItemSlot = table.Column<int>(nullable: false),
                     MatchPlayerId = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
@@ -87,7 +183,8 @@ namespace LccWebAPI.Migrations
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     MatchPlayerId = table.Column<int>(nullable: false),
-                    RuneId = table.Column<long>(nullable: false)
+                    RuneId = table.Column<long>(nullable: false),
+                    RuneSlot = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -107,7 +204,8 @@ namespace LccWebAPI.Migrations
                     Id = table.Column<int>(nullable: false)
                         .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
                     MatchPlayerId = table.Column<int>(nullable: false),
-                    SummonerSpellId = table.Column<long>(nullable: false)
+                    SummonerSpellId = table.Column<long>(nullable: false),
+                    SummonerSpellSlot = table.Column<int>(nullable: false)
                 },
                 constraints: table =>
                 {
@@ -149,6 +247,12 @@ namespace LccWebAPI.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropTable(
+                name: "Champions");
+
+            migrationBuilder.DropTable(
+                name: "Items");
+
+            migrationBuilder.DropTable(
                 name: "PlayerItem");
 
             migrationBuilder.DropTable(
@@ -156,6 +260,15 @@ namespace LccWebAPI.Migrations
 
             migrationBuilder.DropTable(
                 name: "PlayerSummonerSpell");
+
+            migrationBuilder.DropTable(
+                name: "Runes");
+
+            migrationBuilder.DropTable(
+                name: "Summoners");
+
+            migrationBuilder.DropTable(
+                name: "SummonerSpells");
 
             migrationBuilder.DropTable(
                 name: "MatchPlayer");

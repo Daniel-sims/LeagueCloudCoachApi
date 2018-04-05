@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace LccWebAPI.Models.Db
+namespace LccWebAPI.Models.DbMatch
 {
     public class MatchPlayer
     {

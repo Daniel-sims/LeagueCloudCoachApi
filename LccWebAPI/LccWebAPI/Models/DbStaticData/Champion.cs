@@ -5,13 +5,13 @@ using System.Threading.Tasks;
 
 namespace LccWebAPI.Models.DbStaticData
 {
-    public class Rune
+    public class Champion
     {
         // Primary Key
         public int Id { get; set; }
 
-        public int RuneId { get; set; }
-        public string RuneName { get; set; }
+        public int ChampionId { get; set; }
+        public string ChampionName { get; set; }
         public string ImageFull { get; set; }
     }
 }

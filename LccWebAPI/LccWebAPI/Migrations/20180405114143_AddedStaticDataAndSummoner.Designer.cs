@@ -11,16 +11,17 @@ using System;
 namespace LccWebAPI.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class LccDatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20180405114143_AddedStaticDataAndSummoner")]
+    partial class AddedStaticDataAndSummoner
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
                 .HasAnnotation("ProductVersion", "2.0.2-rtm-10011")
                 .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-            modelBuilder.Entity("LccWebAPI.Models.Db.Match", b =>
+            modelBuilder.Entity("LccWebAPI.Models.DbMatch.Match", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
@@ -40,7 +41,7 @@ namespace LccWebAPI.Migrations
                     b.ToTable("Matches");
                 });
 
-            modelBuilder.Entity("LccWebAPI.Models.Db.MatchPlayer", b =>
+            modelBuilder.Entity("LccWebAPI.Models.DbMatch.MatchPlayer", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
@@ -70,7 +71,7 @@ namespace LccWebAPI.Migrations
                     b.ToTable("MatchPlayer");
                 });
 
-            modelBuilder.Entity("LccWebAPI.Models.Db.MatchTeam", b =>
+            modelBuilder.Entity("LccWebAPI.Models.DbMatch.MatchTeam", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
@@ -94,7 +95,7 @@ namespace LccWebAPI.Migrations
                     b.ToTable("MatchTeam");
                 });
 
-            modelBuilder.Entity("LccWebAPI.Models.Db.PlayerItem", b =>
+            modelBuilder.Entity("LccWebAPI.Models.DbMatch.PlayerItem", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
@@ -112,7 +113,7 @@ namespace LccWebAPI.Migrations
                     b.ToTable("PlayerItem");
                 });
 
-            modelBuilder.Entity("LccWebAPI.Models.Db.PlayerRune", b =>
+            modelBuilder.Entity("LccWebAPI.Models.DbMatch.PlayerRune", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
@@ -130,7 +131,7 @@ namespace LccWebAPI.Migrations
                     b.ToTable("PlayerRune");
                 });
 
-            modelBuilder.Entity("LccWebAPI.Models.Db.PlayerSummonerSpell", b =>
+            modelBuilder.Entity("LccWebAPI.Models.DbMatch.PlayerSummonerSpell", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd();
@@ -148,40 +149,126 @@ namespace LccWebAPI.Migrations
                     b.ToTable("PlayerSummonerSpell");
                 });
 
-            modelBuilder.Entity("LccWebAPI.Models.Db.MatchPlayer", b =>
+            modelBuilder.Entity("LccWebAPI.Models.DbStaticData.Champion", b =>
                 {
-                    b.HasOne("LccWebAPI.Models.Db.MatchTeam", "MatchTeam")
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<int>("ChampionId");
+
+                    b.Property<string>("ChampionName");
+
+                    b.Property<string>("ImageFull");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Champions");
+                });
+
+            modelBuilder.Entity("LccWebAPI.Models.DbStaticData.Item", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("ImageFull");
+
+                    b.Property<int>("ItemId");
+
+                    b.Property<string>("ItemName");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Items");
+                });
+
+            modelBuilder.Entity("LccWebAPI.Models.DbStaticData.Rune", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("ImageFull");
+
+                    b.Property<int>("RuneId");
+
+                    b.Property<string>("RuneName");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Runes");
+                });
+
+            modelBuilder.Entity("LccWebAPI.Models.DbStaticData.SummonerSpell", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<string>("ImageFull");
+
+                    b.Property<int>("SummonerSpellId");
+
+                    b.Property<string>("SummonerSpellName");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SummonerSpells");
+                });
+
+            modelBuilder.Entity("LccWebAPI.Models.DbSummoner.Summoner", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd();
+
+                    b.Property<long>("AccountId");
+
+                    b.Property<long>("Level");
+
+                    b.Property<int>("ProfileIconId");
+
+                    b.Property<DateTime>("RevisionDate");
+
+                    b.Property<long>("SummonerId");
+
+                    b.Property<string>("SummonerName");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Summoners");
+                });
+
+            modelBuilder.Entity("LccWebAPI.Models.DbMatch.MatchPlayer", b =>
+                {
+                    b.HasOne("LccWebAPI.Models.DbMatch.MatchTeam", "MatchTeam")
                         .WithMany("Players")
                         .HasForeignKey("MatchTeamId1");
                 });
 
-            modelBuilder.Entity("LccWebAPI.Models.Db.MatchTeam", b =>
+            modelBuilder.Entity("LccWebAPI.Models.DbMatch.MatchTeam", b =>
                 {
-                    b.HasOne("LccWebAPI.Models.Db.Match", "Match")
+                    b.HasOne("LccWebAPI.Models.DbMatch.Match", "Match")
                         .WithMany("Teams")
                         .HasForeignKey("MatchId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("LccWebAPI.Models.Db.PlayerItem", b =>
+            modelBuilder.Entity("LccWebAPI.Models.DbMatch.PlayerItem", b =>
                 {
-                    b.HasOne("LccWebAPI.Models.Db.MatchPlayer", "MatchPlayer")
+                    b.HasOne("LccWebAPI.Models.DbMatch.MatchPlayer", "MatchPlayer")
                         .WithMany("Items")
                         .HasForeignKey("MatchPlayerId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("LccWebAPI.Models.Db.PlayerRune", b =>
+            modelBuilder.Entity("LccWebAPI.Models.DbMatch.PlayerRune", b =>
                 {
-                    b.HasOne("LccWebAPI.Models.Db.MatchPlayer", "MatchPlayer")
+                    b.HasOne("LccWebAPI.Models.DbMatch.MatchPlayer", "MatchPlayer")
                         .WithMany("Runes")
                         .HasForeignKey("MatchPlayerId")
                         .OnDelete(DeleteBehavior.Cascade);
                 });
 
-            modelBuilder.Entity("LccWebAPI.Models.Db.PlayerSummonerSpell", b =>
+            modelBuilder.Entity("LccWebAPI.Models.DbMatch.PlayerSummonerSpell", b =>
                 {
-                    b.HasOne("LccWebAPI.Models.Db.MatchPlayer", "MatchPlayer")
+                    b.HasOne("LccWebAPI.Models.DbMatch.MatchPlayer", "MatchPlayer")
                         .WithMany("SummonerSpells")
                         .HasForeignKey("MatchPlayerId")
                         .OnDelete(DeleteBehavior.Cascade);
