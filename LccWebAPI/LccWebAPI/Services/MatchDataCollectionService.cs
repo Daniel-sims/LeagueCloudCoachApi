@@ -44,10 +44,10 @@ namespace LccWebAPI.Services
                     {
                         try
                         {
-                            RiotSharp.Endpoints.LeagueEndpoint.League challengerPlayers = await _throttledRequestHelper.SendThrottledRequest(async () => await _riotApi.League.GetChallengerLeagueAsync(Region.euw, LeagueQueue.RankedSolo));
-                            RiotSharp.Endpoints.LeagueEndpoint.League mastersPlayers = await _throttledRequestHelper.SendThrottledRequest(async () => await _riotApi.League.GetMasterLeagueAsync(Region.euw, LeagueQueue.RankedSolo));
+                            var challengerPlayers = await _throttledRequestHelper.SendThrottledRequest(async () => await _riotApi.League.GetChallengerLeagueAsync(Region.euw, LeagueQueue.RankedSolo));
+                            var mastersPlayers = await _throttledRequestHelper.SendThrottledRequest(async () => await _riotApi.League.GetMasterLeagueAsync(Region.euw, LeagueQueue.RankedSolo));
 
-                            IEnumerable<RiotSharp.Endpoints.LeagueEndpoint.LeaguePosition> highEloPlayerEntires = challengerPlayers.Entries.Concat(mastersPlayers.Entries);
+                            var highEloPlayerEntires = challengerPlayers.Entries.Concat(mastersPlayers.Entries);
 
                             int totalPlayersFound = highEloPlayerEntires.Count();
                             int currentPlayerCount = 0;
@@ -60,13 +60,12 @@ namespace LccWebAPI.Services
                                 {
                                     _logging.LogEvent(++currentPlayerCount + "/" + totalPlayersFound + ": " + highEloPlayer.PlayerOrTeamName);
 
-                                    RiotSharp.Endpoints.SummonerEndpoint.Summoner summoner = await _throttledRequestHelper.SendThrottledRequest(async () => await _riotApi.Summoner.GetSummonerBySummonerIdAsync(Region.euw, Convert.ToInt64(highEloPlayer.PlayerOrTeamId)));
-
-                                    Models.DbSummoner.Summoner dbSummoner = await dbContext.Summoners.FirstOrDefaultAsync(x => x.AccountId == summoner.AccountId);
+                                    var summoner = await _throttledRequestHelper.SendThrottledRequest(async () => await _riotApi.Summoner.GetSummonerBySummonerIdAsync(Region.euw, long.Parse(highEloPlayer.PlayerOrTeamId)));
+                                    var dbSummoner = await dbContext.Summoners.FirstOrDefaultAsync(x => x.AccountId == summoner.AccountId);
 
                                     if (dbSummoner == null)
                                     {
-                                        Models.DbSummoner.Summoner newDbSummoner = new Models.DbSummoner.Summoner
+                                        var newDbSummoner = new Models.DbSummoner.Summoner
                                         {
                                             SummonerId = summoner.Id,
                                             AccountId = summoner.AccountId,
@@ -112,7 +111,7 @@ namespace LccWebAPI.Services
                                             collectionToDate = DateTime.Now;
                                         }
 
-                                        RiotSharp.Endpoints.MatchEndpoint.MatchList matchList = await _throttledRequestHelper.SendThrottledRequest(
+                                        var matchList = await _throttledRequestHelper.SendThrottledRequest(
                                             async () =>
                                             await _riotApi.Match.GetMatchListAsync(
                                                 Region.euw, summoner.AccountId,
@@ -132,7 +131,7 @@ namespace LccWebAPI.Services
                                             {
                                                 if(!dbContext.Matches.Any(x => x.GameId == match.GameId))
                                                 {
-                                                    Models.DbMatch.Match newDbMatch = await ConvertRiotMatchReferenceToDbMatch(match);
+                                                    var newDbMatch = await ConvertRiotMatchReferenceToDbMatch(match);
                                                     if (newDbMatch != null)
                                                     {
                                                         dbContext.Matches.Add(newDbMatch);
@@ -178,9 +177,9 @@ namespace LccWebAPI.Services
         {
             try
             {
-                Models.DbMatch.Match newDbMatch = new Models.DbMatch.Match();
+                var newDbMatch = new Models.DbMatch.Match();
 
-                RiotSharp.Endpoints.MatchEndpoint.Match riotMatch = await _throttledRequestHelper.SendThrottledRequest( async () => await _riotApi.Match.GetMatchAsync(Region.euw, riotMatchReference.GameId));
+                var riotMatch = await _throttledRequestHelper.SendThrottledRequest( async () => await _riotApi.Match.GetMatchAsync(Region.euw, riotMatchReference.GameId));
 
                 if (riotMatch != null)
                 {
@@ -190,13 +189,13 @@ namespace LccWebAPI.Services
                     newDbMatch.GamePatch = riotMatch.GameVersion;
                     newDbMatch.WinningTeamId = riotMatch.Participants.FirstOrDefault(x => x.Stats.Win).TeamId;
 
-                    IEnumerable<RiotSharp.Endpoints.MatchEndpoint.Participant> winningTeamParticipants = riotMatch.Participants.Where(x => x.TeamId == newDbMatch.WinningTeamId);
-                    RiotSharp.Endpoints.MatchEndpoint.TeamStats winningTeamstats = riotMatch.Teams.FirstOrDefault(x => x.TeamId == newDbMatch.WinningTeamId);
+                    var winningTeamParticipants = riotMatch.Participants.Where(x => x.TeamId == newDbMatch.WinningTeamId);
+                    var winningTeamstats = riotMatch.Teams.FirstOrDefault(x => x.TeamId == newDbMatch.WinningTeamId);
 
                     newDbMatch.Teams.Add(ConvertRiotParticipantsToDbTeam(winningTeamParticipants, winningTeamstats));
 
-                    IEnumerable<RiotSharp.Endpoints.MatchEndpoint.Participant> losingTeamParticipants = riotMatch.Participants.Where(x => x.TeamId != newDbMatch.WinningTeamId);
-                    RiotSharp.Endpoints.MatchEndpoint.TeamStats losingTeamStats = riotMatch.Teams.FirstOrDefault(x => x.TeamId != newDbMatch.WinningTeamId);
+                    var losingTeamParticipants = riotMatch.Participants.Where(x => x.TeamId != newDbMatch.WinningTeamId);
+                    var losingTeamStats = riotMatch.Teams.FirstOrDefault(x => x.TeamId != newDbMatch.WinningTeamId);
 
                     newDbMatch.Teams.Add(ConvertRiotParticipantsToDbTeam(losingTeamParticipants, losingTeamStats));
                     
@@ -213,7 +212,7 @@ namespace LccWebAPI.Services
 
         private Models.DbMatch.MatchTeam ConvertRiotParticipantsToDbTeam(IEnumerable<RiotSharp.Endpoints.MatchEndpoint.Participant> participants, RiotSharp.Endpoints.MatchEndpoint.TeamStats teamStats)
         {
-            Models.DbMatch.MatchTeam team = new Models.DbMatch.MatchTeam
+            var team = new Models.DbMatch.MatchTeam
             {
                 BaronKills = teamStats.BaronKills,
                 DragonKills = teamStats.DragonKills,
@@ -221,7 +220,7 @@ namespace LccWebAPI.Services
                 RiftHeraldKills = teamStats.RiftHeraldKills
             };
 
-            foreach (RiotSharp.Endpoints.MatchEndpoint.Participant participant in participants)
+            foreach (var participant in participants)
             {
                 try
                 {
@@ -321,7 +320,7 @@ namespace LccWebAPI.Services
         
         private ICollection<Models.DbMatch.PlayerItem> GetItemsForParticipant(RiotSharp.Endpoints.MatchEndpoint.Participant participant)
         {
-            ICollection<Models.DbMatch.PlayerItem> items = new List<Models.DbMatch.PlayerItem>();
+            var items = new List<Models.DbMatch.PlayerItem>();
 
             try
             {
@@ -365,7 +364,7 @@ namespace LccWebAPI.Services
         
         private ICollection<Models.DbMatch.PlayerRune> GetRunesForParticipant(RiotSharp.Endpoints.MatchEndpoint.Participant participant)
         {
-            ICollection<Models.DbMatch.PlayerRune> runes = new List<Models.DbMatch.PlayerRune>();
+            var runes = new List<Models.DbMatch.PlayerRune>();
 
             try
             {
@@ -427,7 +426,7 @@ namespace LccWebAPI.Services
 
         private ICollection<Models.DbMatch.PlayerSummonerSpell> GetSummonerSpellsForParticipant(RiotSharp.Endpoints.MatchEndpoint.Participant participant)
         {
-            ICollection<Models.DbMatch.PlayerSummonerSpell> summonerSpells = new List<Models.DbMatch.PlayerSummonerSpell>();
+            var summonerSpells = new List<Models.DbMatch.PlayerSummonerSpell>();
 
             try
             {
