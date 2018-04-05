@@ -27,26 +27,30 @@ namespace LccWebAPI.Controllers
         }
 
         [HttpGet("GetMatchup")]
-        public async Task<JsonResult> GetMatchup(long usersChampionId, long[] friendlyTeamChampions, long[] enemyTeamChampions, int maxMatchLimit = 5)
+        public async Task<JsonResult> GetMatchup(int usersChampionId, int[] friendlyTeamChampions, int[] enemyTeamChampions, int maxMatchLimit = 5)
         {
-            IList<long> friendlyTeamChampionIds = new List<long>(friendlyTeamChampions) { usersChampionId };
-            IList<long> enemyTeamChampionIds = enemyTeamChampions;
+            IList<int> friendlyTeamChampionIds = new List<int>(friendlyTeamChampions) { usersChampionId };
+            IList<int> enemyTeamChampionIds = enemyTeamChampions;
 
             using (var dbContext = _serviceProvider.GetRequiredService<DatabaseContext>())
             {
                 try
                 {
+                    //Find matches in the database matching the users query
                     var allMatchesContainingUsersChampion = dbContext.Matches
                         .Include(x => x.Teams).ThenInclude(y => y.Players).ThenInclude(x => x.Runes)
                         .Include(x => x.Teams).ThenInclude(y => y.Players).ThenInclude(x => x.Items)
                         .Include(x => x.Teams).ThenInclude(y => y.Players).ThenInclude(x => x.SummonerSpells)
-                        .Where(x => x.Teams.Any(y => y.Players.Any(v => v.ChampionId == usersChampionId))).ToList();
-
-                    //This query
-                    var fullMatchupMatches = allMatchesContainingUsersChampion
-                        .Where(x => x.Teams
-                            .All(y => y.Players
-                                .Any(v => (friendlyTeamChampionIds.Contains(v.ChampionId)) || (enemyTeamChampionIds.Contains(v.ChampionId))))).ToList();
+                        .Where(x => x.Teams.Any(y => y.Players.Any(v => v.ChampionId == usersChampionId)))
+                        .Where(q => q.Teams
+                        .All(t =>
+                            friendlyTeamChampionIds.All(f => t.Players.Select(p => p.ChampionId).Contains(f)) ||
+                            enemyTeamChampionIds.All(f => t.Players.Select(p => p.ChampionId).Contains(f))));
+                    
+                    var fullMatchupMatches = allMatchesContainingUsersChampion.Where(q => q.Teams
+                        .All(t =>
+                            friendlyTeamChampionIds.All(f => t.Players.Select(p => p.ChampionId).Contains(f)) ||
+                            enemyTeamChampionIds.All(f => t.Players.Select(p => p.ChampionId).Contains(f)))).ToList();
 
                 }
                 catch (Exception e)
