@@ -26,9 +26,11 @@ namespace LccWebAPI.Models.DbMatch
         public int ChampionId { get; set; }
         public int ChampionLevel { get; set; }
 
-        public virtual ICollection<PlayerItem> Items { get; set; }
-        public virtual ICollection<PlayerRune> Runes { get; set; }
-        public virtual ICollection<PlayerSummonerSpell> SummonerSpells { get; set; }
+        public virtual ICollection<PlayerItem> Items { get; set; } = new List<PlayerItem>();
+        public virtual long TrinketId { get; set; }
+
+        public virtual ICollection<PlayerRune> Runes { get; set; } = new List<PlayerRune>();
+        public virtual ICollection<PlayerSummonerSpell> SummonerSpells { get; set; } = new List<PlayerSummonerSpell>();
         
         public long GoldEarned { get; set; }
 

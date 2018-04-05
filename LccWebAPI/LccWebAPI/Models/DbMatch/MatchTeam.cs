@@ -11,7 +11,7 @@ namespace LccWebAPI.Models.DbMatch
         public int Id { get; set; }
 
         // Match specific data 
-        public virtual ICollection<MatchPlayer> Players { get; set; }
+        public virtual ICollection<MatchPlayer> Players { get; set; } = new List<MatchPlayer>();
         public int TeamId { get; set; }
         public int BaronKills { get; set; }
         public int DragonKills { get; set; }
