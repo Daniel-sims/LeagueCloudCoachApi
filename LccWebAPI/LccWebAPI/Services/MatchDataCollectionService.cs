@@ -47,14 +47,12 @@ namespace LccWebAPI.Services
                             var challengerPlayers = await _throttledRequestHelper.SendThrottledRequest(async () => await _riotApi.League.GetChallengerLeagueAsync(Region.euw, LeagueQueue.RankedSolo));
                             var mastersPlayers = await _throttledRequestHelper.SendThrottledRequest(async () => await _riotApi.League.GetMasterLeagueAsync(Region.euw, LeagueQueue.RankedSolo));
 
-                            var highEloPlayerEntires = challengerPlayers.Entries.Concat(mastersPlayers.Entries);
-
-                            int totalPlayersFound = highEloPlayerEntires.Count();
-                            int currentPlayerCount = 0;
+                            var totalPlayersFound = challengerPlayers.Entries.Concat(mastersPlayers.Entries).Count();
+                            var currentPlayerCount = 0;
 
                             _logging.LogEvent("Found " + totalPlayersFound + " summoners.");
 
-                            foreach (RiotSharp.Endpoints.LeagueEndpoint.LeaguePosition highEloPlayer in highEloPlayerEntires)
+                            foreach (var highEloPlayer in challengerPlayers.Entries.Concat(mastersPlayers.Entries))
                             {
                                 try
                                 {
@@ -123,11 +121,11 @@ namespace LccWebAPI.Services
                                                 0,                          //starting index
                                                 25));                       //ending index
 
-                                        if (matchList != null && matchList?.Matches != null)
+                                        if(matchList?.Matches != null)
                                         {
-                                            _logging.LogEvent(" Found " + matchList?.Matches.Count() + " matches for the summoner " + dbSummoner.SummonerName);
+                                            _logging.LogEvent("Found " + matchList?.Matches.Count() + " matches for the summoner " + dbSummoner.SummonerName);
 
-                                            foreach (RiotSharp.Endpoints.MatchEndpoint.MatchReference match in matchList?.Matches)
+                                            foreach (var match in matchList?.Matches)
                                             {
                                                 if(!dbContext.Matches.Any(x => x.GameId == match.GameId))
                                                 {
@@ -137,36 +135,36 @@ namespace LccWebAPI.Services
                                                         dbContext.Matches.Add(newDbMatch);
                                                         await dbContext.SaveChangesAsync();
 
-                                                        _logging.LogEvent(" Added new match " + newDbMatch.GameId);
+                                                        _logging.LogEvent("Added new match " + newDbMatch.GameId);
                                                     }
                                                 }
                                                 else
                                                 {
-                                                    _logging.LogEvent(" The game " + match.GameId + " already exists in our database.");
+                                                    _logging.LogEvent("The game " + match.GameId + " already exists in our database.");
                                                 }
                                             }
                                         }
                                     }
                                 }
                                 //This catch block avoids one unhandled exception causing the service to restart
-                                catch (RiotSharp.RiotSharpException ex)
+                                catch (RiotSharpException ex)
                                 {
-                                    _logging.LogEvent(" RiotSharpException: " + ex.Message);
+                                    _logging.LogEvent("#RiotSharpException: " + ex.Message);
                                 }
                                 catch (Exception ex)
                                 {
-                                    _logging.LogEvent(" Exception: " + ex.Message);
+                                    _logging.LogEvent("#Exception: " + ex.Message);
                                 }
                             }
                         }
                         //This catch block is to stop the app crashing if something goes really tits up somewhere I haven't thought of
-                        catch (RiotSharp.RiotSharpException ex)
+                        catch (RiotSharpException ex)
                         {
-                            _logging.LogEvent(" RiotSharpException: " + ex.Message);
+                            _logging.LogEvent("#RiotSharpException: " + ex.Message);
                         }
                         catch (Exception ex)
                         {
-                            _logging.LogEvent(" Exception: " + ex.Message);
+                            _logging.LogEvent("#Exception: " + ex.Message);
                         }
                     }
                 }
@@ -187,7 +185,7 @@ namespace LccWebAPI.Services
                     newDbMatch.GameDuration = riotMatch.GameDuration;
                     newDbMatch.GameDate = riotMatch.GameCreation;
                     newDbMatch.GamePatch = riotMatch.GameVersion;
-                    newDbMatch.WinningTeamId = riotMatch.Participants.FirstOrDefault(x => x.Stats.Win).TeamId;
+                    newDbMatch.WinningTeamId = riotMatch.Participants.FirstOrDefault(x => x.Stats.Win)?.TeamId;
 
                     var winningTeamParticipants = riotMatch.Participants.Where(x => x.TeamId == newDbMatch.WinningTeamId);
                     var winningTeamstats = riotMatch.Teams.FirstOrDefault(x => x.TeamId == newDbMatch.WinningTeamId);
@@ -204,7 +202,7 @@ namespace LccWebAPI.Services
             }
             catch(Exception e)
             {
-                _logging.LogEvent(" Exception hit when converting Riot Match Reference to DbMatch. Reason: " + e.Message);
+                _logging.LogEvent("#Exception hit when converting Riot Match Reference to DbMatch. Reason: " + e.Message);
             }
             
             return null;
@@ -311,7 +309,7 @@ namespace LccWebAPI.Services
                 }
                 catch(Exception e)
                 {
-                    _logging.LogEvent(" Exception encountered when converting Riot Participants to DbTeam. Reason: " + e.Message);
+                    _logging.LogEvent("#Exception encountered when converting Riot Participants to DbTeam. Reason: " + e.Message);
                 }
             }
 
@@ -326,37 +324,37 @@ namespace LccWebAPI.Services
             {
                 if (participant?.Stats?.Item0 != 0)
                 {
-                    items.Add(new Models.DbMatch.PlayerItem() { ItemId = participant.Stats.Item0, ItemSlot = 0});
+                    items.Add(new Models.DbMatch.PlayerItem() { ItemId = participant?.Stats?.Item0, ItemSlot = 0});
                 }
 
-                if (participant?.Stats.Item1 != 0)
+                if (participant?.Stats?.Item1 != 0)
                 {
-                    items.Add(new Models.DbMatch.PlayerItem() { ItemId = participant.Stats.Item1, ItemSlot = 1 });
+                    items.Add(new Models.DbMatch.PlayerItem() { ItemId = participant?.Stats?.Item1, ItemSlot = 1 });
                 }
 
                 if (participant?.Stats?.Item2 != 0)
                 {
-                    items.Add(new Models.DbMatch.PlayerItem() { ItemId = participant.Stats.Item2, ItemSlot = 2 });
+                    items.Add(new Models.DbMatch.PlayerItem() { ItemId = participant?.Stats?.Item2, ItemSlot = 2 });
                 }
 
                 if (participant?.Stats?.Item3 != 0)
                 {
-                    items.Add(new Models.DbMatch.PlayerItem() { ItemId = participant.Stats.Item3, ItemSlot = 3 });
+                    items.Add(new Models.DbMatch.PlayerItem() { ItemId = participant?.Stats?.Item3, ItemSlot = 3 });
                 }
 
                 if (participant?.Stats?.Item4 != 0)
                 {
-                    items.Add(new Models.DbMatch.PlayerItem() { ItemId = participant.Stats.Item4, ItemSlot = 4 });
+                    items.Add(new Models.DbMatch.PlayerItem() { ItemId = participant?.Stats?.Item4, ItemSlot = 4 });
                 }
 
                 if (participant?.Stats?.Item5 != 0)
                 {
-                    items.Add(new Models.DbMatch.PlayerItem() { ItemId = participant.Stats.Item5, ItemSlot = 5 });
+                    items.Add(new Models.DbMatch.PlayerItem() { ItemId = participant?.Stats?.Item5, ItemSlot = 5 });
                 }
             }
             catch(Exception ex)
             {
-                _logging.LogEvent(" Exception hit when getting items for participant : " + ex.Message);
+                _logging.LogEvent("#Exception hit when getting items for participant : " + ex.Message);
             }
             
             return items;
@@ -371,54 +369,54 @@ namespace LccWebAPI.Services
                 //Primary Style
                 if(participant?.Stats?.PerkPrimaryStyle != 0)
                 {
-                    runes.Add(new Models.DbMatch.PlayerRune() { RuneId = participant.Stats.PerkPrimaryStyle, RuneSlot = 0 });
+                    runes.Add(new Models.DbMatch.PlayerRune() { RuneId = participant?.Stats?.PerkPrimaryStyle, RuneSlot = 0 });
                 }
 
                 //Primary sub style row one
                 if (participant?.Stats?.Perk0 != 0)
                 {
-                    runes.Add(new Models.DbMatch.PlayerRune() { RuneId = participant.Stats.Perk0, RuneSlot = 1 });
+                    runes.Add(new Models.DbMatch.PlayerRune() { RuneId = participant?.Stats?.Perk0, RuneSlot = 1 });
                 }
 
                 //Primary sub style row two
                 if (participant?.Stats?.Perk1 != 0)
                 {
-                    runes.Add(new Models.DbMatch.PlayerRune() { RuneId = participant.Stats.Perk1, RuneSlot = 2 });
+                    runes.Add(new Models.DbMatch.PlayerRune() { RuneId = participant?.Stats?.Perk1, RuneSlot = 2 });
                 }
 
                 //Primary sub style row three
                 if (participant?.Stats?.Perk2 != 0)
                 {
-                    runes.Add(new Models.DbMatch.PlayerRune() { RuneId = participant.Stats.Perk2, RuneSlot = 3 });
+                    runes.Add(new Models.DbMatch.PlayerRune() { RuneId = participant?.Stats?.Perk2, RuneSlot = 3 });
                 }
 
                 //Primary sub style row four
                 if (participant?.Stats?.Perk3 != 0)
                 {
-                    runes.Add(new Models.DbMatch.PlayerRune() { RuneId = participant.Stats.Perk3, RuneSlot = 4 });
+                    runes.Add(new Models.DbMatch.PlayerRune() { RuneId = participant?.Stats?.Perk3, RuneSlot = 4 });
                 }
 
                 //secondary Style
                 if (participant?.Stats?.PerkSubStyle != 0)
                 {
-                    runes.Add(new Models.DbMatch.PlayerRune() { RuneId = participant.Stats.PerkSubStyle, RuneSlot = 5 });
+                    runes.Add(new Models.DbMatch.PlayerRune() { RuneId = participant?.Stats?.PerkSubStyle, RuneSlot = 5 });
                 }
 
                 //secondary sub style row one
                 if (participant?.Stats?.Perk4 != 0)
                 {
-                    runes.Add(new Models.DbMatch.PlayerRune() { RuneId = participant.Stats.Perk4, RuneSlot = 6 });
+                    runes.Add(new Models.DbMatch.PlayerRune() { RuneId = participant?.Stats?.Perk4, RuneSlot = 6 });
                 }
 
                 //secondary sub style row two
                 if (participant?.Stats?.Perk5 != 0)
                 {
-                    runes.Add(new Models.DbMatch.PlayerRune() { RuneId = participant.Stats.Perk5, RuneSlot = 7 });
+                    runes.Add(new Models.DbMatch.PlayerRune() { RuneId = participant?.Stats?.Perk5, RuneSlot = 7 });
                 }
             }
             catch (Exception ex)
             {
-                _logging.LogEvent(" Exception hit when getting runes for participant : " + ex.Message);
+                _logging.LogEvent("#Exception hit when getting runes for participant : " + ex.Message);
             }
 
             return runes;
@@ -432,17 +430,17 @@ namespace LccWebAPI.Services
             {
                 if(participant?.Spell1Id != 0)
                 {
-                    summonerSpells.Add(new Models.DbMatch.PlayerSummonerSpell() { SummonerSpellId = participant.Spell1Id, SummonerSpellSlot = 0 });
+                    summonerSpells.Add(new Models.DbMatch.PlayerSummonerSpell() { SummonerSpellId = participant?.Spell1Id, SummonerSpellSlot = 0 });
                 }
 
                 if (participant?.Spell2Id != 0)
                 {
-                    summonerSpells.Add(new Models.DbMatch.PlayerSummonerSpell() { SummonerSpellId = participant.Spell2Id, SummonerSpellSlot = 0 });
+                    summonerSpells.Add(new Models.DbMatch.PlayerSummonerSpell() { SummonerSpellId = participant?.Spell2Id, SummonerSpellSlot = 0 });
                 }
             }
             catch(Exception ex)
             {
-                _logging.LogEvent(" Exception hit when getting summoner spells for participant : " + ex.Message);
+                _logging.LogEvent("#Exception hit when getting summoner spells for participant : " + ex.Message);
             }
 
             return summonerSpells;

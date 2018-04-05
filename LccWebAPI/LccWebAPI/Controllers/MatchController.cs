@@ -1,7 +1,13 @@
-﻿using LccWebAPI.Controllers.Utils.Match;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using LccWebAPI.Controllers.Utils.Match;
 using Microsoft.AspNetCore.Mvc;
 using RiotSharp.Interfaces;
 using System.Threading.Tasks;
+using LccWebAPI.Database.Context;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace LccWebAPI.Controllers
 {
@@ -9,24 +15,48 @@ namespace LccWebAPI.Controllers
     public class MatchController : Controller
     {
         private IRiotApi _riotApi;
+        private readonly IServiceProvider _serviceProvider;
 
-        private readonly IMatchControllerUtils _matchControllerUtils;
-        
-        public MatchController(IRiotApi riotApi, IMatchControllerUtils matchControllerUtils)
+        public MatchController(
+            IRiotApi riotApi, 
+            IServiceProvider serviceProvider
+            )
         {
             _riotApi = riotApi;
-
-            _matchControllerUtils = matchControllerUtils;
-        }
-
-        public IActionResult Index()
-        {
-            return View();
+            _serviceProvider = serviceProvider;
         }
 
         [HttpGet("GetMatchup")]
-        public async Task<JsonResult> GetMatchup(long usersChampionId, string usersLane, long[] friendlyTeamChampions, long[] enemyTeamChampions, int maxMatchLimit = 5, string summonerName = "BOLULU")
+        public async Task<JsonResult> GetMatchup(long usersChampionId, long[] friendlyTeamChampions, long[] enemyTeamChampions, int maxMatchLimit = 5)
         {
+            IList<long> friendlyTeamChampionIds = new List<long>(friendlyTeamChampions) { usersChampionId };
+            IList<long> enemyTeamChampionIds = enemyTeamChampions;
+
+            using (var dbContext = _serviceProvider.GetRequiredService<DatabaseContext>())
+            {
+                try
+                {
+                    var allMatchesContainingUsersChampion = dbContext.Matches
+                        .Include(x => x.Teams).ThenInclude(y => y.Players).ThenInclude(x => x.Runes)
+                        .Include(x => x.Teams).ThenInclude(y => y.Players).ThenInclude(x => x.Items)
+                        .Include(x => x.Teams).ThenInclude(y => y.Players).ThenInclude(x => x.SummonerSpells)
+                        .Where(x => x.Teams.Any(y => y.Players.Any(v => v.ChampionId == usersChampionId))).ToList();
+
+                    //This query
+                    var fullMatchupMatches = allMatchesContainingUsersChampion
+                        .Where(x => x.Teams
+                            .All(y => y.Players
+                                .Any(v => (friendlyTeamChampionIds.Contains(v.ChampionId)) || (enemyTeamChampionIds.Contains(v.ChampionId))))).ToList();
+
+                }
+                catch (Exception e)
+                {
+                    int i = 0;
+                    i++;
+                }
+                
+            }
+            
             //var m = _basicMatchupInformationRepository.GetAllMatchups();
             //IEnumerable<Db_LccBasicMatchInfo> allMatchesInDatabase = _matchupInformationRepository.GetAllMatchups();
             //IList<long> friendlyTeamChampionIds = new List<long>(friendlyTeamChampions) { usersChampionId };

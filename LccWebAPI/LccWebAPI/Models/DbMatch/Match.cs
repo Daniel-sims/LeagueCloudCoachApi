@@ -16,7 +16,7 @@ namespace LccWebAPI.Models.DbMatch
         public DateTime GameDate { get; set; }
         public TimeSpan GameDuration { get; set; }
         public string GamePatch { get; set; }
-        public int WinningTeamId { get; set; }
+        public int? WinningTeamId { get; set; }
 
         // Data 
         public virtual ICollection<MatchTeam> Teams { get; set; } = new List<MatchTeam>();

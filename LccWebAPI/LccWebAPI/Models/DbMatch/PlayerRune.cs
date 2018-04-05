@@ -11,7 +11,7 @@ namespace LccWebAPI.Models.DbMatch
         public int Id { get; set; }
 
         // Game specific data
-        public long RuneId { get; set; }
+        public long? RuneId { get; set; }
         public int RuneSlot { get; set; }
 
         // Foreign Key

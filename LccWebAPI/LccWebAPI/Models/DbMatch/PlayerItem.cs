@@ -11,7 +11,7 @@ namespace LccWebAPI.Models.DbMatch
         public int Id { get; set; }
 
         // Game specific data
-        public long ItemId { get; set; }
+        public long? ItemId { get; set; }
         public int ItemSlot { get; set; }
         
         // Foreign Key
