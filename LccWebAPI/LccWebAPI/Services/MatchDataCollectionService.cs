@@ -215,7 +215,9 @@ namespace LccWebAPI.Services
                 BaronKills = teamStats.BaronKills,
                 DragonKills = teamStats.DragonKills,
                 InhibitorKills = teamStats.InhibitorKills,
-                RiftHeraldKills = teamStats.RiftHeraldKills
+                RiftHeraldKills = teamStats.RiftHeraldKills,
+                TeamId = teamStats.TeamId
+
             };
 
             foreach (var participant in participants)
@@ -257,7 +259,7 @@ namespace LccWebAPI.Services
                             TrueDamageDealt = participant.Stats.TrueDamageDealt,
                             TrueDamageDealtToChampions = participant.Stats.TrueDamageDealtToChampions,
 
-                            MagicalDamageTaken = participant.Stats.MagicalDamageTaken,
+                            MagicDamageTaken = participant.Stats.MagicalDamageTaken,
                             MagicDamageDealt = participant.Stats.MagicDamageDealt,
                             MagicDamageDealtToChampions = participant.Stats.MagicDamageDealtToChampions,
 

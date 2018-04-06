@@ -1,22 +1,68 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Linq.Expressions;
+﻿using LccWebAPI.Database.Context;
 using LccWebAPI.Models.ApiMatch;
 using LccWebAPI.Utils;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace LccWebAPI.Controllers.Utils.Match
 {
-    public class MatchControllerUtils : IMatchControllerUtils
+    public class MatchProvider : IMatchProvider
     {
         private readonly ILogging _logging;
+        private readonly IServiceProvider _serviceProvider;
 
-        public MatchControllerUtils(ILogging logging)
+        public MatchProvider(ILogging logging, IServiceProvider serviceProvider)
         {
             _logging = logging;
+            _serviceProvider = serviceProvider;
         }
 
-        public Models.ApiMatch.Match ConvertDbMatchToApiMatch(Models.DbMatch.Match dbMatch)
+        public IEnumerable<Models.ApiMatch.Match> GetMatchesForListOfTeamIds(long usersChampionId, IEnumerable<int> teamOne, IEnumerable<int> teamTwo, int matchCount)
+        {
+            var matchList = new List<Models.ApiMatch.Match>();
+
+            using (var dbContext = _serviceProvider.GetRequiredService<DatabaseContext>())
+            {
+                try
+                {
+                    //Find matches in the database matching the users query
+                    IList<Models.DbMatch.Match> allMatchesContainingUsersChampion = dbContext.Matches
+                        .Include(x => x.Teams).ThenInclude(y => y.Players).ThenInclude(x => x.Runes)
+                        .Include(x => x.Teams).ThenInclude(y => y.Players).ThenInclude(x => x.Items)
+                        .Include(x => x.Teams).ThenInclude(y => y.Players).ThenInclude(x => x.SummonerSpells).ToList();
+
+                    var fullMatchupMatches = allMatchesContainingUsersChampion
+                        .Where(x => x.Teams.Any(y => y.Players.Any(v => v.ChampionId == usersChampionId)))
+                        .Where(q => q.Teams
+                        .All(t =>
+                            teamOne.All(f => t.Players.Select(p => p.ChampionId).Contains(f)) ||
+                            teamTwo.All(f => t.Players.Select(p => p.ChampionId).Contains(f)))).ToList();
+
+                    if (fullMatchupMatches.Any())
+                    {
+                        foreach (var match in fullMatchupMatches)
+                        {
+                            if (matchList.Count == matchCount)
+                                break;
+
+                            matchList.Add(ConvertDbMatchToApiMatch(match));
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logging.LogEvent("Exception caught when getting matches for ids : " + ex.Message);
+                }
+
+            }
+
+            return matchList;
+        }
+        
+        private Models.ApiMatch.Match ConvertDbMatchToApiMatch(Models.DbMatch.Match dbMatch)
         {
             var match = new Models.ApiMatch.Match
             {
@@ -37,20 +83,27 @@ namespace LccWebAPI.Controllers.Utils.Match
 
             try
             {
-                var winningTeamPlayers =
-                    dbTeams.Where(x => x.TeamId == winningTeamId).Select(x => x.Players).FirstOrDefault();
-
-                var losingTeamPlayers =
-                    dbTeams.Where(x => x.TeamId != winningTeamId).Select(x => x.Players).FirstOrDefault();
+                var dbWinningTeam = dbTeams.FirstOrDefault(x => x.TeamId == winningTeamId);
+                var dbLosingTeam = dbTeams.FirstOrDefault(x => x.TeamId != winningTeamId);
 
                 var winningTeam = new MatchTeam
                 {
-                    Players = ConvertDbPlayersToApiPlayers(winningTeamPlayers)
+                    BaronKills = dbWinningTeam.BaronKills,
+                    DragonKills = dbWinningTeam.DragonKills,
+                    InhibitorKills = dbWinningTeam.InhibitorKills,
+                    RiftHeraldKills = dbWinningTeam.RiftHeraldKills,
+                    TeamId = dbWinningTeam.TeamId,
+                    Players = ConvertDbPlayersToApiPlayers(dbWinningTeam.Players)
                 };
 
                 var losingTeam = new MatchTeam()
                 {
-                    Players = ConvertDbPlayersToApiPlayers(losingTeamPlayers)
+                    BaronKills = dbLosingTeam.BaronKills,
+                    DragonKills = dbLosingTeam.DragonKills,
+                    InhibitorKills = dbLosingTeam.InhibitorKills,
+                    RiftHeraldKills = dbLosingTeam.RiftHeraldKills,
+                    TeamId = dbLosingTeam.TeamId,
+                    Players = ConvertDbPlayersToApiPlayers(dbLosingTeam.Players)
                 };
 
                 matchTeams.Add(winningTeam);
@@ -70,7 +123,7 @@ namespace LccWebAPI.Controllers.Utils.Match
 
             try
             {
-                foreach (var player in matchPlayers)
+                foreach (var player in dbPlayers)
                 {
                     matchPlayers.Add(new MatchPlayer()
                     {

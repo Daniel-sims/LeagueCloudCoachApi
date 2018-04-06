@@ -51,7 +51,7 @@ namespace LccWebAPI.Models.DbMatch
         public long TrueDamageDealt { get; set; }
         public long TrueDamageDealtToChampions { get; set; }
 
-        public long MagicalDamageTaken { get; set; }
+        public long MagicDamageTaken { get; set; }
         public long MagicDamageDealt { get; set; }
         public long MagicDamageDealtToChampions { get; set; }
 
