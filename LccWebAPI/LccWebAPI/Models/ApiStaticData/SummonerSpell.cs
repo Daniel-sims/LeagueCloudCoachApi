@@ -7,5 +7,8 @@ namespace LccWebAPI.Models.ApiStaticData
 {
     public class SummonerSpell
     {
+        public int SummonerSpellId { get; set; }
+        public string SummonerSpellName { get; set; }
+        public string ImageFull { get; set; }
     }
 }

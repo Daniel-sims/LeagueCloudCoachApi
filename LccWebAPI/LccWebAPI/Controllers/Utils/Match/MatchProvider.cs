@@ -1,5 +1,6 @@
 ﻿using LccWebAPI.Database.Context;
 using LccWebAPI.Models.ApiMatch;
+using LccWebAPI.Models.ApiStaticData;
 using LccWebAPI.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -86,28 +87,31 @@ namespace LccWebAPI.Controllers.Utils.Match
                 var dbWinningTeam = dbTeams.FirstOrDefault(x => x.TeamId == winningTeamId);
                 var dbLosingTeam = dbTeams.FirstOrDefault(x => x.TeamId != winningTeamId);
 
-                var winningTeam = new MatchTeam
+                if (dbWinningTeam != null && dbLosingTeam != null)
                 {
-                    BaronKills = dbWinningTeam.BaronKills,
-                    DragonKills = dbWinningTeam.DragonKills,
-                    InhibitorKills = dbWinningTeam.InhibitorKills,
-                    RiftHeraldKills = dbWinningTeam.RiftHeraldKills,
-                    TeamId = dbWinningTeam.TeamId,
-                    Players = ConvertDbPlayersToApiPlayers(dbWinningTeam.Players)
-                };
+                    var winningTeam = new MatchTeam
+                    {
+                        BaronKills = dbWinningTeam.BaronKills,
+                        DragonKills = dbWinningTeam.DragonKills,
+                        InhibitorKills = dbWinningTeam.InhibitorKills,
+                        RiftHeraldKills = dbWinningTeam.RiftHeraldKills,
+                        TeamId = dbWinningTeam.TeamId,
+                        Players = ConvertDbPlayersToApiPlayers(dbWinningTeam.Players)
+                    };
 
-                var losingTeam = new MatchTeam()
-                {
-                    BaronKills = dbLosingTeam.BaronKills,
-                    DragonKills = dbLosingTeam.DragonKills,
-                    InhibitorKills = dbLosingTeam.InhibitorKills,
-                    RiftHeraldKills = dbLosingTeam.RiftHeraldKills,
-                    TeamId = dbLosingTeam.TeamId,
-                    Players = ConvertDbPlayersToApiPlayers(dbLosingTeam.Players)
-                };
+                    var losingTeam = new MatchTeam()
+                    {
+                        BaronKills = dbLosingTeam.BaronKills,
+                        DragonKills = dbLosingTeam.DragonKills,
+                        InhibitorKills = dbLosingTeam.InhibitorKills,
+                        RiftHeraldKills = dbLosingTeam.RiftHeraldKills,
+                        TeamId = dbLosingTeam.TeamId,
+                        Players = ConvertDbPlayersToApiPlayers(dbLosingTeam.Players)
+                    };
 
-                matchTeams.Add(winningTeam);
-                matchTeams.Add(losingTeam);
+                    matchTeams.Add(winningTeam);
+                    matchTeams.Add(losingTeam);
+                }
             }
             catch (Exception ex)
             {
@@ -144,10 +148,29 @@ namespace LccWebAPI.Controllers.Utils.Match
                         ChampionLevel = player.ChampionLevel,
 
                         //Items
+                        ItemOne = GetItemInformationForItemId(player.Items?.FirstOrDefault(x => x.ItemSlot == 0)?.ItemId),
+                        ItemTwo = GetItemInformationForItemId(player.Items?.FirstOrDefault(x => x.ItemSlot == 1)?.ItemId),
+                        ItemThree = GetItemInformationForItemId(player.Items?.FirstOrDefault(x => x.ItemSlot == 2)?.ItemId),
+                        ItemFour = GetItemInformationForItemId(player.Items?.FirstOrDefault(x => x.ItemSlot == 3)?.ItemId),
+                        ItemFive = GetItemInformationForItemId(player.Items?.FirstOrDefault(x => x.ItemSlot == 4)?.ItemId),
+                        ItemSix = GetItemInformationForItemId(player.Items?.FirstOrDefault(x => x.ItemSlot == 5)?.ItemId),
+
+                        Trinket = GetItemInformationForItemId(player.TrinketId),
 
                         //Runes
+                        PrimaryRuneStyle = GetRuneInformationForRuneId(player.Runes?.FirstOrDefault(x => x.RuneSlot == 0)?.RuneId),
+                        PrimaryRuneSubStyleOne = GetRuneInformationForRuneId(player.Runes?.FirstOrDefault(x => x.RuneSlot == 1)?.RuneId),
+                        PrimaryRuneSubStyleTwo = GetRuneInformationForRuneId(player.Runes?.FirstOrDefault(x => x.RuneSlot == 2)?.RuneId),
+                        PrimaryRuneSubStyleThree = GetRuneInformationForRuneId(player.Runes?.FirstOrDefault(x => x.RuneSlot == 3)?.RuneId),
+                        PrimaryRuneSubStyleFour = GetRuneInformationForRuneId(player.Runes?.FirstOrDefault(x => x.RuneSlot == 4)?.RuneId),
+
+                        SecondaryRuneStyle = GetRuneInformationForRuneId(player.Runes?.FirstOrDefault(x => x.RuneSlot == 5)?.RuneId),
+                        SecondaryRuneStyleOne = GetRuneInformationForRuneId(player.Runes?.FirstOrDefault(x => x.RuneSlot == 6)?.RuneId),
+                        SecondaryRuneStyleTwo = GetRuneInformationForRuneId(player.Runes?.FirstOrDefault(x => x.RuneSlot == 7)?.RuneId),
 
                         //Summoners
+                        SummonerSpellOne = GetSummonerSpellInformationForSummonerSpellId(player.SummonerSpells?.FirstOrDefault(x => x.SummonerSpellSlot == 0)?.SummonerSpellId),
+                        SummonerSpellTwo = GetSummonerSpellInformationForSummonerSpellId(player.SummonerSpells?.FirstOrDefault(x => x.SummonerSpellSlot == 1)?.SummonerSpellId),
 
                         //Gold
                         GoldEarned = player.GoldEarned,
@@ -224,6 +247,58 @@ namespace LccWebAPI.Controllers.Utils.Match
             }
 
             return matchPlayers;
+        }
+
+        private Item GetItemInformationForItemId(long? itemId)
+        {
+            var item = new Item();
+            using (var dbContext = _serviceProvider.GetRequiredService<DatabaseContext>())
+            {
+                var itemForItemId = dbContext.Items.FirstOrDefault(x => x.ItemId == itemId);
+                if (itemForItemId != null)
+                {
+                    item.ItemId = itemForItemId.ItemId;
+                    item.ItemName = itemForItemId.ItemName;
+                    item.ImageFull = itemForItemId.ImageFull;
+                }
+            }
+
+            return item;
+        }
+
+        private Rune GetRuneInformationForRuneId(long? runeId)
+        {
+            var rune = new Rune();
+
+            using (var dbContext = _serviceProvider.GetRequiredService<DatabaseContext>())
+            {
+                var runeForRuneId = dbContext.Runes.FirstOrDefault(x => x.RuneId == runeId);
+                if (runeForRuneId != null)
+                {
+                    rune.RuneId = runeForRuneId.RuneId;
+                    rune.RuneName = runeForRuneId?.RuneName;
+                }
+            }
+
+            return rune;
+        }
+
+        private SummonerSpell GetSummonerSpellInformationForSummonerSpellId(long? summonerSpellId)
+        {
+            var summonerSpell = new SummonerSpell();
+
+            using (var dbContext = _serviceProvider.GetRequiredService<DatabaseContext>())
+            {
+                var summonerSpellForId = dbContext.SummonerSpells.FirstOrDefault(x => x.SummonerSpellId == summonerSpellId);
+                if (summonerSpellForId != null)
+                {
+                    summonerSpell.SummonerSpellId = summonerSpellForId.SummonerSpellId;
+                    summonerSpell.SummonerSpellName = summonerSpellForId?.SummonerSpellName;
+                    summonerSpell.ImageFull = summonerSpellForId?.ImageFull;
+                }
+            }
+
+            return summonerSpell;
         }
 
     }

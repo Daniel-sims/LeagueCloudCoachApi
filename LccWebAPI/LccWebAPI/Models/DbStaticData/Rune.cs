@@ -12,6 +12,5 @@ namespace LccWebAPI.Models.DbStaticData
 
         public int RuneId { get; set; }
         public string RuneName { get; set; }
-        public string ImageFull { get; set; }
     }
 }

@@ -7,5 +7,8 @@ namespace LccWebAPI.Models.ApiStaticData
 {
     public class Item
     {
+        public int ItemId { get; set; }
+        public string ItemName { get; set; }
+        public string ImageFull { get; set; }
     }
 }
