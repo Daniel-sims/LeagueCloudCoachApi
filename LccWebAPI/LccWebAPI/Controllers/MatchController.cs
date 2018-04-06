@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using RiotSharp.Interfaces;
 using System.Threading.Tasks;
 using LccWebAPI.Database.Context;
+using LccWebAPI.Models.ApiMatch;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -16,18 +17,21 @@ namespace LccWebAPI.Controllers
     {
         private IRiotApi _riotApi;
         private readonly IServiceProvider _serviceProvider;
+        private readonly IMatchControllerUtils _matchControllerUtils;
 
         public MatchController(
             IRiotApi riotApi, 
-            IServiceProvider serviceProvider
+            IServiceProvider serviceProvider,
+            IMatchControllerUtils matchControllerUtils
             )
         {
             _riotApi = riotApi;
             _serviceProvider = serviceProvider;
+            _matchControllerUtils = matchControllerUtils;
         }
 
         [HttpGet("GetMatchup")]
-        public async Task<JsonResult> GetMatchup(int usersChampionId, int[] friendlyTeamChampions, int[] enemyTeamChampions, int maxMatchLimit = 5)
+        public JsonResult GetMatchup(int usersChampionId, int[] friendlyTeamChampions, int[] enemyTeamChampions, int maxMatchLimit = 5)
         {
             IList<int> friendlyTeamChampionIds = new List<int>(friendlyTeamChampions) { usersChampionId };
             IList<int> enemyTeamChampionIds = enemyTeamChampions;
@@ -41,16 +45,24 @@ namespace LccWebAPI.Controllers
                         .Include(x => x.Teams).ThenInclude(y => y.Players).ThenInclude(x => x.Runes)
                         .Include(x => x.Teams).ThenInclude(y => y.Players).ThenInclude(x => x.Items)
                         .Include(x => x.Teams).ThenInclude(y => y.Players).ThenInclude(x => x.SummonerSpells)
-                        .Where(x => x.Teams.Any(y => y.Players.Any(v => v.ChampionId == usersChampionId)))
-                        .Where(q => q.Teams
-                        .All(t =>
-                            friendlyTeamChampionIds.All(f => t.Players.Select(p => p.ChampionId).Contains(f)) ||
-                            enemyTeamChampionIds.All(f => t.Players.Select(p => p.ChampionId).Contains(f))));
-                    
+                        .Where(x => x.Teams.Any(y => y.Players.Any(v => v.ChampionId == usersChampionId)));
+
                     var fullMatchupMatches = allMatchesContainingUsersChampion.Where(q => q.Teams
                         .All(t =>
                             friendlyTeamChampionIds.All(f => t.Players.Select(p => p.ChampionId).Contains(f)) ||
-                            enemyTeamChampionIds.All(f => t.Players.Select(p => p.ChampionId).Contains(f)))).ToList();
+                            enemyTeamChampionIds.All(f => t.Players.Select(p => p.ChampionId).Contains(f))));
+
+                    if(fullMatchupMatches.Any())
+                    {
+                        var apiMatches = new List<Models.ApiMatch.Match>();
+
+                        foreach (var match in fullMatchupMatches)
+                        {
+                            apiMatches.Add(_matchControllerUtils.ConvertDbMatchToApiMatch(match));
+                        }
+
+                        return new JsonResult(apiMatches);
+                    }
 
                 }
                 catch (Exception e)
@@ -58,7 +70,8 @@ namespace LccWebAPI.Controllers
                     int i = 0;
                     i++;
                 }
-                
+
+                return new JsonResult("");
             }
             
             //var m = _basicMatchupInformationRepository.GetAllMatchups();

@@ -2,6 +2,6 @@
 {
     public interface IMatchControllerUtils
     {
-
+        Models.ApiMatch.Match ConvertDbMatchToApiMatch(Models.DbMatch.Match dbMatch);
     }
 }
