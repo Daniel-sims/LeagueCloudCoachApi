@@ -62,6 +62,10 @@ namespace LccWebAPI
             app.UseMvc();
         }
 
+        // Not sure about this method being called here, basically the idea is, is that I want to get updated information when the API starts.
+        // Some thoughts I had are; have a middle line between the datacontext and accessing my static data (data in this method) which basically checks
+        // if I have anything in the table and returns it, if there's nothing it fetches it and returns it
+        // Or an endpoint I can call that does this
         private async Task CollectStaticData(IServiceProvider serviceProvider)
         {
             var staticDataEndpoint = serviceProvider.GetRequiredService<IStaticDataEndpoints>();
@@ -78,7 +82,12 @@ namespace LccWebAPI
                         {
                             ItemId = riotItem.Value.Id,
                             ItemName = riotItem.Value.Name,
-                            ImageFull = riotItem.Value.Image.Full
+                            ImageFull = riotItem.Value.Image.Full,
+
+                            PlainText = riotItem.Value.PlainText,
+
+                            Description = riotItem.Value.Description,
+                            SanitizedDescription = riotItem.Value.SanitizedDescription
                         });
                     }
 
@@ -95,6 +104,14 @@ namespace LccWebAPI
                         {
                             RuneId = riotRune.Id,
                             RuneName = riotRune.Name,
+
+                            //Parent style of this rune
+                            RunePathId =  riotRune.RunePathId,
+                            RunePathName =  riotRune.RunePathName,
+
+                            Key = riotRune.Key,
+                            ShortDesc = riotRune.ShortDesc,
+                            LongDesc = riotRune.LongDesc
                         });
                     }
 
@@ -134,8 +151,6 @@ namespace LccWebAPI
 
                     dbContext.SaveChanges();
                 }
-
-                
             }
         }
     }

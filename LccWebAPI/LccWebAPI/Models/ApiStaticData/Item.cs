@@ -10,5 +10,10 @@ namespace LccWebAPI.Models.ApiStaticData
         public int ItemId { get; set; }
         public string ItemName { get; set; }
         public string ImageFull { get; set; }
+
+        public string PlainText { get; set; }
+
+        public string Description { get; set; }
+        public string SanitizedDescription { get; set; }
     }
 }

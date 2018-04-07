@@ -9,6 +9,5 @@ namespace LccWebAPI.Models.ApiStaticData
     {
         public int RuneId { get; set; }
         public string RuneName { get; set; }
-        public string ImageFull { get; set; }
     }
 }

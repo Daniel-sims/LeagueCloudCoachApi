@@ -16,9 +16,9 @@ namespace LccWebAPI.Models.ApiMatch
         public long Assists { get; set; }
         public long TotalMinionsKilled { get; set; }
 
-        public int ChampionId { get; set; }
+        public Champion Champion { get; set; }
         public long ChampionLevel { get; set; }
-
+        
         public Item ItemOne { get; set; }
         public Item ItemTwo { get; set; }
         public Item ItemThree { get; set; }

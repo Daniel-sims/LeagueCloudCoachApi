@@ -13,53 +13,55 @@ namespace LccWebAPI.Controllers.Utils.Match
     public class MatchProvider : IMatchProvider
     {
         private readonly ILogging _logging;
-        private readonly IServiceProvider _serviceProvider;
+
+        private readonly DatabaseContext _dbContext;
 
         public MatchProvider(ILogging logging, IServiceProvider serviceProvider)
         {
             _logging = logging;
-            _serviceProvider = serviceProvider;
+
+            // This is something I'm not sure about, the lifetime of this is transient so the context will be created when a
+            // route is called and destroyed (not disposted I assume) when the API returns the value
+            // I originally has this has a using(var db .....) but was getting errors in my other methods about accessing a disposed 
+            // object.
+            _dbContext = serviceProvider.GetRequiredService<DatabaseContext>();
         }
 
         public IEnumerable<Models.ApiMatch.Match> GetMatchesForListOfTeamIds(long usersChampionId, IEnumerable<int> teamOne, IEnumerable<int> teamTwo, int matchCount)
         {
             var matchList = new List<Models.ApiMatch.Match>();
 
-            using (var dbContext = _serviceProvider.GetRequiredService<DatabaseContext>())
+            try
             {
-                try
+                //Find matches in the database matching the users query
+                IList<Models.DbMatch.Match> allMatchesContainingUsersChampion = _dbContext.Matches
+                    .Include(x => x.Teams).ThenInclude(y => y.Players).ThenInclude(x => x.Runes)
+                    .Include(x => x.Teams).ThenInclude(y => y.Players).ThenInclude(x => x.Items)
+                    .Include(x => x.Teams).ThenInclude(y => y.Players).ThenInclude(x => x.SummonerSpells).ToList();
+
+                var fullMatchupMatches = allMatchesContainingUsersChampion
+                    .Where(x => x.Teams.Any(y => y.Players.Any(v => v.ChampionId == usersChampionId)))
+                    .Where(q => q.Teams
+                    .All(t =>
+                        teamOne.All(f => t.Players.Select(p => p.ChampionId).Contains(f)) ||
+                        teamTwo.All(f => t.Players.Select(p => p.ChampionId).Contains(f)))).ToList();
+
+                if (fullMatchupMatches.Any())
                 {
-                    //Find matches in the database matching the users query
-                    IList<Models.DbMatch.Match> allMatchesContainingUsersChampion = dbContext.Matches
-                        .Include(x => x.Teams).ThenInclude(y => y.Players).ThenInclude(x => x.Runes)
-                        .Include(x => x.Teams).ThenInclude(y => y.Players).ThenInclude(x => x.Items)
-                        .Include(x => x.Teams).ThenInclude(y => y.Players).ThenInclude(x => x.SummonerSpells).ToList();
-
-                    var fullMatchupMatches = allMatchesContainingUsersChampion
-                        .Where(x => x.Teams.Any(y => y.Players.Any(v => v.ChampionId == usersChampionId)))
-                        .Where(q => q.Teams
-                        .All(t =>
-                            teamOne.All(f => t.Players.Select(p => p.ChampionId).Contains(f)) ||
-                            teamTwo.All(f => t.Players.Select(p => p.ChampionId).Contains(f)))).ToList();
-
-                    if (fullMatchupMatches.Any())
+                    foreach (var match in fullMatchupMatches)
                     {
-                        foreach (var match in fullMatchupMatches)
-                        {
-                            if (matchList.Count == matchCount)
-                                break;
+                        if (matchList.Count == matchCount)
+                            break;
 
-                            matchList.Add(ConvertDbMatchToApiMatch(match));
-                        }
+                        matchList.Add(ConvertDbMatchToApiMatch(match));
                     }
                 }
-                catch (Exception ex)
-                {
-                    _logging.LogEvent("Exception caught when getting matches for ids : " + ex.Message);
-                }
-
             }
-
+            catch (Exception ex)
+            {
+                _logging.LogEvent("Exception caught when getting matches for ids : " + ex.Message);
+            }
+            
             return matchList;
         }
         
@@ -144,7 +146,7 @@ namespace LccWebAPI.Controllers.Utils.Match
                         Assists = player.Assists,
                         TotalMinionsKilled = player.TotalMinionsKilled,
 
-                        ChampionId = player.ChampionId,
+                        Champion = GetChampionInformationForChampionId(player.ChampionId),
                         ChampionLevel = player.ChampionLevel,
 
                         //Items
@@ -158,13 +160,13 @@ namespace LccWebAPI.Controllers.Utils.Match
                         Trinket = GetItemInformationForItemId(player.TrinketId),
 
                         //Runes
-                        PrimaryRuneStyle = GetRuneInformationForRuneId(player.Runes?.FirstOrDefault(x => x.RuneSlot == 0)?.RuneId),
+                        PrimaryRuneStyle = GetParentRuneForRuneId(player.Runes?.FirstOrDefault(x => x.RuneSlot == 1)?.RuneId),
                         PrimaryRuneSubStyleOne = GetRuneInformationForRuneId(player.Runes?.FirstOrDefault(x => x.RuneSlot == 1)?.RuneId),
                         PrimaryRuneSubStyleTwo = GetRuneInformationForRuneId(player.Runes?.FirstOrDefault(x => x.RuneSlot == 2)?.RuneId),
                         PrimaryRuneSubStyleThree = GetRuneInformationForRuneId(player.Runes?.FirstOrDefault(x => x.RuneSlot == 3)?.RuneId),
                         PrimaryRuneSubStyleFour = GetRuneInformationForRuneId(player.Runes?.FirstOrDefault(x => x.RuneSlot == 4)?.RuneId),
 
-                        SecondaryRuneStyle = GetRuneInformationForRuneId(player.Runes?.FirstOrDefault(x => x.RuneSlot == 5)?.RuneId),
+                        SecondaryRuneStyle = GetParentRuneForRuneId(player.Runes?.FirstOrDefault(x => x.RuneSlot == 6)?.RuneId),
                         SecondaryRuneStyleOne = GetRuneInformationForRuneId(player.Runes?.FirstOrDefault(x => x.RuneSlot == 6)?.RuneId),
                         SecondaryRuneStyleTwo = GetRuneInformationForRuneId(player.Runes?.FirstOrDefault(x => x.RuneSlot == 7)?.RuneId),
 
@@ -252,15 +254,25 @@ namespace LccWebAPI.Controllers.Utils.Match
         private Item GetItemInformationForItemId(long? itemId)
         {
             var item = new Item();
-            using (var dbContext = _serviceProvider.GetRequiredService<DatabaseContext>())
+
+            try
             {
-                var itemForItemId = dbContext.Items.FirstOrDefault(x => x.ItemId == itemId);
+                var itemForItemId = _dbContext.Items.FirstOrDefault(x => x.ItemId == itemId);
                 if (itemForItemId != null)
                 {
                     item.ItemId = itemForItemId.ItemId;
                     item.ItemName = itemForItemId.ItemName;
                     item.ImageFull = itemForItemId.ImageFull;
+
+                    item.PlainText = itemForItemId.PlainText;
+
+                    item.Description = itemForItemId.Description;
+                    item.SanitizedDescription = itemForItemId.SanitizedDescription;
                 }
+            }
+            catch (Exception ex)
+            {
+                _logging.LogEvent(" Exception hit getting item information for id : " + ex.Message);
             }
 
             return item;
@@ -270,14 +282,39 @@ namespace LccWebAPI.Controllers.Utils.Match
         {
             var rune = new Rune();
 
-            using (var dbContext = _serviceProvider.GetRequiredService<DatabaseContext>())
+            try
             {
-                var runeForRuneId = dbContext.Runes.FirstOrDefault(x => x.RuneId == runeId);
+                var runeForRuneId = _dbContext.Runes.FirstOrDefault(x => x.RuneId == runeId);
                 if (runeForRuneId != null)
                 {
                     rune.RuneId = runeForRuneId.RuneId;
-                    rune.RuneName = runeForRuneId?.RuneName;
+                    rune.RuneName = runeForRuneId.RuneName;
                 }
+            }
+            catch (Exception ex)
+            {
+                _logging.LogEvent(" Exception hit getting rune information for id : " + ex.Message);
+            }
+            
+            return rune;
+        }
+
+        private Rune GetParentRuneForRuneId(long? runeId)
+        {
+            var rune = new Rune();
+
+            try
+            {
+                var runeForRuneId = _dbContext.Runes.FirstOrDefault(x => x.RunePathId == runeId);
+                if (runeForRuneId != null)
+                {
+                    rune.RuneId = runeForRuneId.RuneId;
+                    rune.RuneName = runeForRuneId.RuneName;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logging.LogEvent(" Exception hit getting rune information for id : " + ex.Message);
             }
 
             return rune;
@@ -287,19 +324,49 @@ namespace LccWebAPI.Controllers.Utils.Match
         {
             var summonerSpell = new SummonerSpell();
 
-            using (var dbContext = _serviceProvider.GetRequiredService<DatabaseContext>())
+            try
             {
-                var summonerSpellForId = dbContext.SummonerSpells.FirstOrDefault(x => x.SummonerSpellId == summonerSpellId);
+                var summonerSpellForId = _dbContext.SummonerSpells.FirstOrDefault(x => x.SummonerSpellId == summonerSpellId);
                 if (summonerSpellForId != null)
                 {
                     summonerSpell.SummonerSpellId = summonerSpellForId.SummonerSpellId;
-                    summonerSpell.SummonerSpellName = summonerSpellForId?.SummonerSpellName;
-                    summonerSpell.ImageFull = summonerSpellForId?.ImageFull;
+                    summonerSpell.SummonerSpellName = summonerSpellForId.SummonerSpellName;
+
+                    summonerSpell.Description = summonerSpellForId.Description;
+
+                    summonerSpell.ImageFull = summonerSpellForId.ImageFull;
                 }
             }
-
+            catch (Exception ex)
+            {
+                _logging.LogEvent(" Exception hit getting summoner spell information for id : " + ex.Message);
+            }
+            
             return summonerSpell;
         }
+
+        private Champion GetChampionInformationForChampionId(long? championId)
+        {
+            var champion = new Champion();
+
+            try
+            {
+                var championForId = _dbContext.Champions.FirstOrDefault(x => x.ChampionId == championId);
+                if (championForId != null)
+                {
+                    champion.ChampionId = championForId.ChampionId;
+                    champion.ChampionName = championForId.ChampionName;
+                    champion.ImageFull = championForId.ImageFull;
+                }
+            }
+            catch (Exception ex)
+            {
+                _logging.LogEvent(" Exception hit getting summoner spell information for id : " + ex.Message);
+            }
+
+            return champion;
+        }
+
 
     }
 }
