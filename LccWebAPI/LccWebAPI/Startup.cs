@@ -37,6 +37,7 @@ namespace LccWebAPI
             services.AddSingleton<IHostedService, MatchDataCollectionService>();
             services.AddSingleton<ILogging, Logging>();
             services.AddSingleton<IThrottledRequestHelper, ThrottledRequestHelper>();
+            services.AddScoped<IStaticDataCollectionService, StaticDataCollectionService>();
 
             services.AddSingleton<IRiotApi>(RiotApi.GetDevelopmentInstance(RiotApiKey));
             services.AddSingleton<IStaticDataEndpoints>(StaticDataEndpoints.GetInstance(RiotApiKey));
@@ -50,108 +51,16 @@ namespace LccWebAPI
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IServiceProvider serviceProvider)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, IStaticDataCollectionService staticDataCollectionService)
         {
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
             }
 
-            CollectStaticData(serviceProvider).GetAwaiter().GetResult();
+            staticDataCollectionService.CollectStaticDataIfNeeded().GetAwaiter().GetResult();
 
             app.UseMvc();
-        }
-
-        // Not sure about this method being called here, basically the idea is, is that I want to get updated information when the API starts.
-        // Some thoughts I had are; have a middle line between the datacontext and accessing my static data (data in this method) which basically checks
-        // if I have anything in the table and returns it, if there's nothing it fetches it and returns it
-        // Or an endpoint I can call that does this
-        private async Task CollectStaticData(IServiceProvider serviceProvider)
-        {
-            var staticDataEndpoint = serviceProvider.GetRequiredService<IStaticDataEndpoints>();
-
-            using (var dbContext = serviceProvider.GetRequiredService<DatabaseContext>())
-            {
-                if (!dbContext.Items.Any())
-                {
-                    var riotItemInformation = await staticDataEndpoint.Item.GetItemsAsync(Region.euw);
-
-                    foreach (var riotItem in riotItemInformation.Items)
-                    {
-                        dbContext.Items.Add(new Item()
-                        {
-                            ItemId = riotItem.Value.Id,
-                            ItemName = riotItem.Value.Name,
-                            ImageFull = riotItem.Value.Image.Full,
-
-                            PlainText = riotItem.Value.PlainText,
-
-                            Description = riotItem.Value.Description,
-                            SanitizedDescription = riotItem.Value.SanitizedDescription
-                        });
-                    }
-
-                    dbContext.SaveChanges();
-                }
-
-                if (!dbContext.Runes.Any())
-                {
-                    var riotRuneInformation = await staticDataEndpoint.Rune.GetRunesReforgedAsync(Region.euw);
-
-                    foreach (var riotRune in riotRuneInformation)
-                    {
-                        dbContext.Runes.Add(new Rune()
-                        {
-                            RuneId = riotRune.Id,
-                            RuneName = riotRune.Name,
-
-                            //Parent style of this rune
-                            RunePathId =  riotRune.RunePathId,
-                            RunePathName =  riotRune.RunePathName,
-
-                            Key = riotRune.Key,
-                            ShortDesc = riotRune.ShortDesc,
-                            LongDesc = riotRune.LongDesc
-                        });
-                    }
-
-                    dbContext.SaveChanges();
-                }
-
-                if (!dbContext.SummonerSpells.Any())
-                {
-                    var riotSummonerSpellInformation = await staticDataEndpoint.SummonerSpell.GetSummonerSpellsAsync(Region.euw);
-
-                    foreach (var riotSummonerSpell in riotSummonerSpellInformation.SummonerSpells)
-                    {
-                        dbContext.SummonerSpells.Add(new SummonerSpell()
-                        {
-                            SummonerSpellId = riotSummonerSpell.Value.Id,
-                            SummonerSpellName = riotSummonerSpell.Value.Name,
-                            ImageFull = riotSummonerSpell.Value.Image.Full
-                        });
-                    }
-
-                    dbContext.SaveChanges();
-                }
-
-                if (!dbContext.Champions.Any())
-                {
-                    var riotChampionInformation = await staticDataEndpoint.Champion.GetChampionsAsync(Region.euw);
-
-                    foreach (var riotChampion in riotChampionInformation.Champions)
-                    {
-                        dbContext.Champions.Add(new Champion()
-                        {
-                            ChampionId = riotChampion.Value.Id,
-                            ChampionName = riotChampion.Value.Name,
-                            ImageFull = riotChampion.Value.Image.Full
-                        });
-                    }
-
-                    dbContext.SaveChanges();
-                }
-            }
         }
     }
 }
