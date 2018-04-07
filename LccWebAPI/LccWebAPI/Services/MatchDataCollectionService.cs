@@ -437,7 +437,7 @@ namespace LccWebAPI.Services
 
                 if (participant?.Spell2Id != 0)
                 {
-                    summonerSpells.Add(new Models.DbMatch.PlayerSummonerSpell() { SummonerSpellId = participant?.Spell2Id, SummonerSpellSlot = 0 });
+                    summonerSpells.Add(new Models.DbMatch.PlayerSummonerSpell() { SummonerSpellId = participant?.Spell2Id, SummonerSpellSlot = 1 });
                 }
             }
             catch(Exception ex)

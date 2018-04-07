@@ -34,17 +34,20 @@ namespace LccWebAPI.Controllers.Utils.Match
             try
             {
                 //Find matches in the database matching the users query
-                IList<Models.DbMatch.Match> allMatchesContainingUsersChampion = _dbContext.Matches
+                var allMatchesContainingUsersChampion = _dbContext.Matches
                     .Include(x => x.Teams).ThenInclude(y => y.Players).ThenInclude(x => x.Runes)
                     .Include(x => x.Teams).ThenInclude(y => y.Players).ThenInclude(x => x.Items)
-                    .Include(x => x.Teams).ThenInclude(y => y.Players).ThenInclude(x => x.SummonerSpells).ToList();
+                    .Include(x => x.Teams).ThenInclude(y => y.Players).ThenInclude(x => x.SummonerSpells).ToList(); 
+                //To list on this avoids some errors to do with ignored includes
 
+                // This Linq query could be added to the one above?
                 var fullMatchupMatches = allMatchesContainingUsersChampion
                     .Where(x => x.Teams.Any(y => y.Players.Any(v => v.ChampionId == usersChampionId)))
                     .Where(q => q.Teams
                     .All(t =>
                         teamOne.All(f => t.Players.Select(p => p.ChampionId).Contains(f)) ||
                         teamTwo.All(f => t.Players.Select(p => p.ChampionId).Contains(f)))).ToList();
+                //To list on this avoids resharper warning of possible multiple enumerations
 
                 if (fullMatchupMatches.Any())
                 {
@@ -160,13 +163,13 @@ namespace LccWebAPI.Controllers.Utils.Match
                         Trinket = GetItemInformationForItemId(player.TrinketId),
 
                         //Runes
-                        PrimaryRuneStyle = GetParentRuneForRuneId(player.Runes?.FirstOrDefault(x => x.RuneSlot == 1)?.RuneId),
+                        PrimaryRuneStyle = GetParentRuneForRuneId(player.Runes?.FirstOrDefault(x => x.RuneSlot == 0)?.RuneId),
                         PrimaryRuneSubStyleOne = GetRuneInformationForRuneId(player.Runes?.FirstOrDefault(x => x.RuneSlot == 1)?.RuneId),
                         PrimaryRuneSubStyleTwo = GetRuneInformationForRuneId(player.Runes?.FirstOrDefault(x => x.RuneSlot == 2)?.RuneId),
                         PrimaryRuneSubStyleThree = GetRuneInformationForRuneId(player.Runes?.FirstOrDefault(x => x.RuneSlot == 3)?.RuneId),
                         PrimaryRuneSubStyleFour = GetRuneInformationForRuneId(player.Runes?.FirstOrDefault(x => x.RuneSlot == 4)?.RuneId),
 
-                        SecondaryRuneStyle = GetParentRuneForRuneId(player.Runes?.FirstOrDefault(x => x.RuneSlot == 6)?.RuneId),
+                        SecondaryRuneStyle = GetParentRuneForRuneId(player.Runes?.FirstOrDefault(x => x.RuneSlot == 5)?.RuneId),
                         SecondaryRuneStyleOne = GetRuneInformationForRuneId(player.Runes?.FirstOrDefault(x => x.RuneSlot == 6)?.RuneId),
                         SecondaryRuneStyleTwo = GetRuneInformationForRuneId(player.Runes?.FirstOrDefault(x => x.RuneSlot == 7)?.RuneId),
 
@@ -289,6 +292,10 @@ namespace LccWebAPI.Controllers.Utils.Match
                 {
                     rune.RuneId = runeForRuneId.RuneId;
                     rune.RuneName = runeForRuneId.RuneName;
+
+                    rune.Key = runeForRuneId.Key;
+                    rune.LongDesc = runeForRuneId.LongDesc;
+                    rune.ShortDesc = runeForRuneId.ShortDesc;
                 }
             }
             catch (Exception ex)
@@ -308,8 +315,8 @@ namespace LccWebAPI.Controllers.Utils.Match
                 var runeForRuneId = _dbContext.Runes.FirstOrDefault(x => x.RunePathId == runeId);
                 if (runeForRuneId != null)
                 {
-                    rune.RuneId = runeForRuneId.RuneId;
-                    rune.RuneName = runeForRuneId.RuneName;
+                    rune.RuneId = runeForRuneId.RunePathId;
+                    rune.RuneName = runeForRuneId.RunePathName;
                 }
             }
             catch (Exception ex)
