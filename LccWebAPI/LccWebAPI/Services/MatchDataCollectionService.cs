@@ -1,9 +1,11 @@
 ﻿using LccWebAPI.Constants;
 using LccWebAPI.Database.Context;
+using LccWebAPI.Models.DbMatch;
 using LccWebAPI.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using RiotSharp;
+using RiotSharp.Endpoints.MatchEndpoint;
 using RiotSharp.Interfaces;
 using RiotSharp.Misc;
 using System;
@@ -171,16 +173,20 @@ namespace LccWebAPI.Services
             }
         }
 
-        private async Task<Models.DbMatch.Match> ConvertRiotMatchReferenceToDbMatch(RiotSharp.Endpoints.MatchEndpoint.MatchReference riotMatchReference)
+        private async Task<Models.DbMatch.Match> ConvertRiotMatchReferenceToDbMatch(MatchReference riotMatchReference)
         {
             try
             {
                 var newDbMatch = new Models.DbMatch.Match();
 
-                var riotMatch = await _throttledRequestHelper.SendThrottledRequest( async () => await _riotApi.Match.GetMatchAsync(Region.euw, riotMatchReference.GameId));
+                var riotMatch = await _throttledRequestHelper.SendThrottledRequest( async () => 
+                    await _riotApi.Match.GetMatchAsync(Region.euw, riotMatchReference.GameId));
 
                 if (riotMatch != null)
                 {
+                    var riotMatchTimeline = await _throttledRequestHelper.SendThrottledRequest(async () =>
+                        await _riotApi.Match.GetMatchTimelineAsync(Region.euw, riotMatch.GameId));
+
                     newDbMatch.GameId = riotMatch.GameId;
                     newDbMatch.GameDuration = riotMatch.GameDuration;
                     newDbMatch.GameDate = riotMatch.GameCreation;
@@ -189,13 +195,13 @@ namespace LccWebAPI.Services
 
                     var winningTeamParticipants = riotMatch.Participants.Where(x => x.TeamId == newDbMatch.WinningTeamId);
                     var winningTeamstats = riotMatch.Teams.FirstOrDefault(x => x.TeamId == newDbMatch.WinningTeamId);
-
-                    newDbMatch.Teams.Add(ConvertRiotParticipantsToDbTeam(winningTeamParticipants, winningTeamstats));
+                    
+                    newDbMatch.Teams.Add(ConvertRiotParticipantsToDbTeam(winningTeamParticipants, winningTeamstats, riotMatchTimeline));
 
                     var losingTeamParticipants = riotMatch.Participants.Where(x => x.TeamId != newDbMatch.WinningTeamId);
                     var losingTeamStats = riotMatch.Teams.FirstOrDefault(x => x.TeamId != newDbMatch.WinningTeamId);
 
-                    newDbMatch.Teams.Add(ConvertRiotParticipantsToDbTeam(losingTeamParticipants, losingTeamStats));
+                    newDbMatch.Teams.Add(ConvertRiotParticipantsToDbTeam(losingTeamParticipants, losingTeamStats, riotMatchTimeline));
                     
                     return newDbMatch;
                 }
@@ -208,28 +214,29 @@ namespace LccWebAPI.Services
             return null;
         }
 
-        private Models.DbMatch.MatchTeam ConvertRiotParticipantsToDbTeam(IEnumerable<RiotSharp.Endpoints.MatchEndpoint.Participant> participants, RiotSharp.Endpoints.MatchEndpoint.TeamStats teamStats)
+        private MatchTeam ConvertRiotParticipantsToDbTeam(IEnumerable<Participant> riotParticipants, TeamStats riotTeamStats, Timeline riotTimeline)
         {
-            var team = new Models.DbMatch.MatchTeam
+            var team = new MatchTeam
             {
-                BaronKills = teamStats.BaronKills,
-                DragonKills = teamStats.DragonKills,
-                InhibitorKills = teamStats.InhibitorKills,
-                RiftHeraldKills = teamStats.RiftHeraldKills,
-                TeamId = teamStats.TeamId
+                BaronKills = riotTeamStats.BaronKills,
+                DragonKills = riotTeamStats.DragonKills,
+                InhibitorKills = riotTeamStats.InhibitorKills,
+                RiftHeraldKills = riotTeamStats.RiftHeraldKills,
+                TeamId = riotTeamStats.TeamId
 
             };
 
-            foreach (var participant in participants)
+            foreach (var participant in riotParticipants)
             {
                 try
                 {
                     team.Players.Add
                     (
-                        new Models.DbMatch.MatchPlayer()
+                        new MatchPlayer()
                         {
                             TeamId = participant.TeamId,
                             ParticipantId = participant.ParticipantId,
+                            HighestAcheivedTierLastSeason = participant.HighestAchievedSeasonTier.ToString(),
                             Kills = participant.Stats.Kills,
                             Deaths = participant.Stats.Deaths,
                             Assists = participant.Stats.Assists,
@@ -239,6 +246,7 @@ namespace LccWebAPI.Services
                             TrinketId = participant.Stats.Item6,
                             Runes = GetRunesForParticipant(participant),
                             SummonerSpells = GetSummonerSpellsForParticipant(participant),
+                            Events = GetEventsFromRiotTimelineForParticipant(participant.ParticipantId, riotTimeline),
 
                             //Gold
                             GoldEarned = participant.Stats.GoldEarned,
@@ -317,41 +325,86 @@ namespace LccWebAPI.Services
 
             return team;
         }
-        
-        private ICollection<Models.DbMatch.PlayerItem> GetItemsForParticipant(RiotSharp.Endpoints.MatchEndpoint.Participant participant)
+
+        private ICollection<MatchEvent> GetEventsFromRiotTimelineForParticipant(int participantId, Timeline riotTimeline)
         {
-            var items = new List<Models.DbMatch.PlayerItem>();
+            var matchEvents = new List<MatchEvent>();
 
             try
             {
-                if (participant?.Stats?.Item0 != 0)
+                var riotMatchEvents =
+                    riotTimeline.Frames.Select(x => x.Events.Where(y => y.ParticipantId == participantId));
+
+                foreach (var fr in riotMatchEvents)
                 {
-                    items.Add(new Models.DbMatch.PlayerItem() { ItemId = participant?.Stats?.Item0, ItemSlot = 0});
+                    foreach (var ev in fr)
+                    {
+                        matchEvents.Add(new MatchEvent()
+                        {
+                            Type = ev.Type.ToString(),
+                            Timestamp = ev.Timestamp,
+                            ParticipantId = ev.ParticipantId,
+                            ItemId = ev.ItemId,
+                            SkillSlot = ev.SkillSlot,
+                            LevelUpType = ev.LevelUpType,
+                            WardType = ev.WardType,
+                            CreatorId = ev.CreatorId,
+                            KillerId = ev.KillerId,
+                            VictimId = ev.VictimId,
+                            AfterId = ev.AfterId,
+                            BeforeId = ev.BeforeId,
+                            TeamId = ev.TeamId,
+                            BuildingType = ev.BuildingType,
+                            LaneType = ev.LaneType,
+                            TowerType = ev.TowerType,
+                            MonsterType = ev.MonsterType,
+                            MonsterSubType = ev.MonsterSubType
+                        });
+                    }
+                }
+            }
+            catch (Exception e)
+            {
+                _logging.LogEvent("#Exception encountered when getting events from riot timeline for participant. Reason: " + e.Message);
+            }
+            
+            return matchEvents;
+        }
+        
+        private ICollection<PlayerItem> GetItemsForParticipant(Participant riotParticipant)
+        {
+            var items = new List<PlayerItem>();
+
+            try
+            {
+                if (riotParticipant?.Stats?.Item0 != 0)
+                {
+                    items.Add(new PlayerItem() { ItemId = riotParticipant?.Stats?.Item0, ItemSlot = 0});
                 }
 
-                if (participant?.Stats?.Item1 != 0)
+                if (riotParticipant?.Stats?.Item1 != 0)
                 {
-                    items.Add(new Models.DbMatch.PlayerItem() { ItemId = participant?.Stats?.Item1, ItemSlot = 1 });
+                    items.Add(new PlayerItem() { ItemId = riotParticipant?.Stats?.Item1, ItemSlot = 1 });
                 }
 
-                if (participant?.Stats?.Item2 != 0)
+                if (riotParticipant?.Stats?.Item2 != 0)
                 {
-                    items.Add(new Models.DbMatch.PlayerItem() { ItemId = participant?.Stats?.Item2, ItemSlot = 2 });
+                    items.Add(new PlayerItem() { ItemId = riotParticipant?.Stats?.Item2, ItemSlot = 2 });
                 }
 
-                if (participant?.Stats?.Item3 != 0)
+                if (riotParticipant?.Stats?.Item3 != 0)
                 {
-                    items.Add(new Models.DbMatch.PlayerItem() { ItemId = participant?.Stats?.Item3, ItemSlot = 3 });
+                    items.Add(new PlayerItem() { ItemId = riotParticipant?.Stats?.Item3, ItemSlot = 3 });
                 }
 
-                if (participant?.Stats?.Item4 != 0)
+                if (riotParticipant?.Stats?.Item4 != 0)
                 {
-                    items.Add(new Models.DbMatch.PlayerItem() { ItemId = participant?.Stats?.Item4, ItemSlot = 4 });
+                    items.Add(new PlayerItem() { ItemId = riotParticipant?.Stats?.Item4, ItemSlot = 4 });
                 }
 
-                if (participant?.Stats?.Item5 != 0)
+                if (riotParticipant?.Stats?.Item5 != 0)
                 {
-                    items.Add(new Models.DbMatch.PlayerItem() { ItemId = participant?.Stats?.Item5, ItemSlot = 5 });
+                    items.Add(new PlayerItem() { ItemId = riotParticipant?.Stats?.Item5, ItemSlot = 5 });
                 }
             }
             catch(Exception ex)
@@ -362,58 +415,58 @@ namespace LccWebAPI.Services
             return items;
         }
         
-        private ICollection<Models.DbMatch.PlayerRune> GetRunesForParticipant(RiotSharp.Endpoints.MatchEndpoint.Participant participant)
+        private ICollection<PlayerRune> GetRunesForParticipant(Participant riotParticipant)
         {
-            var runes = new List<Models.DbMatch.PlayerRune>();
+            var runes = new List<PlayerRune>();
 
             try
             {
                 //Primary Style
-                if(participant?.Stats?.PerkPrimaryStyle != 0)
+                if(riotParticipant?.Stats?.PerkPrimaryStyle != 0)
                 {
-                    runes.Add(new Models.DbMatch.PlayerRune() { RuneId = participant?.Stats?.PerkPrimaryStyle, RuneSlot = 0 });
+                    runes.Add(new PlayerRune() { RuneId = riotParticipant?.Stats?.PerkPrimaryStyle, RuneSlot = 0 });
                 }
 
                 //Primary sub style row one
-                if (participant?.Stats?.Perk0 != 0)
+                if (riotParticipant?.Stats?.Perk0 != 0)
                 {
-                    runes.Add(new Models.DbMatch.PlayerRune() { RuneId = participant?.Stats?.Perk0, RuneSlot = 1 });
+                    runes.Add(new PlayerRune() { RuneId = riotParticipant?.Stats?.Perk0, RuneSlot = 1 });
                 }
 
                 //Primary sub style row two
-                if (participant?.Stats?.Perk1 != 0)
+                if (riotParticipant?.Stats?.Perk1 != 0)
                 {
-                    runes.Add(new Models.DbMatch.PlayerRune() { RuneId = participant?.Stats?.Perk1, RuneSlot = 2 });
+                    runes.Add(new PlayerRune() { RuneId = riotParticipant?.Stats?.Perk1, RuneSlot = 2 });
                 }
 
                 //Primary sub style row three
-                if (participant?.Stats?.Perk2 != 0)
+                if (riotParticipant?.Stats?.Perk2 != 0)
                 {
-                    runes.Add(new Models.DbMatch.PlayerRune() { RuneId = participant?.Stats?.Perk2, RuneSlot = 3 });
+                    runes.Add(new PlayerRune() { RuneId = riotParticipant?.Stats?.Perk2, RuneSlot = 3 });
                 }
 
                 //Primary sub style row four
-                if (participant?.Stats?.Perk3 != 0)
+                if (riotParticipant?.Stats?.Perk3 != 0)
                 {
-                    runes.Add(new Models.DbMatch.PlayerRune() { RuneId = participant?.Stats?.Perk3, RuneSlot = 4 });
+                    runes.Add(new PlayerRune() { RuneId = riotParticipant?.Stats?.Perk3, RuneSlot = 4 });
                 }
 
                 //secondary Style
-                if (participant?.Stats?.PerkSubStyle != 0)
+                if (riotParticipant?.Stats?.PerkSubStyle != 0)
                 {
-                    runes.Add(new Models.DbMatch.PlayerRune() { RuneId = participant?.Stats?.PerkSubStyle, RuneSlot = 5 });
+                    runes.Add(new PlayerRune() { RuneId = riotParticipant?.Stats?.PerkSubStyle, RuneSlot = 5 });
                 }
 
                 //secondary sub style row one
-                if (participant?.Stats?.Perk4 != 0)
+                if (riotParticipant?.Stats?.Perk4 != 0)
                 {
-                    runes.Add(new Models.DbMatch.PlayerRune() { RuneId = participant?.Stats?.Perk4, RuneSlot = 6 });
+                    runes.Add(new PlayerRune() { RuneId = riotParticipant?.Stats?.Perk4, RuneSlot = 6 });
                 }
 
                 //secondary sub style row two
-                if (participant?.Stats?.Perk5 != 0)
+                if (riotParticipant?.Stats?.Perk5 != 0)
                 {
-                    runes.Add(new Models.DbMatch.PlayerRune() { RuneId = participant?.Stats?.Perk5, RuneSlot = 7 });
+                    runes.Add(new PlayerRune() { RuneId = riotParticipant?.Stats?.Perk5, RuneSlot = 7 });
                 }
             }
             catch (Exception ex)
@@ -424,20 +477,20 @@ namespace LccWebAPI.Services
             return runes;
         }
 
-        private ICollection<Models.DbMatch.PlayerSummonerSpell> GetSummonerSpellsForParticipant(RiotSharp.Endpoints.MatchEndpoint.Participant participant)
+        private ICollection<PlayerSummonerSpell> GetSummonerSpellsForParticipant(Participant riotParticipant)
         {
-            var summonerSpells = new List<Models.DbMatch.PlayerSummonerSpell>();
+            var summonerSpells = new List<PlayerSummonerSpell>();
 
             try
             {
-                if(participant?.Spell1Id != 0)
+                if(riotParticipant?.Spell1Id != 0)
                 {
-                    summonerSpells.Add(new Models.DbMatch.PlayerSummonerSpell() { SummonerSpellId = participant?.Spell1Id, SummonerSpellSlot = 0 });
+                    summonerSpells.Add(new PlayerSummonerSpell() { SummonerSpellId = riotParticipant?.Spell1Id, SummonerSpellSlot = 0 });
                 }
 
-                if (participant?.Spell2Id != 0)
+                if (riotParticipant?.Spell2Id != 0)
                 {
-                    summonerSpells.Add(new Models.DbMatch.PlayerSummonerSpell() { SummonerSpellId = participant?.Spell2Id, SummonerSpellSlot = 1 });
+                    summonerSpells.Add(new PlayerSummonerSpell() { SummonerSpellId = riotParticipant?.Spell2Id, SummonerSpellSlot = 1 });
                 }
             }
             catch(Exception ex)

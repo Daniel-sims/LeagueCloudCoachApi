@@ -3,7 +3,6 @@ using LccWebAPI.Models.ApiMatch;
 using LccWebAPI.Models.ApiStaticData;
 using LccWebAPI.Utils;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -32,7 +31,8 @@ namespace LccWebAPI.Controllers.Utils.Match
                 var allMatchesContainingUsersChampion = _dbContext.Matches
                     .Include(x => x.Teams).ThenInclude(y => y.Players).ThenInclude(x => x.Runes)
                     .Include(x => x.Teams).ThenInclude(y => y.Players).ThenInclude(x => x.Items)
-                    .Include(x => x.Teams).ThenInclude(y => y.Players).ThenInclude(x => x.SummonerSpells).ToList(); 
+                    .Include(x => x.Teams).ThenInclude(y => y.Players).ThenInclude(x => x.SummonerSpells)
+                    .Include(x => x.Teams).ThenInclude(y => y.Players).ThenInclude(x => x.Events).ToList(); 
                 //To list on this avoids some errors to do with ignored includes
 
                 // This Linq query could be added to the one above?
@@ -146,6 +146,8 @@ namespace LccWebAPI.Controllers.Utils.Match
 
                         Champion = GetChampionInformationForChampionId(player.ChampionId),
                         ChampionLevel = player.ChampionLevel,
+
+                        Events = ConvertDbMatchEventsToApiMatchEvents(player.Events),
 
                         //Items
                         ItemOne = GetItemInformationForItemId(player.Items?.FirstOrDefault(x => x.ItemSlot == 0)?.ItemId),
@@ -313,7 +315,6 @@ namespace LccWebAPI.Controllers.Utils.Match
                     rune.RuneId = runeForRuneId.RunePathId;
                     rune.RuneName = runeForRuneId.RunePathName;
                     rune.Key = runeForRuneId.RunePathName;
-
                 }
             }
             catch (Exception ex)
@@ -369,6 +370,39 @@ namespace LccWebAPI.Controllers.Utils.Match
             }
 
             return champion;
+        }
+
+        public ICollection<MatchEvent> ConvertDbMatchEventsToApiMatchEvents(
+            ICollection<Models.DbMatch.MatchEvent> dbEvents)
+        {
+            var events = new List<MatchEvent>();
+
+            foreach (var ev in dbEvents)
+            {
+                events.Add(new MatchEvent()
+                {
+                    Type = ev.Type,
+                    Timestamp = ev.Timestamp,
+                    ParticipantId = ev.ParticipantId,
+                    ItemId = ev.ItemId,
+                    SkillSlot = ev.SkillSlot,
+                    LevelUpType = ev.LevelUpType,
+                    WardType = ev.WardType,
+                    CreatorId = ev.CreatorId,
+                    KillerId = ev.KillerId,
+                    VictimId = ev.VictimId,
+                    AfterId = ev.AfterId,
+                    BeforeId = ev.BeforeId,
+                    TeamId = ev.TeamId,
+                    BuildingType = ev.BuildingType,
+                    LaneType = ev.LaneType,
+                    TowerType = ev.TowerType,
+                    MonsterType = ev.MonsterType,
+                    MonsterSubType = ev.MonsterSubType
+                });
+            }
+
+            return events.OrderBy(x => x.Timestamp).ToList();
         }
 
 

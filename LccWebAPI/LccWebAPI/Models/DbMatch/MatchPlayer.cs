@@ -13,6 +13,7 @@ namespace LccWebAPI.Models.DbMatch
         
         // General player data
         public long PlayerId { get; set; }
+        public string HighestAcheivedTierLastSeason { get; set; }
 
         // Game specific data
         public int TeamId { get; set; }
@@ -31,6 +32,8 @@ namespace LccWebAPI.Models.DbMatch
 
         public virtual ICollection<PlayerRune> Runes { get; set; } = new List<PlayerRune>();
         public virtual ICollection<PlayerSummonerSpell> SummonerSpells { get; set; } = new List<PlayerSummonerSpell>();
+
+        public virtual ICollection<MatchEvent> Events { get; set; } = new List<MatchEvent>();
         
         //Gold
         public long GoldEarned { get; set; }

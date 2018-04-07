@@ -1,4 +1,5 @@
 ﻿using LccWebAPI.Models.ApiStaticData;
+using System.Collections.Generic;
 
 namespace LccWebAPI.Models.ApiMatch
 {
@@ -10,11 +11,14 @@ namespace LccWebAPI.Models.ApiMatch
         // Game specific data
         public int TeamId { get; set; }
         public int ParticipantId { get; set; }
+        public string HighestAcheivedTierLastSeason { get; set; }
 
         public long Kills { get; set; }
         public long Deaths { get; set; }
         public long Assists { get; set; }
         public long TotalMinionsKilled { get; set; }
+
+        public ICollection<MatchEvent> Events { get; set; } = new List<MatchEvent>();
 
         public Champion Champion { get; set; }
         public long ChampionLevel { get; set; }
