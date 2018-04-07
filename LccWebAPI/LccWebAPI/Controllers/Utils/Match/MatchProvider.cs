@@ -312,6 +312,8 @@ namespace LccWebAPI.Controllers.Utils.Match
                 {
                     rune.RuneId = runeForRuneId.RunePathId;
                     rune.RuneName = runeForRuneId.RunePathName;
+                    rune.Key = runeForRuneId.RunePathName;
+
                 }
             }
             catch (Exception ex)
