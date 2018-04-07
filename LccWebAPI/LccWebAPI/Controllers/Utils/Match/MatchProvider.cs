@@ -16,15 +16,10 @@ namespace LccWebAPI.Controllers.Utils.Match
 
         private readonly DatabaseContext _dbContext;
 
-        public MatchProvider(ILogging logging, IServiceProvider serviceProvider)
+        public MatchProvider(ILogging logging, DatabaseContext databaseContext)
         {
             _logging = logging;
-
-            // This is something I'm not sure about, the lifetime of this is transient so the context will be created when a
-            // route is called and destroyed (not disposted I assume) when the API returns the value
-            // I originally has this has a using(var db .....) but was getting errors in my other methods about accessing a disposed 
-            // object.
-            _dbContext = serviceProvider.GetRequiredService<DatabaseContext>();
+            _dbContext = databaseContext;
         }
 
         public IEnumerable<Models.ApiMatch.Match> GetMatchesForListOfTeamIds(long usersChampionId, IEnumerable<int> teamOne, IEnumerable<int> teamTwo, int matchCount)

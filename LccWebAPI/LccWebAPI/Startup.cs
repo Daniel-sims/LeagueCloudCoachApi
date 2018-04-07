@@ -41,7 +41,7 @@ namespace LccWebAPI
             services.AddSingleton<IRiotApi>(RiotApi.GetDevelopmentInstance(RiotApiKey));
             services.AddSingleton<IStaticDataEndpoints>(StaticDataEndpoints.GetInstance(RiotApiKey));
 
-            services.AddTransient<IMatchProvider, MatchProvider>();
+            services.AddScoped<IMatchProvider, MatchProvider>();
             
             var dbConn = @"Server=(localdb)\mssqllocaldb;Database=LccDatabase;Trusted_Connection=True;ConnectRetryCount=0";
             services.AddDbContext<DatabaseContext>(options => options.UseSqlServer(dbConn));
