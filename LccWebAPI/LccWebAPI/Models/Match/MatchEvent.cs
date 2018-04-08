@@ -50,6 +50,7 @@ namespace LccWebAPI.Models.Match
         // Foreign Key
         [JsonIgnore]
         public int MatchTimelineId { get; set; }
+
         [JsonIgnore]
         public virtual MatchTimeline MatchTimeline { get; set; }
     }

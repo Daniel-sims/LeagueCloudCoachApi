@@ -26,13 +26,13 @@ namespace LccWebAPI.Controllers
         }
 
         [HttpGet("MatchTimeline")]
-        public JsonResult GetMatchTimelines(long[] gameId)
+        public JsonResult GetMatchTimeline(long gameId)
         {
+            _databaseContext.MatchTimelines.Load();
             var timelines = _databaseContext.MatchTimelines
-                .Include(x => x.Events)
-                .ToList()
-                .Where(x => gameId.Contains(x.GameId));
-
+                    .Include(x => x.Events)
+                    .FirstOrDefault(x => x.GameId == gameId);
+            
             return new JsonResult(timelines);
         }
     }
