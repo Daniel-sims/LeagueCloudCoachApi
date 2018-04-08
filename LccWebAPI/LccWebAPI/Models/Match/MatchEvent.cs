@@ -49,8 +49,8 @@ namespace LccWebAPI.Models.Match
 
         // Foreign Key
         [JsonIgnore]
-        public int MatchPlayerId { get; set; }
+        public int MatchTimelineId { get; set; }
         [JsonIgnore]
-        public virtual MatchPlayer MatchPlayer { get; set; }
+        public virtual MatchTimeline MatchTimeline { get; set; }
     }
 }

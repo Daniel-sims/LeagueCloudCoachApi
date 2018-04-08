@@ -49,8 +49,6 @@ namespace LccWebAPI.Models.Match
         
         public long SummonerSpellOneId { get; set; }
         public long SummonerSpellTwoId { get; set; }
-        
-        public virtual ICollection<MatchEvent> Events { get; set; }
 
         //Gold
         public long GoldEarned { get; set; }

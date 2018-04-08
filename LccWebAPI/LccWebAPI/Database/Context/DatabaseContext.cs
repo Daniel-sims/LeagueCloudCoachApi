@@ -8,10 +8,8 @@ namespace LccWebAPI.Database.Context
         
         //Match information 
         public DbSet<Models.Match.Match> Matches { get; set; }
-        // Includes to get full tree
-        // .Include(x => x.Teams).ThenInclude(y => y.Players).ThenInclude(x => x.Runes)
-        // .Include(x => x.Teams).ThenInclude(y => y.Players).ThenInclude(x => x.Items)
-        // .Include(x => x.Teams).ThenInclude(y => y.Players).ThenInclude(x => x.SummonerSpells)
+        //Events that relate to the above matches via gameId
+        public DbSet<Models.Match.MatchTimeline> MatchTimelines { get; set; }
 
         //Summoner information
         public DbSet<Models.Summoner.Summoner> Summoners { get; set; }
