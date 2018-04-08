@@ -19,12 +19,12 @@ namespace LccWebAPI.Controllers.Utils.Match
             _dbContext = databaseContext;
         }
 
-        public IEnumerable<Models.Match.Match> GetMatchesForListOfTeamIds(IEnumerable<int> teamOne, IEnumerable<int> teamTwo, int matchCount)
+        public IEnumerable<Models.Match.Match> GetMatchesForListOfTeamIds(int[] teamOne, int[] teamTwo, int matchCount)
         {
             Console.WriteLine(DateTime.Now + " finding metches of users request.");
             
             var allMatchesInDatabase = _dbContext.Matches
-                .Include(x => x.Teams).ThenInclude(x => x.Players).ThenInclude(y => y.Events);
+                .Include(x => x.Teams).ThenInclude(x => x.Players);
 
             var matches = allMatchesInDatabase
                     .ToList()
@@ -39,7 +39,7 @@ namespace LccWebAPI.Controllers.Utils.Match
             return matches.Take(matchCount);
         }
 
-        public static bool IsMatchBothTeams(Models.Match.Match match, IEnumerable<int> teamIdsOne, IEnumerable<int> teamIdsTwo)
+        public static bool IsMatchBothTeams(Models.Match.Match match, int[] teamIdsOne, int[] teamIdsTwo)
         {
             return (teamIdsOne.All(id => match.TeamOne.Players.Any(p => p.ChampionId == id)) &&
                     teamIdsTwo.All(id => match.TeamTwo.Players.Any(p => p.ChampionId == id))
@@ -48,7 +48,7 @@ namespace LccWebAPI.Controllers.Utils.Match
                     teamIdsOne.All(id => match.TeamTwo.Players.Any(p => p.ChampionId == id)));
         }
 
-        public static bool IsMatchSingleTeam(Models.Match.Match match, IEnumerable<int> teamIds)
+        public static bool IsMatchSingleTeam(Models.Match.Match match, int[] teamIds)
         {
             return (teamIds.All(id => match.TeamOne.Players.Any(p => p.ChampionId == id)) ||
                     teamIds.All(id => match.TeamTwo.Players.Any(p => p.ChampionId == id)));
