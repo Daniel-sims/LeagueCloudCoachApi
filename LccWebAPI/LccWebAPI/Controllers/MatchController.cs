@@ -1,26 +1,39 @@
 ﻿using LccWebAPI.Controllers.Utils.Match;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
+using System.Linq;
+using LccWebAPI.Database.Context;
+using Microsoft.EntityFrameworkCore;
 
 namespace LccWebAPI.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class MatchController : Controller
     {
         private readonly IMatchProvider _matchProvider;
+        private readonly DatabaseContext _databaseContext;
 
-        public MatchController(
-            IMatchProvider matchProvider)
+        public MatchController(IMatchProvider matchProvider, DatabaseContext databaseContext)
         {
             _matchProvider = matchProvider;
+            _databaseContext = databaseContext;
         }
 
-        [HttpGet("GetMatchup")]
-        public JsonResult GetMatchup(int[] friendlyTeamChampions, int[] enemyTeamChampions, int maxMatchLimit = 1)
+        [HttpGet("Matchup")]
+        public JsonResult GetMatchups(int[] teamOneChampionIds, int[] teamTwoChampionIds, int maxMatchLimit = 1)
         {
-            var matchList = _matchProvider.GetMatchesForListOfTeamIds(friendlyTeamChampions, enemyTeamChampions, maxMatchLimit);
+            return new JsonResult(_matchProvider.GetMatchesForListOfTeamIds(teamOneChampionIds, teamTwoChampionIds, maxMatchLimit));
+        }
 
-            return new JsonResult(matchList);
+        [HttpGet("MatchTimeline")]
+        public JsonResult GetMatchTimelines(long[] gameId)
+        {
+            var timelines = _databaseContext.MatchTimelines
+                .Include(x => x.Events)
+                .ToList()
+                .Where(x => gameId.Contains(x.GameId));
+
+            return new JsonResult(timelines);
         }
     }
 }

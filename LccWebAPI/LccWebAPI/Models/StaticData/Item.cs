@@ -1,8 +1,11 @@
-﻿namespace LccWebAPI.Models.StaticData
+﻿using Newtonsoft.Json;
+
+namespace LccWebAPI.Models.StaticData
 {
     public class Item
     {
         // Primary Key
+        [JsonIgnore]
         public int Id { get; set; }
 
         public int ItemId { get; set; }

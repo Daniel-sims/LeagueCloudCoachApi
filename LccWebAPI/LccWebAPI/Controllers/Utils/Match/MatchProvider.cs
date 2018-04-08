@@ -19,20 +19,17 @@ namespace LccWebAPI.Controllers.Utils.Match
             _dbContext = databaseContext;
         }
 
-        public IEnumerable<Models.Match.Match> GetMatchesForListOfTeamIds(int[] teamOne, int[] teamTwo, int matchCount)
+        public IEnumerable<Models.Match.Match> GetMatchesForListOfTeamIds(int[] teamOneChampionIds, int[] teamTwoChampionIds, int matchCount)
         {
-            Console.WriteLine(DateTime.Now + " finding metches of users request.");
-            
-            var allMatchesInDatabase = _dbContext.Matches
-                .Include(x => x.Teams).ThenInclude(x => x.Players);
+            Console.WriteLine(DateTime.Now + " finding matches of users request.");
 
-            var matches = allMatchesInDatabase
-                    .ToList()
-                    .Where(m =>
-                        ((!teamOne.Any()) || (!teamTwo.Any()))
-                            ?
-                            IsMatchSingleTeam(m, ((teamOne.Any()) ? teamOne : teamTwo)) :
-                            IsMatchBothTeams(m, teamOne, teamTwo)).ToList();
+            var matches = _dbContext.Matches
+                .Include(x => x.Teams).ThenInclude(x => x.Players)
+                .ToList()
+                .Where(m =>
+                    !teamOneChampionIds.Any() || !teamTwoChampionIds.Any()
+                        ? IsMatchSingleTeam(m, teamOneChampionIds.Any() ? teamOneChampionIds : teamTwoChampionIds)
+                        : IsMatchBothTeams(m, teamOneChampionIds, teamTwoChampionIds));
 
             Console.WriteLine(DateTime.Now + " found " + matches.Count() + " matches.");
 

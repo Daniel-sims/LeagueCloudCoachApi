@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace LccWebAPI.Models.StaticData
 {
     public class Rune
     {
         // Primary Key
+        [JsonIgnore]
         public int Id { get; set; }
 
         // Rune information
