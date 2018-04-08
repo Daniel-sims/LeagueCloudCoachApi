@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
-namespace LccWebAPI.Models.DbMatch
+namespace LccWebAPI.Models.Match
 {
     public class PlayerItem
     {
@@ -13,9 +14,11 @@ namespace LccWebAPI.Models.DbMatch
         // Game specific data
         public long? ItemId { get; set; }
         public int ItemSlot { get; set; }
-        
+
         // Foreign Key
+        [JsonIgnore]
         public int MatchPlayerId { get; set; }
+        [JsonIgnore]
         public virtual MatchPlayer MatchPlayer { get; set; }
     }
 }

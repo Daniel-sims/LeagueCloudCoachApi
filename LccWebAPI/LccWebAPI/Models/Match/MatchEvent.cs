@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using Newtonsoft.Json;
 
-namespace LccWebAPI.Models.DbMatch
+namespace LccWebAPI.Models.Match
 {
     public class MatchEvent
     {
         //Primary key
+        [JsonIgnore]
         public int Id { get; set; }
 
         // Events
@@ -46,7 +48,9 @@ namespace LccWebAPI.Models.DbMatch
         public string MonsterSubType { get; set; }
 
         // Foreign Key
+        [JsonIgnore]
         public int MatchPlayerId { get; set; }
+        [JsonIgnore]
         public virtual MatchPlayer MatchPlayer { get; set; }
     }
 }

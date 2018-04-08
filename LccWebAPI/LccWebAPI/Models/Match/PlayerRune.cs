@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
-namespace LccWebAPI.Models.DbMatch
+namespace LccWebAPI.Models.Match
 {
     public class PlayerRune
     {
         // Primary Key
+        [JsonIgnore]
         public int Id { get; set; }
 
         // Game specific data
@@ -15,7 +17,9 @@ namespace LccWebAPI.Models.DbMatch
         public int RuneSlot { get; set; }
 
         // Foreign Key
+        [JsonIgnore]
         public int MatchPlayerId { get; set; }
+        [JsonIgnore]
         public virtual MatchPlayer MatchPlayer { get; set; }
     }
 }

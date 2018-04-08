@@ -1,6 +1,6 @@
 ﻿using LccWebAPI.Constants;
 using LccWebAPI.Database.Context;
-using LccWebAPI.Models.DbMatch;
+using LccWebAPI.Models.Match;
 using LccWebAPI.Utils;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -52,7 +52,7 @@ namespace LccWebAPI.Services
                             var totalPlayersFound = challengerPlayers.Entries.Concat(mastersPlayers.Entries).Count();
                             var currentPlayerCount = 0;
 
-                            _logging.LogEvent("Found " + totalPlayersFound + " summoners.");
+                            //_logging.LogEvent("Found " + totalPlayersFound + " summoners.");
 
                             foreach (var highEloPlayer in challengerPlayers.Entries.Concat(mastersPlayers.Entries))
                             {
@@ -65,7 +65,7 @@ namespace LccWebAPI.Services
 
                                     if (dbSummoner == null)
                                     {
-                                        var newDbSummoner = new Models.DbSummoner.Summoner
+                                        var newDbSummoner = new Models.Summoner.Summoner
                                         {
                                             SummonerId = summoner.Id,
                                             AccountId = summoner.AccountId,
@@ -81,11 +81,7 @@ namespace LccWebAPI.Services
                                         
                                         dbSummoner = newDbSummoner;
 
-                                        _logging.LogEvent(dbSummoner.SummonerName + " added to our database.");
-                                    }
-                                    else
-                                    {
-                                        _logging.LogEvent(dbSummoner.SummonerName + " already exists in our database.");
+                                        //_logging.LogEvent(dbSummoner.SummonerName + " added to our database.");
                                     }
 
                                     // If the summoner has had updates post the date what we have on our records
@@ -125,7 +121,7 @@ namespace LccWebAPI.Services
 
                                         if(matchList?.Matches != null)
                                         {
-                                            _logging.LogEvent("Found " + matchList?.Matches.Count() + " matches for the summoner " + dbSummoner.SummonerName);
+                                            //_logging.LogEvent("Found " + matchList?.Matches.Count() + " matches for the summoner " + dbSummoner.SummonerName);
 
                                             foreach (var match in matchList?.Matches)
                                             {
@@ -137,12 +133,8 @@ namespace LccWebAPI.Services
                                                         dbContext.Matches.Add(newDbMatch);
                                                         await dbContext.SaveChangesAsync();
 
-                                                        _logging.LogEvent("Added new match " + newDbMatch.GameId);
+                                                        //_logging.LogEvent("Added new match " + newDbMatch.GameId);
                                                     }
-                                                }
-                                                else
-                                                {
-                                                    _logging.LogEvent("The game " + match.GameId + " already exists in our database.");
                                                 }
                                             }
                                         }
@@ -173,11 +165,11 @@ namespace LccWebAPI.Services
             }
         }
 
-        private async Task<Models.DbMatch.Match> ConvertRiotMatchReferenceToDbMatch(MatchReference riotMatchReference)
+        private async Task<Models.Match.Match> ConvertRiotMatchReferenceToDbMatch(MatchReference riotMatchReference)
         {
             try
             {
-                var newDbMatch = new Models.DbMatch.Match();
+                var newDbMatch = new Models.Match.Match();
 
                 var riotMatch = await _throttledRequestHelper.SendThrottledRequest( async () => 
                     await _riotApi.Match.GetMatchAsync(Region.euw, riotMatchReference.GameId));
@@ -242,10 +234,30 @@ namespace LccWebAPI.Services
                             Assists = participant.Stats.Assists,
                             ChampionId = participant.ChampionId,
                             ChampionLevel = participant.Stats.ChampLevel,
-                            Items = GetItemsForParticipant(participant),
+                            //Item ids
                             TrinketId = participant.Stats.Item6,
-                            Runes = GetRunesForParticipant(participant),
-                            SummonerSpells = GetSummonerSpellsForParticipant(participant),
+                            Item1Id = participant.Stats.Item0,
+                            Item2Id = participant.Stats.Item1,
+                            Item3Id = participant.Stats.Item2,
+                            Item4Id = participant.Stats.Item3,
+                            Item5Id = participant.Stats.Item4,
+                            Item6Id = participant.Stats.Item5,
+
+                            //Rune ids
+                            PrimaryRuneStyleId = participant.Stats.PerkPrimaryStyle,
+                            PrimaryRuneSubStyleOneId = participant.Stats.Perk0,
+                            PrimaryRuneSubStyleTwoId = participant.Stats.Perk1,
+                            PrimaryRuneSubStyleThreeId = participant.Stats.Perk2,
+                            PrimaryRuneSubStyleFourId = participant.Stats.Perk3,
+
+                            SecondaryRuneStyleId = participant.Stats.PerkSubStyle,
+                            SecondaryRuneSubStyleOneId = participant.Stats.Perk4,
+                            SecondaryRuneSubStyleTwoId = participant.Stats.Perk5,
+
+                            //Summoners spell ids
+                            SummonerSpellOneId = participant.Spell1Id,
+                            SummonerSpellTwoId = participant.Spell2Id,
+
                             Events = GetEventsFromRiotTimelineForParticipant(participant.ParticipantId, riotTimeline),
 
                             //Gold

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace LccWebAPI.Models.DbSummoner
+namespace LccWebAPI.Models.Summoner
 {
     public class Summoner
     {

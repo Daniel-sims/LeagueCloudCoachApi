@@ -1,7 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
-namespace LccWebAPI.Models.DbMatch
+namespace LccWebAPI.Models.Match
 {
     public class Match
     {
@@ -17,5 +18,7 @@ namespace LccWebAPI.Models.DbMatch
 
         // Data 
         public virtual ICollection<MatchTeam> Teams { get; set; } = new List<MatchTeam>();
+        public MatchTeam TeamOne => Teams.ElementAt(0);
+        public MatchTeam TeamTwo => Teams.ElementAt(1);
     }
 }

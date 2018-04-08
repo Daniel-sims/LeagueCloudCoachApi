@@ -16,10 +16,9 @@ namespace LccWebAPI.Controllers
         }
 
         [HttpGet("GetMatchup")]
-        public JsonResult GetMatchup(int usersChampionId, int[] friendlyTeamChampions, int[] enemyTeamChampions, int maxMatchLimit = 5)
+        public JsonResult GetMatchup(int[] friendlyTeamChampions, int[] enemyTeamChampions, int maxMatchLimit = 1)
         {
-            var matchList = _matchProvider.GetMatchesForListOfTeamIds(usersChampionId, friendlyTeamChampions, enemyTeamChampions,
-                maxMatchLimit);
+            var matchList = _matchProvider.GetMatchesForListOfTeamIds(friendlyTeamChampions, enemyTeamChampions, maxMatchLimit);
 
             return new JsonResult(matchList);
         }

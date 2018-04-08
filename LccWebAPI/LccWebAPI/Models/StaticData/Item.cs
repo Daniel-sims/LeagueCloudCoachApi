@@ -1,4 +1,4 @@
-﻿namespace LccWebAPI.Models.DbStaticData
+﻿namespace LccWebAPI.Models.StaticData
 {
     public class Item
     {

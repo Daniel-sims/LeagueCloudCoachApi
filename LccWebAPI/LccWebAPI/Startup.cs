@@ -1,6 +1,6 @@
 ﻿using LccWebAPI.Controllers.Utils.Match;
 using LccWebAPI.Database.Context;
-using LccWebAPI.Models.DbStaticData;
+using LccWebAPI.Models.StaticData;
 using LccWebAPI.Services;
 using LccWebAPI.Utils;
 using Microsoft.AspNetCore.Builder;
@@ -22,7 +22,7 @@ namespace LccWebAPI
 {
     public class Startup
     {
-        private const string RiotApiKey = "RGAPI-d146063c-9aa6-4ed2-95b9-9656e0599351";
+        private const string RiotApiKey = "RGAPI-cc77fffa-0855-4618-883e-7279d00adfef";
 
         public Startup(IConfiguration configuration)
         {

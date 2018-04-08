@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations.Schema;
 using System.Linq;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
-namespace LccWebAPI.Models.DbMatch
+namespace LccWebAPI.Models.Match
 {
     public class MatchPlayer
     {
         // Primary Key
+        [JsonIgnore]
         public int Id { get; set; }
         
         // General player data
@@ -26,15 +28,30 @@ namespace LccWebAPI.Models.DbMatch
 
         public int ChampionId { get; set; }
         public long ChampionLevel { get; set; }
+       
+        public long TrinketId { get; set; }
+        public long Item1Id { get; set; }
+        public long Item2Id { get; set; }
+        public long Item3Id { get; set; }
+        public long Item4Id { get; set; }
+        public long Item5Id { get; set; }
+        public long Item6Id { get; set; }
 
-        public virtual ICollection<PlayerItem> Items { get; set; } = new List<PlayerItem>();
-        public virtual long TrinketId { get; set; }
+        public long PrimaryRuneStyleId { get; set; }
+        public long PrimaryRuneSubStyleOneId { get; set; }
+        public long PrimaryRuneSubStyleTwoId { get; set; }
+        public long PrimaryRuneSubStyleThreeId { get; set; }
+        public long PrimaryRuneSubStyleFourId { get; set; }
 
-        public virtual ICollection<PlayerRune> Runes { get; set; } = new List<PlayerRune>();
-        public virtual ICollection<PlayerSummonerSpell> SummonerSpells { get; set; } = new List<PlayerSummonerSpell>();
-
-        public virtual ICollection<MatchEvent> Events { get; set; } = new List<MatchEvent>();
+        public long SecondaryRuneStyleId { get; set; }
+        public long SecondaryRuneSubStyleOneId { get; set; }
+        public long SecondaryRuneSubStyleTwoId { get; set; }
         
+        public long SummonerSpellOneId { get; set; }
+        public long SummonerSpellTwoId { get; set; }
+        
+        public virtual ICollection<MatchEvent> Events { get; set; }
+
         //Gold
         public long GoldEarned { get; set; }
         public long GoldSpent { get; set; }
@@ -101,9 +118,11 @@ namespace LccWebAPI.Models.DbMatch
         public long TotalUnitsHealed { get; set; }
         
         public long TotalScoreRank { get; set; }
-        
+
         // Foreign Key
+        [JsonIgnore]
         public long MatchTeamId { get; set; }
+        [JsonIgnore]
         public virtual MatchTeam MatchTeam { get; set; }
     }
 }

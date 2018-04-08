@@ -11,9 +11,10 @@ using System;
 namespace LccWebAPI.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20180408115208_ChangedMatchPlayerToHoldIdsNotObjects")]
+    partial class ChangedMatchPlayerToHoldIdsNotObjects
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -38,56 +39,6 @@ namespace LccWebAPI.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Matches");
-                });
-
-            modelBuilder.Entity("LccWebAPI.Models.Match.MatchEvent", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd();
-
-                    b.Property<long?>("AfterId");
-
-                    b.Property<long?>("BeforeId");
-
-                    b.Property<string>("BuildingType");
-
-                    b.Property<long?>("CreatorId");
-
-                    b.Property<long?>("ItemId");
-
-                    b.Property<long?>("KillerId");
-
-                    b.Property<string>("LaneType");
-
-                    b.Property<string>("LevelUpType");
-
-                    b.Property<int>("MatchPlayerId");
-
-                    b.Property<string>("MonsterSubType");
-
-                    b.Property<string>("MonsterType");
-
-                    b.Property<long?>("ParticipantId");
-
-                    b.Property<long?>("SkillSlot");
-
-                    b.Property<long?>("TeamId");
-
-                    b.Property<TimeSpan>("Timestamp");
-
-                    b.Property<string>("TowerType");
-
-                    b.Property<string>("Type");
-
-                    b.Property<long?>("VictimId");
-
-                    b.Property<string>("WardType");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MatchPlayerId");
-
-                    b.ToTable("MatchEvent");
                 });
 
             modelBuilder.Entity("LccWebAPI.Models.Match.MatchPlayer", b =>
@@ -374,14 +325,6 @@ namespace LccWebAPI.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Summoners");
-                });
-
-            modelBuilder.Entity("LccWebAPI.Models.Match.MatchEvent", b =>
-                {
-                    b.HasOne("LccWebAPI.Models.Match.MatchPlayer", "MatchPlayer")
-                        .WithMany("Events")
-                        .HasForeignKey("MatchPlayerId")
-                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("LccWebAPI.Models.Match.MatchPlayer", b =>

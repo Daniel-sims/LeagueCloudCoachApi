@@ -1,6 +1,6 @@
 ﻿using System;
 using LccWebAPI.Database.Context;
-using LccWebAPI.Models.DbStaticData;
+using LccWebAPI.Models.StaticData;
 using RiotSharp.Endpoints.Interfaces.Static;
 using RiotSharp.Misc;
 using System.Linq;

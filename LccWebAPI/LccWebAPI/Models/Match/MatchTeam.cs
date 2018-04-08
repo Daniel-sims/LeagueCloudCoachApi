@@ -2,12 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
-namespace LccWebAPI.Models.DbMatch
+namespace LccWebAPI.Models.Match
 {
     public class MatchTeam
     {
         // Primary Key
+        [JsonIgnore]
         public int Id { get; set; }
 
         // Match specific data 
@@ -19,7 +21,9 @@ namespace LccWebAPI.Models.DbMatch
         public int InhibitorKills { get; set; }
 
         // Foreign Key
+        [JsonIgnore]
         public int MatchId { get; set; }
+        [JsonIgnore]
         public virtual Match Match { get; set; }
     }
 }

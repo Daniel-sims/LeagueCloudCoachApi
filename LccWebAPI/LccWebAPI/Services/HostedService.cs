@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using LccWebAPI.Models.DbSummoner;
+using LccWebAPI.Models.Summoner;
 using Microsoft.EntityFrameworkCore;
 
 namespace LccWebAPI.Services
