@@ -1,7 +1,6 @@
 ﻿using LccWebAPI.Database.Context;
-using LccWebAPI.Utils;
 using Microsoft.EntityFrameworkCore;
-using System;
+using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -9,13 +8,12 @@ namespace LccWebAPI.Controllers.Utils.Match
 {
     public class MatchProvider : IMatchProvider
     {
-        private readonly ILogging _logging;
-
         private readonly DatabaseContext _dbContext;
+        private readonly ILogger _logger;
 
-        public MatchProvider(ILogging logging, DatabaseContext databaseContext)
+        public MatchProvider(ILogger logger, DatabaseContext databaseContext)
         {
-            _logging = logging;
+            _logger = logger;
             _dbContext = databaseContext;
         }
 

@@ -1,8 +1,6 @@
-﻿using LccWebAPI.Utils;
+﻿using Microsoft.Extensions.Logging;
 using RiotSharp;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
 using System.Threading;
 using System.Threading.Tasks;
@@ -16,11 +14,11 @@ namespace LccWebAPI.Services
         
         private int DelayBetweenRequestsAsSeconds { get { return (1000 * _timePeriod) / _requestsPerTimePeriod; } }
 
-        private readonly ILogging _logging;
+        private readonly ILogger _logger;
 
-        public ThrottledRequestHelper(ILogging logging)
+        public ThrottledRequestHelper(ILogger logger)
         {
-            _logging = logging;
+            _logger = logger;
             _timePeriod = 120;
             _requestsPerTimePeriod = 90;
         }
@@ -34,17 +32,22 @@ namespace LccWebAPI.Services
             }
             catch (RiotSharpException e)
             {
-                //Leaving this one for now as it's generally important exceptions being logged here but will replace
-                _logging.LogEvent("######RiotSharpException encountered when sending throttle request - " + e.Message + ".");
+                _logger.LogError("RiotSharpException encountered when sending throttle request - " + e.Message + ".");
                 if (e.HttpStatusCode == (HttpStatusCode)429)
                 {
-                    _logging.LogEvent("Sleeping for 50 seconds.");
-                    await Task.Run(() => Thread.Sleep(50 * 1000));
+                    _logger.LogError("Sleeping for 25 seconds due to rate limit status code.");
+                    await Task.Run(() => Thread.Sleep(25 * 1000));
+                }
+
+                if (e.HttpStatusCode == (HttpStatusCode)403)
+                {
+                    _logger.LogCritical("Sleeping for a longgggg time because we're forbidden.");
+                    await Task.Run(() => Thread.Sleep(1000 * 1000));
                 }
             }
             catch(Exception e)
             {
-                _logging.LogEvent("######Exception encountered when trying to send throttled request - " + e.Message + ". Action: " + action.ToString());
+                _logger.LogError("RiotSharpException encountered when sending throttle request - " + e.Message + ".");
             }
 
 

@@ -1,8 +1,6 @@
 ﻿using LccWebAPI.Controllers.Utils.Match;
 using LccWebAPI.Database.Context;
-using LccWebAPI.Models.StaticData;
 using LccWebAPI.Services;
-using LccWebAPI.Utils;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -13,10 +11,6 @@ using RiotSharp;
 using RiotSharp.Endpoints.Interfaces.Static;
 using RiotSharp.Endpoints.StaticDataEndpoint;
 using RiotSharp.Interfaces;
-using RiotSharp.Misc;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace LccWebAPI
 {
@@ -35,7 +29,6 @@ namespace LccWebAPI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddSingleton<IHostedService, MatchDataCollectionService>();
-            services.AddSingleton<ILogging, Logging>();
             services.AddSingleton<IThrottledRequestHelper, ThrottledRequestHelper>();
             services.AddScoped<IStaticDataCollectionService, StaticDataCollectionService>();
 
