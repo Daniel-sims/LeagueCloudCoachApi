@@ -13,12 +13,9 @@ namespace LccWebAPI.Services
         private int _requestsPerTimePeriod;
         
         private int DelayBetweenRequestsAsSeconds { get { return (1000 * _timePeriod) / _requestsPerTimePeriod; } }
-
-        private readonly ILogger _logger;
-
-        public ThrottledRequestHelper(ILogger logger)
+        
+        public ThrottledRequestHelper()
         {
-            _logger = logger;
             _timePeriod = 120;
             _requestsPerTimePeriod = 90;
         }
@@ -32,22 +29,18 @@ namespace LccWebAPI.Services
             }
             catch (RiotSharpException e)
             {
-                _logger.LogError("RiotSharpException encountered when sending throttle request - " + e.Message + ".");
                 if (e.HttpStatusCode == (HttpStatusCode)429)
                 {
-                    _logger.LogError("Sleeping for 25 seconds due to rate limit status code.");
                     await Task.Run(() => Thread.Sleep(25 * 1000));
                 }
 
                 if (e.HttpStatusCode == (HttpStatusCode)403)
                 {
-                    _logger.LogCritical("Sleeping for a longgggg time because we're forbidden.");
                     await Task.Run(() => Thread.Sleep(1000 * 1000));
                 }
             }
             catch(Exception e)
             {
-                _logger.LogError("RiotSharpException encountered when sending throttle request - " + e.Message + ".");
             }
 
 

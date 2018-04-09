@@ -50,7 +50,7 @@ namespace LccWebAPI
             {
                 app.UseDeveloperExceptionPage();
             }
-
+            
             staticDataCollectionService.CollectStaticDataIfNeeded().GetAwaiter().GetResult();
 
             app.UseMvc();

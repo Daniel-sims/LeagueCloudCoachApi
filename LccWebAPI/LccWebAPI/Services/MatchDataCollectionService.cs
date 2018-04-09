@@ -3,7 +3,6 @@ using LccWebAPI.Database.Context;
 using LccWebAPI.Models.Match;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Logging;
 using RiotSharp;
 using RiotSharp.Endpoints.MatchEndpoint;
 using RiotSharp.Interfaces;
@@ -19,17 +18,14 @@ namespace LccWebAPI.Services
     public class MatchDataCollectionService : HostedService
     {
         private readonly IRiotApi _riotApi;
-        private readonly ILogger _logger;
         private readonly IThrottledRequestHelper _throttledRequestHelper;
         private readonly IServiceProvider _serviceProvider;
 
         public MatchDataCollectionService(IRiotApi riotApi,
-            ILogger logger,
             IThrottledRequestHelper throttledRequestHelper,
             IServiceProvider serviceProvider)
         {
             _riotApi = riotApi;
-            _logger = logger;
             _throttledRequestHelper = throttledRequestHelper;
             _serviceProvider = serviceProvider;
         }

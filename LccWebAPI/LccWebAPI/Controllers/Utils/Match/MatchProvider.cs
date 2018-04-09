@@ -9,11 +9,9 @@ namespace LccWebAPI.Controllers.Utils.Match
     public class MatchProvider : IMatchProvider
     {
         private readonly DatabaseContext _dbContext;
-        private readonly ILogger _logger;
 
-        public MatchProvider(ILogger logger, DatabaseContext databaseContext)
+        public MatchProvider(DatabaseContext databaseContext)
         {
-            _logger = logger;
             _dbContext = databaseContext;
         }
 
