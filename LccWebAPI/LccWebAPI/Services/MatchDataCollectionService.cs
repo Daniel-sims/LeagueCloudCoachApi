@@ -128,8 +128,6 @@ namespace LccWebAPI.Services
 
                                         if (matchList?.Matches != null)
                                         {
-                                            //_logging.LogEvent("Found " + matchList?.Matches.Count() + " matches for the summoner " + dbSummoner.SummonerName);
-
                                             foreach (var match in matchList?.Matches)
                                             {
                                                 if (!dbContext.Matches.Any(x => x.GameId == match.GameId))
@@ -139,19 +137,15 @@ namespace LccWebAPI.Services
                                                     {
                                                         dbContext.Matches.Add(newDbMatch);
 
-                                                        var riotMatchTimeline =
-                                                            await _throttledRequestHelper.SendThrottledRequest(
-                                                                async () =>
-                                                                    await _riotApi.Match.GetMatchTimelineAsync(
-                                                                        Region.euw, newDbMatch.GameId));
+                                                        var riotMatchTimeline = await _throttledRequestHelper.SendThrottledRequest(
+                                                                async () => await _riotApi.Match.GetMatchTimelineAsync(Region.euw, newDbMatch.GameId));
 
-                                                        dbContext.MatchTimelines.Add(
-                                                            ConvertRiotMatchTimelineToDbMatchTimeline(riotMatchTimeline,
-                                                                newDbMatch.GameId));
+                                                        if (riotMatchTimeline != null)
+                                                        {
+                                                            dbContext.MatchTimelines.Add(ConvertRiotMatchTimelineToDbMatchTimeline(riotMatchTimeline, newDbMatch.GameId));
+                                                        }
 
                                                         await dbContext.SaveChangesAsync();
-
-                                                        //_logging.LogEvent("Added new match " + newDbMatch.GameId);
                                                     }
                                                 }
                                             }
@@ -189,8 +183,7 @@ namespace LccWebAPI.Services
             {
                 var newDbMatch = new Models.Match.Match();
 
-                var riotMatch = await _throttledRequestHelper.SendThrottledRequest(async () =>
-                    await _riotApi.Match.GetMatchAsync(Region.euw, riotMatchReference.GameId));
+                var riotMatch = await _throttledRequestHelper.SendThrottledRequest(async () => await _riotApi.Match.GetMatchAsync(Region.euw, riotMatchReference.GameId));
 
                 if (riotMatch != null)
                 {
@@ -200,14 +193,12 @@ namespace LccWebAPI.Services
                     newDbMatch.GamePatch = riotMatch.GameVersion;
                     newDbMatch.WinningTeamId = riotMatch.Participants.FirstOrDefault(x => x.Stats.Win)?.TeamId;
 
-                    var winningTeamParticipants =
-                        riotMatch.Participants.Where(x => x.TeamId == newDbMatch.WinningTeamId);
+                    var winningTeamParticipants = riotMatch.Participants.Where(x => x.TeamId == newDbMatch.WinningTeamId);
                     var winningTeamstats = riotMatch.Teams.FirstOrDefault(x => x.TeamId == newDbMatch.WinningTeamId);
 
                     newDbMatch.Teams.Add(ConvertRiotParticipantsToDbTeam(winningTeamParticipants, winningTeamstats));
 
-                    var losingTeamParticipants =
-                        riotMatch.Participants.Where(x => x.TeamId != newDbMatch.WinningTeamId);
+                    var losingTeamParticipants = riotMatch.Participants.Where(x => x.TeamId != newDbMatch.WinningTeamId);
                     var losingTeamStats = riotMatch.Teams.FirstOrDefault(x => x.TeamId != newDbMatch.WinningTeamId);
 
                     newDbMatch.Teams.Add(ConvertRiotParticipantsToDbTeam(losingTeamParticipants, losingTeamStats));
