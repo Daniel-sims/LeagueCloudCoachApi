@@ -21,34 +21,28 @@ namespace LccWebAPI.Controllers.Utils.Match
 
         public IEnumerable<Models.Match.Match> GetMatchesForListOfTeamIds(int[] teamOneChampionIds, int[] teamTwoChampionIds, int matchCount)
         {
-            Console.WriteLine(DateTime.Now + " finding matches of users request.");
-
-            var matches = _dbContext.Matches
+            return _dbContext.Matches
                 .Include(x => x.Teams).ThenInclude(x => x.Players)
                 .ToList()
                 .Where(m =>
                     !teamOneChampionIds.Any() || !teamTwoChampionIds.Any()
                         ? IsMatchSingleTeam(m, teamOneChampionIds.Any() ? teamOneChampionIds : teamTwoChampionIds)
-                        : IsMatchBothTeams(m, teamOneChampionIds, teamTwoChampionIds));
-
-            Console.WriteLine(DateTime.Now + " found " + matches.Count() + " matches.");
-
-            return matches.Take(matchCount);
+                        : IsMatchBothTeams(m, teamOneChampionIds, teamTwoChampionIds)).Take(matchCount);
         }
 
         public static bool IsMatchBothTeams(Models.Match.Match match, int[] teamIdsOne, int[] teamIdsTwo)
         {
-            return (teamIdsOne.All(id => match.TeamOne.Players.Any(p => p.ChampionId == id)) &&
+            return  teamIdsOne.All(id => match.TeamOne.Players.Any(p => p.ChampionId == id)) &&
                     teamIdsTwo.All(id => match.TeamTwo.Players.Any(p => p.ChampionId == id))
                     ||
                     teamIdsTwo.All(id => match.TeamOne.Players.Any(p => p.ChampionId == id)) &&
-                    teamIdsOne.All(id => match.TeamTwo.Players.Any(p => p.ChampionId == id)));
+                    teamIdsOne.All(id => match.TeamTwo.Players.Any(p => p.ChampionId == id));
         }
 
         public static bool IsMatchSingleTeam(Models.Match.Match match, int[] teamIds)
         {
-            return (teamIds.All(id => match.TeamOne.Players.Any(p => p.ChampionId == id)) ||
-                    teamIds.All(id => match.TeamTwo.Players.Any(p => p.ChampionId == id)));
+            return  teamIds.All(id => match.TeamOne.Players.Any(p => p.ChampionId == id)) ||
+                    teamIds.All(id => match.TeamTwo.Players.Any(p => p.ChampionId == id));
         }
     }
 }

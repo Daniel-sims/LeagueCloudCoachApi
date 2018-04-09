@@ -1,9 +1,8 @@
 ﻿using LccWebAPI.Controllers.Utils.Match;
-using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Linq;
 using LccWebAPI.Database.Context;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
 
 namespace LccWebAPI.Controllers
 {
@@ -28,12 +27,11 @@ namespace LccWebAPI.Controllers
         [HttpGet("MatchTimeline")]
         public JsonResult GetMatchTimeline(long gameId)
         {
-            _databaseContext.MatchTimelines.Load();
-            var timelines = _databaseContext.MatchTimelines
+            var timeline = _databaseContext.MatchTimelines
                     .Include(x => x.Events)
                     .FirstOrDefault(x => x.GameId == gameId);
             
-            return new JsonResult(timelines);
+            return new JsonResult(timeline);
         }
     }
 }
