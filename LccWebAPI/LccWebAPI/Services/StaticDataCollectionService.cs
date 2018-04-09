@@ -28,9 +28,8 @@ namespace LccWebAPI.Services
                 await CollectRuneStaticData();
                 await CollectSummonerSpellStaticData();
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                Console.WriteLine(e);
             }
 
             _dbContext.SaveChanges();

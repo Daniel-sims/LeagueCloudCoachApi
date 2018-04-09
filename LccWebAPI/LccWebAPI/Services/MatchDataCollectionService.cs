@@ -38,8 +38,6 @@ namespace LccWebAPI.Services
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                _logging.LogEvent("MatchDataCollectionService started.");
-
                 using (var scope = _serviceProvider.CreateScope())
                 {
                     using (var dbContext = scope.ServiceProvider.GetRequiredService<DatabaseContext>())
@@ -50,36 +48,26 @@ namespace LccWebAPI.Services
                                 await _riotApi.League.GetChallengerLeagueAsync(Region.euw, LeagueQueue.RankedSolo));
                             var mastersPlayers = await _throttledRequestHelper.SendThrottledRequest(async () =>
                                 await _riotApi.League.GetMasterLeagueAsync(Region.euw, LeagueQueue.RankedSolo));
-
-                            var totalPlayersFound = challengerPlayers.Entries.Concat(mastersPlayers.Entries).Count();
-                            var currentPlayerCount = 0;
-
-                            //_logging.LogEvent("Found " + totalPlayersFound + " summoners.");
-
+                            
                             foreach (var highEloPlayer in challengerPlayers.Entries.Concat(mastersPlayers.Entries))
                             {
                                 try
                                 {
-                                    _logging.LogEvent(++currentPlayerCount + "/" + totalPlayersFound + ": " +
-                                                      highEloPlayer.PlayerOrTeamName);
+                                    var riotSummoner = await _throttledRequestHelper.SendThrottledRequest(async () =>
+                                        await _riotApi.Summoner.GetSummonerBySummonerIdAsync(Region.euw, long.Parse(highEloPlayer.PlayerOrTeamId)));
 
-                                    var summoner = await _throttledRequestHelper.SendThrottledRequest(async () =>
-                                        await _riotApi.Summoner.GetSummonerBySummonerIdAsync(Region.euw,
-                                            long.Parse(highEloPlayer.PlayerOrTeamId)));
-                                    var dbSummoner =
-                                        await dbContext.Summoners.FirstOrDefaultAsync(x =>
-                                            x.AccountId == summoner.AccountId);
+                                    var dbSummoner = await dbContext.Summoners.FirstOrDefaultAsync(x => x.AccountId == riotSummoner.AccountId);
 
                                     if (dbSummoner == null)
                                     {
                                         var newDbSummoner = new Models.Summoner.Summoner
                                         {
-                                            SummonerId = summoner.Id,
-                                            AccountId = summoner.AccountId,
-                                            ProfileIconId = summoner.ProfileIconId,
-                                            Level = summoner.Level,
-                                            RevisionDate = summoner.RevisionDate,
-                                            SummonerName = summoner.Name,
+                                            SummonerId = riotSummoner.Id,
+                                            AccountId = riotSummoner.AccountId,
+                                            ProfileIconId = riotSummoner.ProfileIconId,
+                                            Level = riotSummoner.Level,
+                                            RevisionDate = riotSummoner.RevisionDate,
+                                            SummonerName = riotSummoner.Name,
                                             LastUpdatedDate = new DateTime()
                                         };
 
@@ -87,13 +75,11 @@ namespace LccWebAPI.Services
                                         await dbContext.SaveChangesAsync();
 
                                         dbSummoner = newDbSummoner;
-
-                                        //_logging.LogEvent(dbSummoner.SummonerName + " added to our database.");
                                     }
 
                                     // If the summoner has had updates post the date what we have on our records
                                     // RevisionDate can be anything from a level up to new games played
-                                    if (summoner.RevisionDate > dbSummoner.LastUpdatedDate)
+                                    if (riotSummoner.RevisionDate > dbSummoner.LastUpdatedDate)
                                     {
                                         /*
                                         * TODO: Update Summoner information
@@ -114,10 +100,10 @@ namespace LccWebAPI.Services
                                             collectionToDate = DateTime.Now;
                                         }
 
-                                        var matchList = await _throttledRequestHelper.SendThrottledRequest(
+                                        var riotMatchList = await _throttledRequestHelper.SendThrottledRequest(
                                             async () =>
                                                 await _riotApi.Match.GetMatchListAsync(
-                                                    Region.euw, summoner.AccountId,
+                                                    Region.euw, riotSummoner.AccountId,
                                                     null,
                                                     null,
                                                     null,
@@ -126,9 +112,9 @@ namespace LccWebAPI.Services
                                                     0, //starting index
                                                     25)); //ending index
 
-                                        if (matchList?.Matches != null)
+                                        if (riotMatchList?.Matches != null)
                                         {
-                                            foreach (var match in matchList?.Matches)
+                                            foreach (var match in riotMatchList?.Matches)
                                             {
                                                 if (!dbContext.Matches.Any(x => x.GameId == match.GameId))
                                                 {
@@ -152,25 +138,19 @@ namespace LccWebAPI.Services
                                         }
                                     }
                                 }
-                                //This catch block avoids one unhandled exception causing the service to restart
-                                catch (RiotSharpException ex)
+                                catch (RiotSharpException)
                                 {
-                                    _logging.LogEvent("#RiotSharpException: " + ex.Message);
                                 }
-                                catch (Exception ex)
+                                catch (Exception)
                                 {
-                                    _logging.LogEvent("#Exception: " + ex.Message);
                                 }
                             }
                         }
-                        //This catch block is to stop the app crashing if something goes really tits up somewhere I haven't thought of
-                        catch (RiotSharpException ex)
+                        catch (RiotSharpException)
                         {
-                            _logging.LogEvent("#RiotSharpException: " + ex.Message);
                         }
-                        catch (Exception ex)
+                        catch (Exception)
                         {
-                            _logging.LogEvent("#Exception: " + ex.Message);
                         }
                     }
                 }
@@ -206,10 +186,8 @@ namespace LccWebAPI.Services
                     return newDbMatch;
                 }
             }
-            catch (Exception e)
+            catch (Exception)
             {
-                _logging.LogEvent(
-                    "#Exception hit when converting Riot Match Reference to DbMatch. Reason: " + e.Message);
             }
 
             return null;
@@ -337,10 +315,8 @@ namespace LccWebAPI.Services
                         }
                     );
                 }
-                catch (Exception e)
+                catch (Exception)
                 {
-                    _logging.LogEvent("#Exception encountered when converting Riot Participants to DbTeam. Reason: " +
-                                      e.Message);
                 }
             }
 

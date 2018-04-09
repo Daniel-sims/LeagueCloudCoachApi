@@ -34,6 +34,7 @@ namespace LccWebAPI.Services
             }
             catch (RiotSharpException e)
             {
+                //Leaving this one for now as it's generally important exceptions being logged here but will replace
                 _logging.LogEvent("######RiotSharpException encountered when sending throttle request - " + e.Message + ".");
                 if (e.HttpStatusCode == (HttpStatusCode)429)
                 {
