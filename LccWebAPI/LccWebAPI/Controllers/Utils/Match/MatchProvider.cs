@@ -37,24 +37,29 @@ namespace LccWebAPI.Controllers.Utils.Match
             }
             else
             {
-                var matchedPlayers = teamOneChampionIds
-                    .Concat(teamTwoChampionIds)
+                // find matches where all of the Ids are in the game
+                var matchedPlayers = 
+                    teamOneChampionIds.Concat(teamTwoChampionIds)
                     .SelectMany(m =>
                         _dbContext.MatchPlayer.Where(p => p.ChampionId == m).Select(p => new { p.MatchTeam.MatchId, p.MatchTeamId, p.ChampionId })
                     );
 
+                //Gets the players for each match using the matchId as all MatchPlayers will have the same MatchId
                 var playersByMatch = matchedPlayers.GroupBy(m => m.MatchId);
+
                 matchedMatches = new List<int>();
                 foreach (var matchPlayers in playersByMatch)
                 {
-                    // The two teams
+                    // Group by TeamId to seperate into two teams
                     var teams = matchPlayers.GroupBy(m => m.MatchTeamId);
                     var teamOnePlayers = teams.First();
                     var teamTwoPlayers = teams.Last();
 
+                    // check to see if the teams contain the Ids
                     if ((teamOnePlayers.Any(m => teamOneChampionIds.Contains(m.ChampionId)) && teamTwoPlayers.Any(m => teamTwoChampionIds.Contains(m.ChampionId))) ||
                         (teamTwoPlayers.Any(m => teamOneChampionIds.Contains(m.ChampionId)) && teamOnePlayers.Any(m => teamTwoChampionIds.Contains(m.ChampionId))))
                     {
+                        // If this match isn't already in the list
                         if (!matchedMatches.Contains(matchPlayers.Key))
                         {
                             matchedMatches.Add(matchPlayers.Key);
