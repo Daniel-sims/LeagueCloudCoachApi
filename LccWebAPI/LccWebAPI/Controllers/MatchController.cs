@@ -1,4 +1,5 @@
-﻿using LccWebAPI.Controllers.Utils.Match;
+﻿using System;
+using LccWebAPI.Controllers.Utils.Match;
 using LccWebAPI.Database.Context;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -21,6 +22,7 @@ namespace LccWebAPI.Controllers
         [HttpGet("Matchup")]
         public JsonResult GetMatchups(int[] teamOneChampionIds, int[] teamTwoChampionIds, int maxMatchLimit = 1)
         {
+            Console.WriteLine(DateTime.Now + " request received");
             return new JsonResult(_matchProvider.GetMatchesForListOfTeamIds(teamOneChampionIds, teamTwoChampionIds, maxMatchLimit));
         }
 

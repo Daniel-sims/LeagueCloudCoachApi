@@ -8,6 +8,9 @@ namespace LccWebAPI.Database.Context
         
         //Match information 
         public DbSet<Models.Match.Match> Matches { get; set; }
+        public DbSet<Models.Match.MatchTeam> MatchTeam { get; set; }
+        public DbSet<Models.Match.MatchPlayer> MatchPlayer { get; set; }
+
         //Events that relate to the above matches via gameId
         public DbSet<Models.Match.MatchTimeline> MatchTimelines { get; set; }
 

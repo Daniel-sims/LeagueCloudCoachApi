@@ -18,7 +18,5 @@ namespace LccWebAPI.Models.Match
 
         // Data 
         public virtual ICollection<MatchTeam> Teams { get; set; } = new List<MatchTeam>();
-        public MatchTeam TeamOne => Teams.ElementAt(0);
-        public MatchTeam TeamTwo => Teams.ElementAt(1);
     }
 }
