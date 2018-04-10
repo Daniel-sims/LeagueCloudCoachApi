@@ -9,7 +9,11 @@ namespace LccWebAPI.Models.Match
         public int Id { get; set; }
         
         // General player data
-        public long PlayerId { get; set; }
+        public string SummonerName { get; set; }
+        public long ProfileIconId { get; set; }
+        public long SummonerId { get; set; }
+        public long AccountId { get; set; }
+
         public string HighestAcheivedTierLastSeason { get; set; }
 
         // Game specific data

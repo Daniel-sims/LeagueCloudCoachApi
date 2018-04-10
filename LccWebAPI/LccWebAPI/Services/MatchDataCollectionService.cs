@@ -170,14 +170,16 @@ namespace LccWebAPI.Services
                     newDbMatch.WinningTeamId = riotMatch.Participants.FirstOrDefault(x => x.Stats.Win)?.TeamId;
 
                     var winningTeamParticipants = riotMatch.Participants.Where(x => x.TeamId == newDbMatch.WinningTeamId);
+                    var winningTeamParticipantIdentifies = riotMatch.ParticipantIdentities.Where(x => winningTeamParticipants.Any(y => y.ParticipantId == x.ParticipantId));
                     var winningTeamstats = riotMatch.Teams.FirstOrDefault(x => x.TeamId == newDbMatch.WinningTeamId);
-
-                    newDbMatch.Teams.Add(ConvertRiotParticipantsToDbTeam(winningTeamParticipants, winningTeamstats));
+                    
+                    newDbMatch.Teams.Add(ConvertRiotParticipantsToDbTeam(winningTeamParticipantIdentifies, winningTeamParticipants, winningTeamstats));
 
                     var losingTeamParticipants = riotMatch.Participants.Where(x => x.TeamId != newDbMatch.WinningTeamId);
+                    var losingTeamParticipantIdentifies = riotMatch.ParticipantIdentities.Where(x => losingTeamParticipants.Any(y => y.ParticipantId == x.ParticipantId));
                     var losingTeamStats = riotMatch.Teams.FirstOrDefault(x => x.TeamId != newDbMatch.WinningTeamId);
 
-                    newDbMatch.Teams.Add(ConvertRiotParticipantsToDbTeam(losingTeamParticipants, losingTeamStats));
+                    newDbMatch.Teams.Add(ConvertRiotParticipantsToDbTeam(losingTeamParticipantIdentifies, losingTeamParticipants, losingTeamStats));
 
                     return newDbMatch;
                 }
@@ -189,8 +191,7 @@ namespace LccWebAPI.Services
             return null;
         }
 
-        private MatchTeam ConvertRiotParticipantsToDbTeam(IEnumerable<Participant> riotParticipants,
-            TeamStats riotTeamStats)
+        private MatchTeam ConvertRiotParticipantsToDbTeam(IEnumerable<ParticipantIdentity> riotParticipantIdentities , IEnumerable<Participant> riotParticipants, TeamStats riotTeamStats)
         {
             var team = new MatchTeam
             {
@@ -205,10 +206,16 @@ namespace LccWebAPI.Services
             {
                 try
                 {
+                    var participantIdentity = riotParticipantIdentities.FirstOrDefault(x => x.ParticipantId == participant.ParticipantId).Player;
+
                     team.Players.Add
                     (
                         new MatchPlayer()
                         {
+                            AccountId = participantIdentity.AccountId,
+                            SummonerId = participantIdentity.SummonerId,
+                            SummonerName = participantIdentity.SummonerName,
+                            ProfileIconId = participantIdentity.ProfileIcon,
                             TeamId = participant.TeamId,
                             ParticipantId = participant.ParticipantId,
                             HighestAcheivedTierLastSeason = participant.HighestAchievedSeasonTier.ToString(),

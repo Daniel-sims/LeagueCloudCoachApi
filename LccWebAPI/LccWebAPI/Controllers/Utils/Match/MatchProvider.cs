@@ -37,11 +37,12 @@ namespace LccWebAPI.Controllers.Utils.Match
             }
             else
             {
-                // find matches where all of the Ids are in the game
+                // Find matches which contain championIds from the list
+                // will be a list of this; { matchId = 6123123, TeamId = 100, ChampionId = 15 }
                 var matchedPlayers = 
                     teamOneChampionIds.Concat(teamTwoChampionIds)
                     .SelectMany(m =>
-                        _dbContext.MatchPlayer.Where(p => p.ChampionId == m).Select(p => new { p.MatchTeam.MatchId, p.MatchTeamId, p.ChampionId })
+                        _dbContext.MatchPlayer.Where(p => p.ChampionId == m).Select(p => new { p.MatchTeam.MatchId, p.TeamId, p.ChampionId })
                     );
 
                 //Gets the players for each match using the matchId as all MatchPlayers will have the same MatchId
@@ -51,13 +52,13 @@ namespace LccWebAPI.Controllers.Utils.Match
                 foreach (var matchPlayers in playersByMatch)
                 {
                     // Group by TeamId to seperate into two teams
-                    var teams = matchPlayers.GroupBy(m => m.MatchTeamId);
+                    var teams = matchPlayers.GroupBy(m => m.TeamId);
                     var teamOnePlayers = teams.First();
                     var teamTwoPlayers = teams.Last();
 
                     // check to see if the teams contain the Ids
-                    if ((teamOnePlayers.Any(m => teamOneChampionIds.Contains(m.ChampionId)) && teamTwoPlayers.Any(m => teamTwoChampionIds.Contains(m.ChampionId))) ||
-                        (teamTwoPlayers.Any(m => teamOneChampionIds.Contains(m.ChampionId)) && teamOnePlayers.Any(m => teamTwoChampionIds.Contains(m.ChampionId))))
+                    if ((teamOneChampionIds.All(m => teamOnePlayers.Any(x => x.ChampionId == m)) && teamTwoChampionIds.All(m => teamTwoPlayers.Any(x => x.ChampionId == m))) ||
+                        (teamTwoChampionIds.All(m => teamOnePlayers.Any(x => x.ChampionId == m)) && teamOneChampionIds.All(m => teamTwoPlayers.Any(x => x.ChampionId == m))))
                     {
                         // If this match isn't already in the list
                         if (!matchedMatches.Contains(matchPlayers.Key))

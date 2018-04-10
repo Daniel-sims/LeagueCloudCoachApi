@@ -1,6 +1,9 @@
-﻿using LccWebAPI.Database.Context;
+﻿using System.Collections;
+using System.Collections.Generic;
+using LccWebAPI.Database.Context;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 
 namespace LccWebAPI.Controllers
 {
@@ -34,6 +37,28 @@ namespace LccWebAPI.Controllers
 
             return new JsonResult(dataStats);
         }
+
+        [HttpGet("TestMatchIds")]
+        public JsonResult GetTestMatchData()
+        {
+            var testTeamIds = new TestTeamIds();
+
+            var match = _databaseContext.Matches.Include(x => x.Teams).ThenInclude(x => x.Players).FirstOrDefault();
+
+            var teamOne = match.Teams.First(x => x.TeamId == 100);
+            foreach (var player in teamOne.Players)
+            {
+                testTeamIds.TeamOneIds.Add(player.ChampionId);
+            }
+
+            var teamTwo = match.Teams.First(x => x.TeamId == 200);
+            foreach (var player in teamTwo.Players)
+            {
+                testTeamIds.TeamTwoIds.Add(player.ChampionId);
+            }
+
+            return new JsonResult(testTeamIds);
+        }
     }
 
     public class DataStats
@@ -46,5 +71,11 @@ namespace LccWebAPI.Controllers
         public int Runes { get; set; }
         public int Champions { get; set; }
         public int SummonerSpells { get; set; }
+    }
+
+    public class TestTeamIds
+    {
+        public IList<int> TeamOneIds { get; set; } = new List<int>();
+        public IList<int> TeamTwoIds { get; set; } = new List<int>();
     }
 }
