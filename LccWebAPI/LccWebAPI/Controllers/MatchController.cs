@@ -3,7 +3,6 @@ using LccWebAPI.Database.Context;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
-using Microsoft.Extensions.Logging;
 
 namespace LccWebAPI.Controllers
 {

@@ -1,13 +1,11 @@
 ﻿using Newtonsoft.Json;
 using RiotSharp.Caching;
 using RiotSharp.Endpoints.Interfaces.Static;
-using RiotSharp.Endpoints.StaticDataEndpoint;
 using RiotSharp.Endpoints.StaticDataEndpoint.Item.Cache;
 using RiotSharp.Http.Interfaces;
 using RiotSharp.Misc;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace RiotSharp.Endpoints.StaticDataEndpoint.Item

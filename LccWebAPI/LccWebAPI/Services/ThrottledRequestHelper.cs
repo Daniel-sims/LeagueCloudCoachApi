@@ -1,5 +1,4 @@
-﻿using Microsoft.Extensions.Logging;
-using RiotSharp;
+﻿using RiotSharp;
 using System;
 using System.Net;
 using System.Threading;
@@ -31,18 +30,18 @@ namespace LccWebAPI.Services
             {
                 if (e.HttpStatusCode == (HttpStatusCode)429)
                 {
+                    Console.WriteLine("429 received sleeping for 25 seconds.");
                     await Task.Run(() => Thread.Sleep(25 * 1000));
                 }
 
                 if (e.HttpStatusCode == (HttpStatusCode)403)
                 {
+                    Console.WriteLine("403 received sleeping indefinetly.");
                     await Task.Run(() => Thread.Sleep(1000 * 1000));
                 }
             }
             catch(Exception e)
-            {
-            }
-
+            { }
 
             return await Task.FromResult<T>(null);
         }

@@ -2,7 +2,6 @@
 using RiotSharp.Endpoints.Interfaces.Static;
 using RiotSharp.Endpoints.StaticDataEndpoint;
 using RiotSharp.Http;
-using RiotSharp.Http.Interfaces;
 using RiotSharp.Interfaces;
 using System;
 using System.Collections.Generic;

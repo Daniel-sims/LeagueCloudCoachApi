@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using LccWebAPI.Controllers.Utils.Match;
-using LccWebAPI.Database.Context;
+﻿using LccWebAPI.Database.Context;
 using Microsoft.AspNetCore.Mvc;
 
 namespace LccWebAPI.Controllers

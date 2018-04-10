@@ -4,7 +4,6 @@ using System.Linq;
 using System.Net;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using RiotSharp.Endpoints.MatchEndpoint.Enums;
-using RiotSharp.Misc;
 
 namespace RiotSharp.Test
 {

@@ -1,11 +1,6 @@
 ﻿using Microsoft.Extensions.Hosting;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using LccWebAPI.Models.Summoner;
-using Microsoft.EntityFrameworkCore;
 
 namespace LccWebAPI.Services
 {

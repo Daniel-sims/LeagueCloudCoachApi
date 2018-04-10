@@ -1,6 +1,5 @@
 ﻿using System;
 using RiotSharp.Misc;
-using RiotSharp;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Net;
 using Microsoft.Extensions.Configuration;
