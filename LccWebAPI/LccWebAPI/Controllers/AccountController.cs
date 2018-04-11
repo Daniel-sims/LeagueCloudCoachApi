@@ -59,5 +59,41 @@ namespace LccWebAPI.Controllers
 
             return BadRequest(result.Errors);
         }
+
+        /// <summary>
+        /// Adds a new summoner that belongs to the user, I.E their smurfs
+        /// </summary>
+        [HttpPost("NewUserSummoner")]
+        public async Task<IActionResult> AddNewUserSummonerToUserProfile(string username, string summonerName)
+        {
+            return BadRequest("Not yet implemented");
+        }
+
+        /// <summary>
+        /// Gets all summoners for a users profile, I.E their smurfs
+        /// </summary>
+        [HttpPost("NewUserSummoner")]
+        public async Task<IActionResult> GetUsersSummonersForUserProfile(string username)
+        {
+            return BadRequest("Not yet implemented");
+        }
+
+        /// <summary>
+        /// Adds a new tracking summoner to a users profile, I.E someone may want to have quick access to view Apdos profile
+        /// </summary>
+        [HttpPost("newTrackingSummoner")]
+        public async Task<IActionResult> AddNewTrackingSummonerToUserProfile(string username, string summonerName)
+        {
+            return BadRequest("Not yet implemented");
+        }
+
+        /// <summary>
+        ///Gets all tracking summoners for a users profile
+        /// </summary>
+        [HttpPost("newTrackingSummoner")]
+        public async Task<IActionResult> GetTrackingSummonersForUserProfile(string username)
+        {
+            return BadRequest("Not yet implemented");
+        }
     }
 }
