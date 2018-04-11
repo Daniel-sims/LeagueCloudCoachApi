@@ -52,7 +52,7 @@ namespace LccWebAPI.Controllers.Utils.Match
                 foreach (var matchPlayers in playersByMatch)
                 {
                     // Group by TeamId to seperate into two teams
-                    var teams = matchPlayers.GroupBy(m => m.TeamId);
+                    var teams = matchPlayers.GroupBy(m => m.TeamId).ToList();
                     var teamOnePlayers = teams.First();
                     var teamTwoPlayers = teams.Last();
 
