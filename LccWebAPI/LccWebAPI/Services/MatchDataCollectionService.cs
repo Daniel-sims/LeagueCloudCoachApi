@@ -99,7 +99,8 @@ namespace LccWebAPI.Services
                                         var riotMatchList = await _throttledRequestHelper.SendThrottledRequest(
                                             async () =>
                                                 await _riotApi.Match.GetMatchListAsync(
-                                                    Region.euw, riotSummoner.AccountId,
+                                                    Region.euw, 
+                                                    riotSummoner.AccountId,
                                                     null,
                                                     null,
                                                     null,
@@ -132,6 +133,8 @@ namespace LccWebAPI.Services
                                                 }
                                             }
                                         }
+
+                                        dbSummoner.LastUpdatedDate = riotSummoner.RevisionDate;
                                     }
                                 }
                                 catch (RiotSharpException)
