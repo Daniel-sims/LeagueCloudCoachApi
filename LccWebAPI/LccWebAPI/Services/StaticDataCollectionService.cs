@@ -39,11 +39,14 @@ namespace LccWebAPI.Services
         {
             if (_dbContext.Items.Any())
                 return;
-            
+
+            Console.WriteLine("Collection items.");
+
             var riotItemInformation = await _staticDataEndpoints.Item.GetItemsAsync(Region.euw);
 
             foreach (var riotItem in riotItemInformation.Items)
             {
+               
                 _dbContext.Items.Add(new Item()
                 {
                     ItemId = riotItem.Value.Id,
@@ -60,9 +63,12 @@ namespace LccWebAPI.Services
 
         private async Task CollectChampionStaticData()
         {
+
             if (_dbContext.Champions.Any())
                 return;
-            
+
+            Console.WriteLine("Collection champions.");
+
             var riotChampionInformation = await _staticDataEndpoints.Champion.GetChampionsAsync(Region.euw);
 
             foreach (var riotChampion in riotChampionInformation.Champions)
@@ -80,7 +86,9 @@ namespace LccWebAPI.Services
         {
             if (_dbContext.SummonerSpells.Any())
                 return;
-            
+
+            Console.WriteLine("Collection summonerSpells.");
+
             var riotSummonerSpellInformation = await _staticDataEndpoints.SummonerSpell.GetSummonerSpellsAsync(Region.euw);
 
             foreach (var riotSummonerSpell in riotSummonerSpellInformation.SummonerSpells)
@@ -89,6 +97,7 @@ namespace LccWebAPI.Services
                 {
                     SummonerSpellId = riotSummonerSpell.Value.Id,
                     SummonerSpellName = riotSummonerSpell.Value.Name,
+                    Description = riotSummonerSpell.Value.Description,
                     ImageFull = riotSummonerSpell.Value.Image.Full
                 });
             }
@@ -98,7 +107,9 @@ namespace LccWebAPI.Services
         {
             if (_dbContext.Runes.Any())
                 return;
-            
+
+            Console.WriteLine("Collection runes.");
+
             var riotRuneInformation = await _staticDataEndpoints.Rune.GetRunesReforgedAsync(Region.euw);
 
             foreach (var riotRune in riotRuneInformation)
