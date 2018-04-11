@@ -4,10 +4,12 @@ using LccWebAPI.Database.Context;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Linq;
+using Microsoft.AspNetCore.Authorization;
 
 namespace LccWebAPI.Controllers
 {
     [Route("[controller]")]
+    [Authorize]
     public class MatchController : Controller
     {
         private readonly IMatchProvider _matchProvider;

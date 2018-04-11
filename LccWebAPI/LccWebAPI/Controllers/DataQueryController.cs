@@ -4,6 +4,7 @@ using LccWebAPI.Database.Context;
 using Microsoft.AspNetCore.Mvc;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.Authorization;
 
 namespace LccWebAPI.Controllers
 {
@@ -11,6 +12,7 @@ namespace LccWebAPI.Controllers
      * Test controller to retrieve database stats
      */
     [Route("[controller]")]
+    [Authorize]
     public class DataQueryController : Controller
     {
         private readonly DatabaseContext _databaseContext;

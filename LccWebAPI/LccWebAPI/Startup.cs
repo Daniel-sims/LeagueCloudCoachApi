@@ -69,7 +69,7 @@ namespace LccWebAPI
                 .AddJwtBearer(options =>
                 {
                     // base-address of your identityserver
-                    options.Authority = "http://localhost:52718/";
+                    options.Authority = "http://localhost:54547/";
 
                     // name of the API resource
                     options.Audience = "api1";
