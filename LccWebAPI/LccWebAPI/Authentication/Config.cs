@@ -18,9 +18,7 @@ namespace LccWebAPI.Authentication
         {
             return new List<IdentityResource>
             {
-                new IdentityResources.OpenId(),
-                new IdentityResources.Email(),
-                new IdentityResources.Profile(),
+                new IdentityResources.OpenId()
             };
         }
         
@@ -49,8 +47,6 @@ namespace LccWebAPI.Authentication
                     },
                     AllowedScopes = {
                         IdentityServerConstants.StandardScopes.OpenId,
-                        IdentityServerConstants.StandardScopes.Profile,
-                        IdentityServerConstants.StandardScopes.Email,
                         LccApiScope
                     }
                 }
