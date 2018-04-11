@@ -9,6 +9,11 @@ namespace LccWebAPI.Authentication
 {
     public class Config
     {
+        private const string LccApiScope = "LccApi";
+        private const string ClientSecret = "A9445FF7-A793-429C-8B07-10CF8DB7F6F9";
+
+        private const string LccDesktopApplicationClientId = "LccDeskApplication";
+
         public static IEnumerable<IdentityResource> GetIdentityResources()
         {
             return new List<IdentityResource>
@@ -18,38 +23,35 @@ namespace LccWebAPI.Authentication
                 new IdentityResources.Profile(),
             };
         }
-
-
+        
         public static IEnumerable<ApiResource> GetApiResources()
         {
             return new List<ApiResource>
             {
-                new ApiResource("api1", "My API")
+                new ApiResource(LccApiScope, "League Cloud Coach API")
             };
         }
 
         public static IEnumerable<Client> GetClients()
         {
-            // client credentials client
             return new List<Client>
             {
-                
-                // resource owner password grant client
+                //Client for WPF Application
                 new Client
                 {
-                    ClientId = "ro.angular",
+                    ClientId = LccDesktopApplicationClientId,
                     AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
 
+                    // TODO: Store this client secret in an encrypted file?
                     ClientSecrets =
                     {
-                        new Secret("secret".Sha256())
+                        new Secret(ClientSecret.Sha256())
                     },
                     AllowedScopes = {
                         IdentityServerConstants.StandardScopes.OpenId,
                         IdentityServerConstants.StandardScopes.Profile,
                         IdentityServerConstants.StandardScopes.Email,
-                        IdentityServerConstants.StandardScopes.Address,
-                        "api1"
+                        LccApiScope
                     }
                 }
             };

@@ -58,8 +58,6 @@ namespace LccWebAPI.Controllers
             }
 
             return BadRequest(result.Errors);
-
-
         }
     }
 }

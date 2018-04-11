@@ -12,8 +12,7 @@ namespace LccWebAPI.Database.Context
     public class IdentityDbContext : IdentityDbContext<IdentityUser>
     {
         public IdentityDbContext(DbContextOptions<IdentityDbContext> options) : base(options)
-        {
-        }
+        { }
 
         //User auth
         public DbSet<ApplicationUser> ApplicationUser { get; set; }

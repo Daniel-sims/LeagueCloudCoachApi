@@ -72,7 +72,7 @@ namespace LccWebAPI
                     options.Authority = "http://localhost:54547/";
 
                     // name of the API resource
-                    options.Audience = "api1";
+                    options.Audience = "LccApi";
 
                     options.RequireHttpsMetadata = false;
                 });
