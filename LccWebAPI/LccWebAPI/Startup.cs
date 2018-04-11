@@ -69,7 +69,7 @@ namespace LccWebAPI
                 .AddJwtBearer(options =>
                 {
                     // base-address of your identityserver
-                    options.Authority = "http://localhost:54547/";
+                    options.Authority = "http://localhost:49818/";
 
                     // name of the API resource
                     options.Audience = "LccApi";
@@ -88,16 +88,6 @@ namespace LccWebAPI
 
             app.UseIdentityServer();
             app.UseAuthentication();
-            app.UseMvc(routes =>
-            {
-                routes.MapRoute(
-                    name: "areas",
-                    template: "{area:exists}/{controller=Home}/{action=Index}/{id?}"
-                );
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
-            });
 
             staticDataCollectionService.CollectStaticDataIfNeeded().GetAwaiter().GetResult();
 
