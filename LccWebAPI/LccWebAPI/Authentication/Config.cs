@@ -39,8 +39,8 @@ namespace LccWebAPI.Authentication
                 {
                     ClientId = LccDesktopApplicationClientId,
                     AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
-
-                    // TODO: Store this client secret in an encrypted file?
+                    AllowOfflineAccess = true,
+                    
                     ClientSecrets =
                     {
                         new Secret(ClientSecret.Sha256())
@@ -49,15 +49,8 @@ namespace LccWebAPI.Authentication
                         IdentityServerConstants.StandardScopes.OpenId,
                         IdentityServerConstants.StandardScopes.OfflineAccess,
                         LccApiScope
-                    },
-                    AllowOfflineAccess = true,
-                    //Refresh token doesn't run out
-                    // Information around refresh tokens
-                    // http://docs.identityserver.io/en/release/topics/grant_types.html 
-                    // https://stackoverflow.com/questions/31385593/identity-server-not-returning-refresh-token
-                    // http://docs.identityserver.io/en/release/quickstarts/5_hybrid_and_api_access.html
-                    AbsoluteRefreshTokenLifetime = 0,
-                    RefreshTokenExpiration = TokenExpiration.Sliding
+                    }
+                   
                 }
             };
         }
