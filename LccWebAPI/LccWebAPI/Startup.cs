@@ -20,7 +20,7 @@ namespace LccWebAPI
 {
     public class Startup
     {
-        private const string RiotApiKey = "RGAPI-9823b379-47d2-4b47-be13-f37b6507affc";
+        private const string RiotApiKey = "RGAPI-c0803c4f-0519-4f82-9b5a-17aa1a53d411";
 
         public Startup(IConfiguration configuration)
         {
@@ -69,12 +69,13 @@ namespace LccWebAPI
                 .AddJwtBearer(options =>
                 {
                     // base-address of your identityserver
-                    options.Authority = "http://localhost:49818/";
+                    options.Authority = "http://localhost:54547/";
 
                     // name of the API resource
                     options.Audience = "LccApi";
 
                     options.RequireHttpsMetadata = false;
+
                 });
         }
 

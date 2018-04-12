@@ -47,8 +47,17 @@ namespace LccWebAPI.Authentication
                     },
                     AllowedScopes = {
                         IdentityServerConstants.StandardScopes.OpenId,
+                        IdentityServerConstants.StandardScopes.OfflineAccess,
                         LccApiScope
-                    }
+                    },
+                    AllowOfflineAccess = true,
+                    //Refresh token doesn't run out
+                    // Information around refresh tokens
+                    // http://docs.identityserver.io/en/release/topics/grant_types.html 
+                    // https://stackoverflow.com/questions/31385593/identity-server-not-returning-refresh-token
+                    // http://docs.identityserver.io/en/release/quickstarts/5_hybrid_and_api_access.html
+                    AbsoluteRefreshTokenLifetime = 0,
+                    RefreshTokenExpiration = TokenExpiration.Sliding
                 }
             };
         }
