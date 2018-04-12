@@ -28,10 +28,7 @@ namespace LccWebAPI.Authentication
         public static IEnumerable<ProfileViewModel> GetUserProfiles(IEnumerable<ApplicationUser> users)
         {
             var profiles = new List<ProfileViewModel> { };
-            foreach (ApplicationUser user in users)
-            {
-                profiles.Add(new ProfileViewModel(user));
-            }
+            profiles.AddRange(users.Select(user => new ProfileViewModel(user)));
 
             return profiles;
         }
