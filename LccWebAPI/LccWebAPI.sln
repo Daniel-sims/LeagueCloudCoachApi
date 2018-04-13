@@ -11,6 +11,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RiotSharp.AspNetCore", "..\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RiotSharp.Test", "..\RiotSharp\RiotSharp.Test\RiotSharp.Test.csproj", "{D237C392-B4EF-4510-B0FE-D4F620B7D0F6}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LccIdentityServer", "LccIdentityServer\LccIdentityServer.csproj", "{B502B798-6EAD-4583-A2EA-400FDA468FD9}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -33,6 +35,10 @@ Global
 		{D237C392-B4EF-4510-B0FE-D4F620B7D0F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D237C392-B4EF-4510-B0FE-D4F620B7D0F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D237C392-B4EF-4510-B0FE-D4F620B7D0F6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B502B798-6EAD-4583-A2EA-400FDA468FD9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B502B798-6EAD-4583-A2EA-400FDA468FD9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B502B798-6EAD-4583-A2EA-400FDA468FD9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B502B798-6EAD-4583-A2EA-400FDA468FD9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

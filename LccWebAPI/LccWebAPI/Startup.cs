@@ -16,7 +16,7 @@ namespace LccWebAPI
 {
     public class Startup
     {
-        private const string RiotApiKey = "RGAPI-c0803c4f-0519-4f82-9b5a-17aa1a53d411";
+        private const string RiotApiKey = "RGAPI-1d9e74c5-1163-47f2-889f-289b23c58eca";
 
         public Startup(IConfiguration configuration)
         {
@@ -41,6 +41,19 @@ namespace LccWebAPI
             services.AddDbContext<DatabaseContext>(options => options.UseSqlServer(dbConn));
 
             services.AddMvc();
+
+            services.AddMvcCore()
+                .AddAuthorization()
+                .AddJsonFormatters();
+
+            services.AddAuthentication("Bearer")
+                .AddIdentityServerAuthentication(options =>
+                {
+                    options.Authority = "http://localhost:5000";
+                    options.RequireHttpsMetadata = false;
+
+                    options.ApiName = "api1";
+                });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -52,6 +65,8 @@ namespace LccWebAPI
             }
 
             staticDataCollectionService.CollectStaticDataIfNeeded().GetAwaiter().GetResult();
+
+            app.UseAuthentication();
 
             app.UseMvc();
         }
