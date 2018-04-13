@@ -1,5 +1,4 @@
-﻿using LccWebAPI.Authentication;
-using LccWebAPI.Models.Match;
+﻿using LccWebAPI.Models.Match;
 using LccWebAPI.Models.StaticData;
 using LccWebAPI.Models.Summoner;
 using Microsoft.EntityFrameworkCore;

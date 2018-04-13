@@ -12,7 +12,6 @@ namespace LccWebAPI.Controllers
      * Test controller to retrieve database stats
      */
     [Route("[controller]")]
-    [Authorize]
     public class DataQueryController : Controller
     {
         private readonly DatabaseContext _databaseContext;

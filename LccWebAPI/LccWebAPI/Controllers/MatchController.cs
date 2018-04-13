@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Authorization;
 namespace LccWebAPI.Controllers
 {
     [Route("[controller]")]
-    [Authorize]
     public class MatchController : Controller
     {
         private readonly IMatchProvider _matchProvider;

@@ -5,7 +5,6 @@ using Microsoft.AspNetCore.Mvc;
 namespace LccWebAPI.Controllers
 {
     [Route("[controller]")]
-    [Authorize]
     public class StaticDataController
     {
         private readonly DatabaseContext _dbContext;
