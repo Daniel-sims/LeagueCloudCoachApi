@@ -50,6 +50,8 @@ namespace LccWebAPI
             services.AddIdentity<ApplicationUser, IdentityRole>()
                 .AddEntityFrameworkStores<IdentityDbContext>()
                 .AddDefaultTokenProviders();
+            
+            services.AddMvc();
 
             services.AddIdentityServer()
                 .AddDeveloperSigningCredential()
@@ -58,8 +60,6 @@ namespace LccWebAPI
                 .AddInMemoryApiResources(Config.GetApiResources())
                 .AddInMemoryClients(Config.GetClients())
                 .AddAspNetIdentity<ApplicationUser>();
-            
-            services.AddMvc();
 
             services.AddAuthentication(options =>
                 {
