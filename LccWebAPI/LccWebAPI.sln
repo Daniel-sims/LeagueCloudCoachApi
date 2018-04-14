@@ -13,6 +13,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RiotSharp.Test", "..\RiotSh
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LccIdentityServer", "LccIdentityServer\LccIdentityServer.csproj", "{B502B798-6EAD-4583-A2EA-400FDA468FD9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LccWebMvc", "LccWebMvc\LccWebMvc.csproj", "{00C02198-F9C4-4DC1-92CE-7598F82482A4}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{B502B798-6EAD-4583-A2EA-400FDA468FD9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B502B798-6EAD-4583-A2EA-400FDA468FD9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B502B798-6EAD-4583-A2EA-400FDA468FD9}.Release|Any CPU.Build.0 = Release|Any CPU
+		{00C02198-F9C4-4DC1-92CE-7598F82482A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{00C02198-F9C4-4DC1-92CE-7598F82482A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{00C02198-F9C4-4DC1-92CE-7598F82482A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{00C02198-F9C4-4DC1-92CE-7598F82482A4}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
