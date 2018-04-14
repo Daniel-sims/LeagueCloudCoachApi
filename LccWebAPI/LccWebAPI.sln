@@ -11,9 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RiotSharp.AspNetCore", "..\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RiotSharp.Test", "..\RiotSharp\RiotSharp.Test\RiotSharp.Test.csproj", "{D237C392-B4EF-4510-B0FE-D4F620B7D0F6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LccIdentityServer", "LccIdentityServer\LccIdentityServer.csproj", "{B502B798-6EAD-4583-A2EA-400FDA468FD9}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LccWebMvcApp", "LccWebMvcApp\LccWebMvcApp.csproj", "{F57817CB-95B4-4227-985C-008AA269EBD5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LccWebMvc", "LccWebMvc\LccWebMvc.csproj", "{00C02198-F9C4-4DC1-92CE-7598F82482A4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LccIdentityServer", "LccIdentityServer_2\LccIdentityServer.csproj", "{504B7F0D-CEF4-43A0-B14B-325C30697AB9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -37,14 +37,14 @@ Global
 		{D237C392-B4EF-4510-B0FE-D4F620B7D0F6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D237C392-B4EF-4510-B0FE-D4F620B7D0F6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D237C392-B4EF-4510-B0FE-D4F620B7D0F6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{B502B798-6EAD-4583-A2EA-400FDA468FD9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B502B798-6EAD-4583-A2EA-400FDA468FD9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B502B798-6EAD-4583-A2EA-400FDA468FD9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B502B798-6EAD-4583-A2EA-400FDA468FD9}.Release|Any CPU.Build.0 = Release|Any CPU
-		{00C02198-F9C4-4DC1-92CE-7598F82482A4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{00C02198-F9C4-4DC1-92CE-7598F82482A4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{00C02198-F9C4-4DC1-92CE-7598F82482A4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{00C02198-F9C4-4DC1-92CE-7598F82482A4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F57817CB-95B4-4227-985C-008AA269EBD5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F57817CB-95B4-4227-985C-008AA269EBD5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F57817CB-95B4-4227-985C-008AA269EBD5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F57817CB-95B4-4227-985C-008AA269EBD5}.Release|Any CPU.Build.0 = Release|Any CPU
+		{504B7F0D-CEF4-43A0-B14B-325C30697AB9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{504B7F0D-CEF4-43A0-B14B-325C30697AB9}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{504B7F0D-CEF4-43A0-B14B-325C30697AB9}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{504B7F0D-CEF4-43A0-B14B-325C30697AB9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
