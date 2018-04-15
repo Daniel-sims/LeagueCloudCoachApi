@@ -46,37 +46,17 @@ namespace LccIdentityServer
                         "api1"
                     },
                     AllowOfflineAccess = true
-                }
-            };
-        }
-
-        public static List<TestUser> GetUsers()
-        {
-            return new List<TestUser>
-            {
-                new TestUser
-                {
-                    SubjectId = "1",
-                    Username = "alice",
-                    Password = "password",
-
-                    Claims = new []
-                    {
-                        new Claim("name", "Alice"),
-                        new Claim("website", "https://alice.com")
-                    }
                 },
-                new TestUser
+                new Client
                 {
-                    SubjectId = "2",
-                    Username = "bob",
-                    Password = "password",
+                    ClientId = "ro.client",
+                    AllowedGrantTypes = GrantTypes.ResourceOwnerPassword,
 
-                    Claims = new []
+                    ClientSecrets =
                     {
-                        new Claim("name", "Bob"),
-                        new Claim("website", "https://bob.com")
-                    }
+                        new Secret("secret".Sha256())
+                    },
+                    AllowedScopes = { "api1" }
                 }
             };
         }
