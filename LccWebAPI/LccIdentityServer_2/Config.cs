@@ -79,8 +79,7 @@ namespace LccIdentityServer
                     {
                         LccApiScope
                     },
-
-
+                    
                     AllowOfflineAccess = true
                 }
             };

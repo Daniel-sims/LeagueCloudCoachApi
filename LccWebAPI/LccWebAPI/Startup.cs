@@ -16,7 +16,7 @@ namespace LccWebAPI
 {
     public class Startup
     {
-        private const string RiotApiKey = "RGAPI-1d9e74c5-1163-47f2-889f-289b23c58eca";
+        private const string RiotApiKey = "RGAPI-1cb63199-e5e2-483f-abee-66ff5876ab17";
 
         public Startup(IConfiguration configuration)
         {
@@ -37,7 +37,7 @@ namespace LccWebAPI
 
             services.AddScoped<IMatchProvider, MatchProvider>();
             
-            var dbConn = @"Server=(localdb)\mssqllocaldb;Database=LccDatabase;Trusted_Connection=True;ConnectRetryCount=0";
+            const string dbConn = @"Server=(localdb)\mssqllocaldb;Database=LccDatabase;Trusted_Connection=True;ConnectRetryCount=0";
             services.AddDbContext<DatabaseContext>(options => options.UseSqlServer(dbConn));
 
             services.AddMvc();
@@ -52,7 +52,7 @@ namespace LccWebAPI
                     options.Authority = "http://localhost:5000";
                     options.RequireHttpsMetadata = false;
 
-                    options.ApiName = "api1";
+                    options.ApiName = "LccApi";
                 });
         }
 
