@@ -16,7 +16,7 @@ namespace LccWebAPI
 {
     public class Startup
     {
-        private const string RiotApiKey = "RGAPI-1cb63199-e5e2-483f-abee-66ff5876ab17";
+        private const string RiotApiKey = "RGAPI-dac4b3f3-0594-482d-b574-98a806401303";
 
         public Startup(IConfiguration configuration)
         {

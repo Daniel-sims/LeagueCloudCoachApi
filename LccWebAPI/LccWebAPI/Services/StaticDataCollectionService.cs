@@ -46,7 +46,6 @@ namespace LccWebAPI.Services
 
             foreach (var riotItem in riotItemInformation.Items)
             {
-               
                 _dbContext.Items.Add(new Item()
                 {
                     ItemId = riotItem.Value.Id,
