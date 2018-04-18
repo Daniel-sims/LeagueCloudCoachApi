@@ -53,11 +53,12 @@ namespace LccWebAPI.Controllers.Utils.Match
                 {
                     // Group by TeamId to seperate into two teams
                     var teams = matchPlayers.GroupBy(m => m.TeamId).ToList();
-                    var teamOnePlayers = teams.First();
-                    var teamTwoPlayers = teams.Last();
-
+                    
                     if (teams.Count == 2)
                     {
+                        var teamOnePlayers = teams.First();
+                        var teamTwoPlayers = teams.Last();
+
                         // check to see if the teams contain the Ids
                         if ((teamOneChampionIds.All(m => teamOnePlayers.Any(x => x.ChampionId == m)) && teamTwoChampionIds.All(m => teamTwoPlayers.Any(x => x.ChampionId == m))) ||
                             (teamTwoChampionIds.All(m => teamOnePlayers.Any(x => x.ChampionId == m)) && teamOneChampionIds.All(m => teamTwoPlayers.Any(x => x.ChampionId == m))))
