@@ -26,6 +26,6 @@ namespace LccWebAPI.Database.Context
         public DbSet<Champion> Champions { get; set; }
         public DbSet<SummonerSpell> SummonerSpells { get; set; }
         
-        protected override void OnModelCreating(ModelBuilder modelBuilder) { }
+        protected override void OnModelCreating(ModelBuilder modelBuilder) {  }
     }
 }

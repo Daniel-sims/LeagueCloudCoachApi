@@ -16,7 +16,7 @@ namespace LccWebAPI
 {
     public class Startup
     {
-        private const string RiotApiKey = "RGAPI-dac4b3f3-0594-482d-b574-98a806401303";
+        private const string RiotApiKey = "RGAPI-a485d4c8-abe6-4036-8e7d-fb341a17a194";
 
         public Startup(IConfiguration configuration)
         {
@@ -37,7 +37,7 @@ namespace LccWebAPI
 
             services.AddScoped<IMatchProvider, MatchProvider>();
             
-            const string dbConn = @"Server=(localdb)\mssqllocaldb;Database=LccDatabase;Trusted_Connection=True;ConnectRetryCount=0";
+            var dbConn = @"Server=(localdb)\mssqllocaldb;Database=LccDatabase;Trusted_Connection=True;ConnectRetryCount=0";
             services.AddDbContext<DatabaseContext>(options => options.UseSqlServer(dbConn));
 
             services.AddMvc();

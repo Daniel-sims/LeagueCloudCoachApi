@@ -11,8 +11,8 @@ using System;
 namespace LccWebAPI.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20180411063241_AddedControllers")]
-    partial class AddedControllers
+    [Migration("20180418185044_initial")]
+    partial class initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {

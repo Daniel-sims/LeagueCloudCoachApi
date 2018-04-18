@@ -56,14 +56,17 @@ namespace LccWebAPI.Controllers.Utils.Match
                     var teamOnePlayers = teams.First();
                     var teamTwoPlayers = teams.Last();
 
-                    // check to see if the teams contain the Ids
-                    if ((teamOneChampionIds.All(m => teamOnePlayers.Any(x => x.ChampionId == m)) && teamTwoChampionIds.All(m => teamTwoPlayers.Any(x => x.ChampionId == m))) ||
-                        (teamTwoChampionIds.All(m => teamOnePlayers.Any(x => x.ChampionId == m)) && teamOneChampionIds.All(m => teamTwoPlayers.Any(x => x.ChampionId == m))))
+                    if (teams.Count == 2)
                     {
-                        // If this match isn't already in the list
-                        if (!matchedMatches.Contains(matchPlayers.Key))
+                        // check to see if the teams contain the Ids
+                        if ((teamOneChampionIds.All(m => teamOnePlayers.Any(x => x.ChampionId == m)) && teamTwoChampionIds.All(m => teamTwoPlayers.Any(x => x.ChampionId == m))) ||
+                            (teamTwoChampionIds.All(m => teamOnePlayers.Any(x => x.ChampionId == m)) && teamOneChampionIds.All(m => teamTwoPlayers.Any(x => x.ChampionId == m))))
                         {
-                            matchedMatches.Add(matchPlayers.Key);
+                            // If this match isn't already in the list
+                            if (!matchedMatches.Contains(matchPlayers.Key))
+                            {
+                                matchedMatches.Add(matchPlayers.Key);
+                            }
                         }
                     }
                 }

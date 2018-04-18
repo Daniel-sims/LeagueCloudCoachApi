@@ -77,11 +77,6 @@ namespace LccWebAPI.Services
                                     // RevisionDate can be anything from a level up to new games played
                                     if (riotSummoner.RevisionDate > dbSummoner.LastUpdatedDate)
                                     {
-                                        /*
-                                        * TODO: Update Summoner information
-                                        *  I.E Level, name...etc
-                                        */
-
                                         DateTime? collectionFromDate;
                                         DateTime? collectionToDate;
 
@@ -164,7 +159,8 @@ namespace LccWebAPI.Services
 
                 var riotMatch = await _throttledRequestHelper.SendThrottledRequest(async () => await _riotApi.Match.GetMatchAsync(Region.euw, riotMatchReference.GameId));
 
-                if (riotMatch != null)
+                if (riotMatch != null 
+                    && riotMatch.QueueId == LeagueQueue.RankedSoloId)
                 {
                     newDbMatch.GameId = riotMatch.GameId;
                     newDbMatch.GameDuration = riotMatch.GameDuration;
