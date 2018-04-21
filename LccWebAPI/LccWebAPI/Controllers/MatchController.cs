@@ -23,17 +23,26 @@ namespace LccWebAPI.Controllers
         [HttpGet("Matchup")]
         public JsonResult GetMatchups(int[] teamOneChampionIds, int[] teamTwoChampionIds, int maxMatchLimit = 1)
         {
-            Console.WriteLine(DateTime.Now + " request received");
-            return new JsonResult(_matchProvider.GetMatchesForListOfTeamIds(teamOneChampionIds, teamTwoChampionIds, maxMatchLimit));
+            Console.WriteLine(DateTime.Now + " match request received");
+
+            var response = new JsonResult(_matchProvider.GetMatchesForListOfTeamIds(teamOneChampionIds, teamTwoChampionIds, maxMatchLimit));
+
+            Console.WriteLine(DateTime.Now + " match request returned.");
+
+            return response;
         }
 
         [HttpGet("MatchTimeline")]
         public JsonResult GetMatchTimeline(long gameId)
         {
+            Console.WriteLine(DateTime.Now + " MatchTimeline request received");
+
             var timeline = _databaseContext.MatchTimelines
                     .Include(x => x.Events)
                     .FirstOrDefault(x => x.GameId == gameId);
-            
+
+            Console.WriteLine(DateTime.Now + " MatchTimeline request responded");
+
             return new JsonResult(timeline);
         }
     }
