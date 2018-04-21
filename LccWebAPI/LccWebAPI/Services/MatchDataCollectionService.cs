@@ -221,6 +221,7 @@ namespace LccWebAPI.Services
                             Kills = participant.Stats.Kills,
                             Deaths = participant.Stats.Deaths,
                             Assists = participant.Stats.Assists,
+                            TotalMinionsKilled = participant.Stats.TotalMinionsKilled,
                             ChampionId = participant.ChampionId,
                             ChampionLevel = participant.Stats.ChampLevel,
 
